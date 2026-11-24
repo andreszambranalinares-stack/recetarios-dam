@@ -1,0 +1,2587 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recetario Node PSP</title>
+<script>try { document.documentElement.dataset.theme = localStorage.getItem('recetario-psp-tema') || 'light'; } catch (e) {}</script>
+<style>
+:root, [data-theme="light"] {
+  --bg: #edf2ee; --card: #fbfdfb; --bar: #f4f8f5; --text: #1d2721; --soft: #5d6a62; --rule: #d3ded6;
+  --accent: #2e7d32; --on-accent: #fff; --link: #1d6c88; --chip: #e2ebe4; --chip-hover: #d4e2d8;
+  --inline-bg: #e1eee3; --inline-text: #1b6526; --ojo-bg: #e6f3e8; --thead: #e6eee8;
+  --code-bg: #1c2520; --code-cap: #25312a; --code-text: #e1ebe4; --code-soft: #9cb1a4;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #111613; --card: #19201b; --bar: #151a17; --text: #e2eae4; --soft: #92a097; --rule: #2a342e;
+  --accent: #6cc070; --on-accent: #0f1511; --link: #7fc3dc; --chip: #212924; --chip-hover: #2a342e;
+  --inline-bg: #22302a; --inline-text: #8ed893; --ojo-bg: #1b2820; --thead: #1e2621;
+  --code-bg: #0e1310; --code-cap: #17201a; --code-text: #e1ebe4; --code-soft: #889c90;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 7.5rem; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+a { color: var(--link); text-underline-offset: 2px; }
+
+/* barra superior y pestañas */
+.bar { position: sticky; top: 0; z-index: 10; background: var(--bar); border-bottom: 1px solid var(--rule); }
+.bar-in, .tabs { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem; }
+.bar-in { display: flex; align-items: center; gap: .8rem; padding-top: .7rem; padding-bottom: .4rem; }
+.brand { font-weight: 750; font-size: 1.05rem; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: .45rem; }
+.brand svg { width: 20px; height: 20px; color: var(--accent); }
+.sub { color: var(--soft); font-size: .85rem; }
+#theme { margin-left: auto; display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .85rem;
+  color: var(--text); background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+#theme:hover { background: var(--chip-hover); }
+#theme svg { width: 16px; height: 16px; }
+.tabs { display: flex; gap: .25rem; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { flex: none; display: inline-flex; align-items: center; gap: .4rem; padding: .55rem .8rem .6rem;
+  color: var(--soft); text-decoration: none; font-size: .93rem; border-bottom: 3px solid transparent; }
+.tabs a:hover { color: var(--text); }
+.tabs a b { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 6px;
+  background: var(--chip); color: var(--soft); font-size: .75rem; }
+.tabs a.on { color: var(--text); font-weight: 650; border-bottom-color: var(--accent); }
+.tabs a.on b { background: var(--accent); color: var(--on-accent); }
+
+/* contenido */
+main { max-width: 56rem; margin: 0 auto; padding: 1.8rem 1.25rem 5rem; }
+h1 { font-size: 1.65rem; line-height: 1.2; margin: .3rem 0 1rem; }
+.kicker { margin: .3rem 0 0; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.kicker + h1 { margin-top: .1rem; }
+.intro { color: var(--soft); margin: -.4rem 0 1.2rem; }
+.indice { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 2rem; }
+.indice a { background: var(--chip); color: var(--text); text-decoration: none; font-size: .88rem;
+  padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--rule); }
+.indice a:hover { background: var(--chip-hover); }
+.receta { background: var(--card); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 0 1.4rem; }
+.receta h2 { font-size: 1.2rem; line-height: 1.3; margin: 0 0 .7rem; }
+.receta h2 a { color: var(--text); text-decoration: none; }
+.receta h2 a:hover { color: var(--accent); }
+.ses { display: inline-block; font-size: .72rem; font-weight: 700; color: var(--accent); background: var(--chip);
+  border: 1px solid var(--rule); border-radius: 5px; padding: 0 .4rem; margin-right: .45rem; vertical-align: .15em; }
+p { margin: .7rem 0; }
+code { font-family: ui-monospace, "Cascadia Code", Consolas, "SF Mono", monospace; font-size: .86em;
+  background: var(--inline-bg); color: var(--inline-text); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+.ojo { background: var(--ojo-bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: .55rem .85rem; }
+.ojo strong { color: var(--accent); margin-right: .45rem; }
+.arrow { color: var(--soft); }
+
+/* código */
+figure.code { margin: .9rem 0; border-radius: 10px; overflow: hidden; background: var(--code-bg); }
+figure.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  background: var(--code-cap); padding: .4rem .6rem .4rem .9rem; font-size: .8rem; }
+.file { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--code-soft); }
+.copy { font: inherit; color: var(--code-soft); background: none; border: 1px solid #ffffff22; border-radius: 6px; padding: .15rem .55rem; cursor: pointer; }
+.copy:hover { color: #fff; border-color: #ffffff55; }
+pre { margin: 0; padding: .9rem 1rem 1rem; color: var(--code-text); line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+pre code { background: none; color: inherit; padding: 0; font-size: .86rem; }
+.t-com { color: #84958a; font-style: italic; }
+.t-str, .t-cmd { color: #a9d38a; }
+.t-kw { color: #c99cf3; }
+.t-tag { color: #f07c82; }
+.t-bind { color: #78cfe4; }
+.t-num { color: #f4c86a; }
+.t-fn { color: #82aaff; }
+
+/* tablas */
+.table { margin: .9rem 0; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: .55rem .8rem; }
+thead th { background: var(--thead); font-weight: 650; }
+tbody tr { border-top: 1px solid var(--rule); }
+
+/* listas sin viñetas */
+ul.items { list-style: none; margin: .6rem 0; padding: 0; counter-reset: n; }
+ul.items li { padding: .6rem 0; border-top: 1px solid var(--rule); }
+ul.items li:first-child { border-top: 0; }
+#problemas ul.items li { counter-increment: n; display: grid; grid-template-columns: 2rem minmax(0, 1fr); align-items: baseline; }
+#problemas ul.items li::before { content: counter(n); font-weight: 700; color: var(--accent); }
+.ver { display: block; margin-top: .2rem; font-size: .88rem; color: var(--soft); }
+ol.pasos { margin: .6rem 0; padding-left: 1.3rem; }
+ol.pasos li { margin: .25rem 0; }
+
+.pasar { display: flex; justify-content: space-between; margin-top: 2rem; font-size: .95rem; }
+.pasar a { text-decoration: none; font-weight: 600; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  html { scroll-padding-top: 7rem; }
+  .sub { display: none; }
+  .bar-in, .tabs { padding-left: 1rem; padding-right: 1rem; }
+  main { padding: 1.3rem .75rem 4rem; }
+  h1 { font-size: 1.35rem; }
+  .receta { padding: 1rem 1rem .8rem; border-radius: 10px; }
+  pre { padding: .75rem .8rem; }
+  pre code { font-size: .8rem; }
+  .table { border: 0; border-radius: 0; }
+  .table table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table thead { display: none; }
+  .table tr { border: 1px solid var(--rule); border-radius: 8px; padding: .5rem .7rem; margin: 0 0 .5rem; }
+  .table td { padding: .15rem 0; }
+  .table td:first-child { font-weight: 650; }
+  .table td:not([data-label=""])::before { content: attr(data-label); display: block; font-size: .68rem;
+    font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--soft); }
+}
+@media print {
+  .bar, .indice, .pasar, .copy { display: none !important; }
+  .tab { display: block !important; }
+  body, .receta { background: #fff; color: #000; }
+  .receta { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+<div class="bar-in">
+<a class="brand" href="#b0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5l-8.5-4.8V7.3z"/><path d="M9 15V9l6 6V9"/></svg>Recetario Node</a><span class="sub">PSP · Node.js, Express, Sequelize y Mongoose · sesiones 0.1 a 4.6</span>
+<button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
+</div>
+<nav class="tabs" aria-label="Bloques"><a href="#b0" data-tab="b0"><b>0</b>Node.js</a><a href="#b1" data-tab="b1"><b>1</b>Express</a><a href="#b2" data-tab="b2"><b>2</b>Rutas y middleware</a><a href="#b3" data-tab="b3"><b>3</b>Sequelize</a><a href="#b4" data-tab="b4"><b>4</b>MongoDB</a><a href="#chuletas" data-tab="chuletas">Chuletas</a><a href="#problemas" data-tab="problemas">Problemas</a></nav>
+</header>
+<main>
+
+<!-- ============================ BLOQUE 0 ============================ -->
+<section class="tab" id="b0" data-tab="b0" hidden>
+<p class="kicker">Bloque 0</p><h1>Fundamentos de Node.js</h1>
+<p class="intro">Event loop, módulos, npm, E/S con <code>fs</code>, <code>path</code> y <code>http</code>, y async/await a fondo.</p>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b0--node">Qué cambia de navegador a Node</a><a href="#b0--ejecutar">Ejecutar un script y usar <code>process</code></a><a href="#b0--event-loop">Síncrono, asíncrono y el event loop</a><a href="#b0--callback-await">De callback a promesa a <code>async/await</code></a><a href="#b0--await-olvidado">El <code>await</code> olvidado</a><a href="#b0--commonjs">Módulos CommonJS: <code>require</code></a><a href="#b0--esm">Módulos ESM: <code>import</code></a><a href="#b0--npm">npm y <code>package.json</code></a><a href="#b0--fs">Leer y escribir archivos: <code>fs/promises</code></a><a href="#b0--json">Guardar y leer JSON en disco</a><a href="#b0--path">Construir rutas: <code>path</code></a><a href="#b0--http">Servidor con <code>http</code> a pelo</a><a href="#b0--try-catch">Capturar errores con <code>try/catch</code></a><a href="#b0--promise-all"><code>Promise.all</code> y <code>allSettled</code></a></nav>
+
+<article class="receta" id="b0--node">
+<h2><a href="#b0--node"><span class="ses">0.1</span>Qué cambia de navegador a Node</a></h2>
+<p>Node es el motor <strong>V8</strong> de Chrome sacado del navegador, más módulos para hablar con el sistema operativo. El lenguaje es el mismo; cambia lo que tienes alrededor.</p>
+<div class="table"><table><thead><tr><th>Capa</th><th>Ejemplos</th><th>¿Existe en Node?</th></tr></thead><tbody>
+<tr><td data-label="Capa">El lenguaje (ECMAScript)</td><td data-label="Ejemplos"><code>const</code>, arrow functions, clases, <code>map</code>, promesas, <code>async/await</code></td><td data-label="¿Existe en Node?">Sí, igual</td></tr>
+<tr><td data-label="Capa">API del navegador</td><td data-label="Ejemplos"><code>document</code>, <code>window</code>, <code>alert</code>, <code>localStorage</code></td><td data-label="¿Existe en Node?">No: <code>ReferenceError: document is not defined</code></td></tr>
+<tr><td data-label="Capa">API de Node</td><td data-label="Ejemplos"><code>process</code>, <code>require</code>, <code>fs</code>, <code>__dirname</code></td><td data-label="¿Existe en Node?">Solo en Node</td></tr>
+</tbody></table></div>
+<p>Por qué Node en un servidor: <strong>E/S no bloqueante</strong>. Mientras espera a la base de datos o al disco, atiende a otro cliente.</p>
+</article>
+
+<article class="receta" id="b0--ejecutar">
+<h2><a href="#b0--ejecutar"><span class="ses">0.1</span>Ejecutar un script y usar <code>process</code></a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>node -v
+npm -v
+node hola.js
+node entorno.js hola mundo</code></pre></figure>
+<figure class="code"><figcaption><span class="file">hola.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const nombre = 'Ana';
+console.log(`Hola, soy ${nombre} y esto se ejecuta en Node ${process.version}`);</code></pre></figure>
+<figure class="code"><figcaption><span class="file">entorno.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>console.log('Versión de Node:', process.version);   // v22.20.0
+console.log('Plataforma:', process.platform);        // win32, linux, darwin
+console.log('Carpeta actual:', process.cwd());
+console.log('Argumentos:', process.argv.slice(2));   // [ 'hola', 'mundo' ]
+console.log('Puerto:', process.env.PORT);            // variables de entorno</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong><code>process.argv[0]</code> es la ruta de <code>node</code> y <code>[1]</code> la del script: los tuyos empiezan en la posición 2.</p>
+</article>
+
+<article class="receta" id="b0--event-loop">
+<h2><a href="#b0--event-loop"><span class="ses">0.2</span>Síncrono, asíncrono y el event loop</a></h2>
+<p>Node tiene <strong>un solo hilo</strong>. Lo síncrono se ejecuta del tirón; lo asíncrono (temporizadores, disco, red) se aparca y su callback vuelve a la cola cuando termina. El event loop solo saca algo de la cola cuando la pila está vacía.</p>
+<figure class="code"><figcaption><span class="file">orden.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>console.log('1. inicio');
+
+setTimeout(() =&gt; console.log('4. timeout'), 0);
+
+Promise.resolve().then(() =&gt; console.log('3. promesa'));
+
+console.log('2. fin');
+
+// Salida: 1, 2, 3, 4
+// Las promesas (microtareas) van antes que los timeouts aunque sean de 0 ms</code></pre></figure>
+<p>Bloquear el hilo a propósito para verlo:</p>
+<figure class="code"><figcaption><span class="file">bloqueo.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>setTimeout(() =&gt; console.log('Debería salir a los 100 ms'), 100);
+
+const inicio = Date.now();
+while (Date.now() - inicio &lt; 3000) {}   // bucle síncrono de 3 s
+
+console.log('Bucle terminado');
+// El timeout sale a los 3 s: nadie podía atenderlo mientras el hilo estaba ocupado</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>en un servidor, un bucle pesado o un <code>readFileSync</code> deja a <strong>todos</strong> los clientes esperando.</p>
+</article>
+
+<article class="receta" id="b0--callback-await">
+<h2><a href="#b0--callback-await"><span class="ses">0.2</span>De callback a promesa a <code>async/await</code></a></h2>
+<p>La misma operación en tres estilos. Los callbacks anidados son el «callback hell».</p>
+<figure class="code"><figcaption><span class="file">1-callback.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function consultaLenta(valor, callback) {
+  setTimeout(() =&gt; callback(null, valor * 2), 500);   // (error, resultado)
+}
+
+consultaLenta(5, (err, resultado) =&gt; {
+  if (err) return console.error(err);
+  console.log(resultado);   // 10
+});</code></pre></figure>
+<figure class="code"><figcaption><span class="file">2-promesa.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function consultaLenta(valor) {
+  return new Promise((resolve, reject) =&gt; {
+    setTimeout(() =&gt; {
+      if (valor &lt; 0) return reject(new Error('Valor negativo'));
+      resolve(valor * 2);
+    }, 500);
+  });
+}
+
+consultaLenta(5)
+  .then(resultado =&gt; console.log(resultado))
+  .catch(error =&gt; console.error(error.message));</code></pre></figure>
+<figure class="code"><figcaption><span class="file">3-async-await.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>async function main() {
+  try {
+    const a = await consultaLenta(5);
+    const b = await consultaLenta(a);
+    console.log(a, b);   // 10 20
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+main();</code></pre></figure>
+<p><code>async</code> hace que la función devuelva siempre una promesa. <code>await</code> solo se puede usar dentro de una función <code>async</code> (o arriba del todo en un módulo ESM).</p>
+</article>
+
+<article class="receta" id="b0--await-olvidado">
+<h2><a href="#b0--await-olvidado"><span class="ses">0.2</span>El <code>await</code> olvidado</a></h2>
+<figure class="code"><figcaption><span class="file">olvido.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function obtenerUsuario(id) {
+  return new Promise(resolve =&gt; {
+    setTimeout(() =&gt; resolve({ id, nombre: 'Ana' }), 300);
+  });
+}
+
+async function mostrar(id) {
+  const usuario = obtenerUsuario(id);          // MAL: usuario es una Promise
+  console.log(`Usuario: ${usuario.nombre}`);   // Usuario: undefined
+}
+
+async function mostrarBien(id) {
+  const usuario = await obtenerUsuario(id);    // BIEN
+  console.log(`Usuario: ${usuario.nombre}`);   // Usuario: Ana
+}</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>si ves <code>Promise { &lt;pending&gt; }</code> o <code>undefined</code> en algo que debería tener datos, casi siempre falta un <code>await</code>.</p>
+</article>
+
+<article class="receta" id="b0--commonjs">
+<h2><a href="#b0--commonjs"><span class="ses">0.3</span>Módulos CommonJS: <code>require</code></a></h2>
+<p>El sistema original de Node y el que usa el curso con Express. Cada archivo es un módulo con su propio ámbito.</p>
+<figure class="code"><figcaption><span class="file">matematicas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function sumar(a, b) { return a + b; }
+function restar(a, b) { return a - b; }
+
+module.exports = { sumar, restar };</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { sumar, restar } = require('./matematicas');   // archivo propio: con ./
+const fs = require('fs');                              // módulo core: sin ./
+const express = require('express');                    // paquete de npm: sin ./
+
+console.log(sumar(2, 3)); // 5</code></pre></figure>
+<p>Exportar una sola cosa: <code>module.exports = app;</code> y se importa con <code>const app = require('./app');</code>.</p>
+<p class="ojo"><strong>Ojo</strong><code>require('matematicas')</code> sin <code>./</code> busca en <code>node_modules</code> y da «Cannot find module».</p>
+</article>
+
+<article class="receta" id="b0--esm">
+<h2><a href="#b0--esm"><span class="ses">0.3</span>Módulos ESM: <code>import</code></a></h2>
+<p>El estándar del lenguaje (el mismo que en Angular). En Node se activa con la extensión <code>.mjs</code> o con <code>"type": "module"</code> en <code>package.json</code>.</p>
+<figure class="code"><figcaption><span class="file">matematicas.mjs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>export function sumar(a, b) { return a + b; }
+export function restar(a, b) { return a - b; }
+export default function multiplicar(a, b) { return a * b; }</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.mjs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>import multiplicar, { sumar, restar } from './matematicas.mjs';   // la extensión es obligatoria
+import fs from 'fs/promises';
+
+console.log(sumar(2, 3), multiplicar(2, 3));</code></pre></figure>
+<div class="table"><table><thead><tr><th></th><th>CommonJS</th><th>ESM</th></tr></thead><tbody>
+<tr><td data-label="">Exportar</td><td data-label="CommonJS"><code>module.exports = { a }</code></td><td data-label="ESM"><code>export</code> / <code>export default</code></td></tr>
+<tr><td data-label="">Importar</td><td data-label="CommonJS"><code>const { a } = require('./x')</code></td><td data-label="ESM"><code>import { a } from './x.js'</code></td></tr>
+<tr><td data-label="">Cómo se activa</td><td data-label="CommonJS">Por defecto en <code>.js</code></td><td data-label="ESM"><code>.mjs</code> o <code>"type": "module"</code></td></tr>
+<tr><td data-label=""><code>__dirname</code></td><td data-label="CommonJS">Existe</td><td data-label="ESM">No existe (<code>import.meta.dirname</code>)</td></tr>
+</tbody></table></div>
+<p class="ojo"><strong>Ojo</strong>no mezcles: <code>require</code> en un archivo ESM da «require is not defined in ES module scope».</p>
+</article>
+
+<article class="receta" id="b0--npm">
+<h2><a href="#b0--npm"><span class="ses">0.3</span>npm y <code>package.json</code></a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>mkdir mi-api &amp;&amp; cd mi-api
+npm init -y                    # crea package.json con valores por defecto
+npm install express            # dependencia normal (va en "dependencies")
+npm install --save-dev nodemon # solo para desarrollar (va en "devDependencies")
+npm install                    # instala todo lo que pone package.json
+npm start                      # ejecuta el script "start"
+npm run dev                    # ejecuta cualquier otro script</code></pre></figure>
+<figure class="code" data-lang="json"><figcaption><span class="file">package.json</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{
+  "name": "mi-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": { "express": "^4.19.2" },
+  "devDependencies": { "nodemon": "^3.1.0" }
+}</code></pre></figure>
+<div class="table"><table><thead><tr><th>Rango</th><th>Qué acepta</th></tr></thead><tbody>
+<tr><td data-label="Rango"><code>^4.19.2</code></td><td data-label="Qué acepta">Cualquier <code>4.x.x</code> igual o mayor (no la 5)</td></tr>
+<tr><td data-label="Rango"><code>~4.19.2</code></td><td data-label="Qué acepta">Solo parches: <code>4.19.x</code></td></tr>
+<tr><td data-label="Rango"><code>4.19.2</code></td><td data-label="Qué acepta">Exactamente esa versión</td></tr>
+</tbody></table></div>
+<p><code>package-lock.json</code> guarda las versiones exactas instaladas. <code>node_modules</code> <strong>no se sube</strong> a Git: se regenera con <code>npm install</code>.</p>
+<figure class="code" data-lang="term"><figcaption><span class="file">.gitignore</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>node_modules/
+.env
+*.sqlite
+uploads/</code></pre></figure>
+</article>
+
+<article class="receta" id="b0--fs">
+<h2><a href="#b0--fs"><span class="ses">0.4</span>Leer y escribir archivos: <code>fs/promises</code></a></h2>
+<figure class="code"><figcaption><span class="file">archivos.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const fs = require('fs/promises');
+
+async function main() {
+  // Escribir (crea o sobrescribe)
+  await fs.writeFile('datos.txt', 'Primera línea\n', 'utf-8');
+
+  // Añadir al final (log)
+  await fs.appendFile('datos.txt', `${new Date().toISOString()} - arranque\n`, 'utf-8');
+
+  // Leer
+  const contenido = await fs.readFile('datos.txt', 'utf-8');
+  console.log(contenido);
+
+  // Otras útiles
+  await fs.mkdir('logs', { recursive: true });
+  const archivos = await fs.readdir('.');
+  await fs.unlink('datos.txt');   // borrar
+}
+
+main().catch(err =&gt; console.error('Error:', err.message));</code></pre></figure>
+<p>La versión síncrona existe pero <strong>bloquea el hilo</strong>; úsala solo en scripts de arranque, nunca dentro de una ruta:</p>
+<figure class="code"><figcaption><span class="file">sincrono.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const fs = require('fs');
+const contenido = fs.readFileSync('datos.txt', 'utf-8'); // bloquea el hilo</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>sin <code>'utf-8'</code>, <code>readFile</code> devuelve un <code>Buffer</code> (<code>&lt;Buffer 48 6f 6c ...&gt;</code>), no texto.</p>
+</article>
+
+<article class="receta" id="b0--json">
+<h2><a href="#b0--json"><span class="ses">0.4</span>Guardar y leer JSON en disco</a></h2>
+<figure class="code"><figcaption><span class="file">tareas-repo.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const fs = require('fs/promises');
+const path = require('path');
+
+const RUTA = path.join(__dirname, 'datos', 'tareas.json');
+
+async function leerTareas() {
+  try {
+    const texto = await fs.readFile(RUTA, 'utf-8');
+    return JSON.parse(texto);              // texto -&gt; objeto
+  } catch (error) {
+    if (error.code === 'ENOENT') return []; // el archivo aún no existe
+    throw error;
+  }
+}
+
+async function guardarTareas(tareas) {
+  await fs.writeFile(RUTA, JSON.stringify(tareas, null, 2), 'utf-8'); // objeto -&gt; texto
+}
+
+module.exports = { leerTareas, guardarTareas };</code></pre></figure>
+</article>
+
+<article class="receta" id="b0--path">
+<h2><a href="#b0--path"><span class="ses">0.4</span>Construir rutas: <code>path</code></a></h2>
+<figure class="code"><figcaption><span class="file">rutas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const path = require('path');
+
+const ruta = path.join(__dirname, 'datos', 'usuarios.json');
+console.log(ruta);                    // ruta absoluta, correcta en Windows y Linux
+console.log(path.extname(ruta));      // '.json'
+console.log(path.basename(ruta));     // 'usuarios.json'
+console.log(path.dirname(ruta));      // carpeta que lo contiene
+console.log(path.resolve('public'));  // absoluta desde la carpeta actual</code></pre></figure>
+<p><code>__dirname</code> es la carpeta del archivo que se está ejecutando; <code>process.cwd()</code> es desde donde lanzaste <code>node</code>. No tienen por qué coincidir.</p>
+<p class="ojo"><strong>Ojo</strong>nunca <code>__dirname + '/datos/' + archivo</code>: las barras cambian según el sistema operativo.</p>
+</article>
+
+<article class="receta" id="b0--http">
+<h2><a href="#b0--http"><span class="ses">0.4</span>Servidor con <code>http</code> a pelo</a></h2>
+<figure class="code"><figcaption><span class="file">servidor.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const http = require('http');
+const fs = require('fs/promises');
+const path = require('path');
+
+const servidor = http.createServer(async (req, res) =&gt; {
+  if (req.method === 'GET' &amp;&amp; req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Hola desde Node, sin frameworks');
+
+  } else if (req.method === 'GET' &amp;&amp; req.url === '/tareas') {
+    try {
+      const datos = await fs.readFile(path.join(__dirname, 'tareas.json'), 'utf-8');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(datos);
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'No se pudo leer el archivo' }));
+    }
+
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('No encontrado');
+  }
+});
+
+servidor.listen(3000, () =&gt; {
+  console.log('Escuchando en http://localhost:3000');
+});</code></pre></figure>
+<p>Todo a mano: comparar <code>req.method</code> y <code>req.url</code>, poner cabeceras, convertir a JSON con <code>JSON.stringify</code> y no olvidar el 404. Esto es justo lo que resuelve Express.</p>
+<p class="ojo"><strong>Ojo</strong>si no llamas a <code>res.end()</code> la petición se queda colgada para siempre.</p>
+</article>
+
+<article class="receta" id="b0--try-catch">
+<h2><a href="#b0--try-catch"><span class="ses">0.5</span>Capturar errores con <code>try/catch</code></a></h2>
+<figure class="code"><figcaption><span class="file">config.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const fs = require('fs/promises');
+
+// MAL: si falla y nadie lo captura, el proceso entero se cae
+async function leerConfigMal() {
+  const datos = await fs.readFile('config-que-no-existe.json', 'utf-8');
+  return JSON.parse(datos);
+}
+
+// BIEN
+async function leerConfig() {
+  try {
+    const datos = await fs.readFile('config-que-no-existe.json', 'utf-8');
+    return JSON.parse(datos);
+  } catch (error) {
+    console.error('No se pudo leer la configuración:', error.message);
+    return null;   // no propago el error: devuelvo un valor por defecto
+  } finally {
+    console.log('Esto se ejecuta siempre');
+  }
+}</code></pre></figure>
+<p>Con <code>.then()</code> el equivalente es <code>.catch(error =&gt; ...)</code>. Para relanzar un error tras registrarlo: <code>throw error;</code> dentro del <code>catch</code>.</p>
+<p class="ojo"><strong>Ojo</strong>un error asíncrono sin capturar da <code>UnhandledPromiseRejection</code> y en un servidor tumba a todos los clientes.</p>
+</article>
+
+<article class="receta" id="b0--promise-all">
+<h2><a href="#b0--promise-all"><span class="ses">0.5</span><code>Promise.all</code> y <code>allSettled</code></a></h2>
+<figure class="code"><figcaption><span class="file">paralelo.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const esperar = (ms, valor) =&gt; new Promise(r =&gt; setTimeout(() =&gt; r(valor), ms));
+const obtenerUsuario  = id =&gt; esperar(300, { id, nombre: 'Ana' });
+const obtenerPedidos  = id =&gt; esperar(300, ['p1', 'p2']);
+const obtenerFacturas = id =&gt; esperar(300, ['f1']);
+
+async function enSerie() {
+  console.time('serie');
+  const usuario = await obtenerUsuario(1);
+  const pedidos = await obtenerPedidos(1);
+  const facturas = await obtenerFacturas(1);
+  console.timeEnd('serie');      // ~900 ms
+}
+
+async function enParalelo() {
+  console.time('paralelo');
+  const [usuario, pedidos, facturas] = await Promise.all([
+    obtenerUsuario(1),
+    obtenerPedidos(1),
+    obtenerFacturas(1)
+  ]);
+  console.timeEnd('paralelo');   // ~300 ms
+}</code></pre></figure>
+<p>Si una promesa de <code>Promise.all</code> falla, falla todo. <code>allSettled</code> espera a todas y te dice cuál fue bien:</p>
+<figure class="code"><figcaption><span class="file">allsettled.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const resultados = await Promise.allSettled([
+  obtenerUsuario(1),
+  Promise.reject(new Error('Servicio caído')),
+  obtenerFacturas(1)
+]);
+
+resultados.forEach(r =&gt; {
+  if (r.status === 'fulfilled') console.log('OK:', r.value);
+  else console.log('Falló:', r.reason.message);
+});</code></pre></figure>
+<div class="table"><table><thead><tr><th>Método</th><th>Termina cuando</th><th>Si una falla</th></tr></thead><tbody>
+<tr><td data-label="Método"><code>Promise.all</code></td><td data-label="Termina cuando">Todas se cumplen</td><td data-label="Si una falla">Rechaza al momento con ese error</td></tr>
+<tr><td data-label="Método"><code>Promise.allSettled</code></td><td data-label="Termina cuando">Todas terminan</td><td data-label="Si una falla">Nunca rechaza: <code>{ status, value | reason }</code></td></tr>
+<tr><td data-label="Método"><code>Promise.race</code></td><td data-label="Termina cuando">La primera termina</td><td data-label="Si una falla">Rechaza si la primera falla</td></tr>
+<tr><td data-label="Método"><code>Promise.any</code></td><td data-label="Termina cuando">La primera se cumple</td><td data-label="Si una falla">Solo rechaza si fallan todas</td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><span></span><a href="#b1">Express →</a></nav>
+</section>
+
+<!-- ============================ BLOQUE 1 ============================ -->
+<section class="tab" id="b1" data-tab="b1" hidden>
+<p class="kicker">Bloque 1</p><h1>Filosofía y arquitectura de Express</h1>
+<p class="intro">De <code>http.createServer</code> a Express, estructura del proyecto, rutas, REST y middleware.</p>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b1--primer-servidor">Primer servidor Express</a><a href="#b1--estructura">Estructura del proyecto</a><a href="#b1--app-index">Separar <code>app.js</code> de <code>index.js</code></a><a href="#b1--dotenv">Variables de entorno con <code>dotenv</code></a><a href="#b1--nodemon">Recarga automática con nodemon</a><a href="#b1--req">Leer la petición: <code>req</code></a><a href="#b1--res">Construir la respuesta: <code>res</code></a><a href="#b1--rest">Diseñar rutas REST</a><a href="#b1--codigos">Códigos de estado</a><a href="#b1--crud-memoria">CRUD completo en memoria</a><a href="#b1--anidar">Recursos anidados en la URL</a><a href="#b1--middleware">Qué es un middleware</a><a href="#b1--alcance">Dónde se aplica un middleware</a><a href="#b1--cortar">Middleware que corta la cadena</a><a href="#b1--enriquecer">Middleware que enriquece <code>req</code></a><a href="#b1--incorporados">Middleware incorporados</a></nav>
+
+<article class="receta" id="b1--primer-servidor">
+<h2><a href="#b1--primer-servidor"><span class="ses">1.1</span>Primer servidor Express</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>mkdir mi-api &amp;&amp; cd mi-api
+npm init -y
+npm install express
+node index.js</code></pre></figure>
+<figure class="code"><figcaption><span class="file">index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const express = require('express');
+const app = express();
+
+app.get('/', (req, res) =&gt; res.send('Inicio'));
+app.get('/saluda', (req, res) =&gt; res.send('Hola'));
+app.get('/saluda/:nombre', (req, res) =&gt; res.send(`Hola, ${req.params.nombre}`));
+
+app.listen(3000, () =&gt; console.log('Escuchando en http://localhost:3000'));
+// el 404 para rutas no definidas lo gestiona Express automáticamente</code></pre></figure>
+<p>Comparado con <a href="#b0--http"><code>http</code> a pelo</a>: sin <code>if</code> por cada ruta, sin <code>writeHead</code>, <code>res.json</code> convierte solo y el 404 viene de serie.</p>
+</article>
+
+<article class="receta" id="b1--estructura">
+<h2><a href="#b1--estructura"><span class="ses">1.2</span>Estructura del proyecto</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">mi-api/</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>mi-api/
+├── index.js              # arranca el servidor (listen)
+├── .env                  # variables de entorno (no se sube)
+├── package.json
+└── src/
+    ├── app.js            # monta la app: middleware + routers
+    ├── config/
+    │   └── database.js   # conexión Sequelize (bloque 3)
+    ├── routes/           # productos.routes.js, usuarios.routes.js...
+    ├── controllers/      # qué hace cada ruta con req/res
+    ├── services/         # lógica de negocio, sin req/res
+    ├── models/           # modelos Sequelize
+    ├── middlewares/      # logger.js, validar.js, errores.js
+    ├── esquemas/         # esquemas Zod
+    └── utils/            # ErrorHTTP.js</code></pre></figure>
+</article>
+
+<article class="receta" id="b1--app-index">
+<h2><a href="#b1--app-index"><span class="ses">1.2</span>Separar <code>app.js</code> de <code>index.js</code></a></h2>
+<p><code>app.js</code> <strong>monta</strong> la aplicación y la exporta; <code>index.js</code> solo la <strong>arranca</strong>. Así luego se puede importar la app en tests sin abrir el puerto.</p>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.get('/', (req, res) =&gt; res.send('API funcionando'));
+
+module.exports = app;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const app = require('./src/app');
+const PUERTO = process.env.PORT || 3000;
+
+app.listen(PUERTO, () =&gt; console.log(`Escuchando en el puerto ${PUERTO}`));</code></pre></figure>
+</article>
+
+<article class="receta" id="b1--dotenv">
+<h2><a href="#b1--dotenv"><span class="ses">1.2</span>Variables de entorno con <code>dotenv</code></a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install dotenv</code></pre></figure>
+<figure class="code" data-lang="env"><figcaption><span class="file">.env</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>NODE_ENV=development
+PORT=4000
+FRONTEND_URL=http://localhost:4200</code></pre></figure>
+<figure class="code"><figcaption><span class="file">index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>require('dotenv').config();          // SIEMPRE la primera línea
+const app = require('./src/app');
+
+const PUERTO = process.env.PORT || 3000;
+app.listen(PUERTO, () =&gt; console.log(`Arriba en ${PUERTO}`));</code></pre></figure>
+<p>Todo lo que viene de <code>process.env</code> es <strong>texto</strong>: <code>Number(process.env.PORT)</code> si necesitas un número.</p>
+<p class="ojo"><strong>Ojo</strong><code>.env</code> va en <code>.gitignore</code>. Sube un <code>.env.example</code> con las claves pero sin los valores secretos.</p>
+</article>
+
+<article class="receta" id="b1--nodemon">
+<h2><a href="#b1--nodemon"><span class="ses">1.2</span>Recarga automática con nodemon</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install --save-dev nodemon
+npm run dev     # desarrollo: reinicia al guardar
+npm start       # producción: node normal</code></pre></figure>
+<figure class="code" data-lang="json"><figcaption><span class="file">package.json</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>"scripts": {
+  "start": "node index.js",
+  "dev": "nodemon index.js"
+}</code></pre></figure>
+<p>Alternativa sin instalar nada (Node 18+): <code>node --watch index.js</code>.</p>
+</article>
+
+<article class="receta" id="b1--req">
+<h2><a href="#b1--req"><span class="ses">1.3</span>Leer la petición: <code>req</code></a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// GET /productos/7?orden=precio&amp;pagina=2
+app.get('/productos/:id', (req, res) =&gt; {
+  console.log(req.params);   // { id: '7' }            parte fija de la ruta
+  console.log(req.query);    // { orden: 'precio', pagina: '2' }  tras el ?
+  console.log(req.body);     // cuerpo (POST/PUT/PATCH), necesita express.json()
+  console.log(req.method);   // 'GET'
+  console.log(req.url);      // '/productos/7?orden=precio&amp;pagina=2'
+  console.log(req.headers['content-type']);
+
+  const id = Number(req.params.id);   // params y query llegan SIEMPRE como texto
+  res.json({ id, orden: req.query.orden || 'nombre' });
+});</code></pre></figure>
+<div class="table"><table><thead><tr><th>Propiedad</th><th>De dónde sale</th><th>Ejemplo</th></tr></thead><tbody>
+<tr><td data-label="Propiedad"><code>req.params</code></td><td data-label="De dónde sale">Los <code>:nombre</code> de la ruta</td><td data-label="Ejemplo"><code>/productos/:id</code> <span class="arrow">→</span> <code>{ id: '7' }</code></td></tr>
+<tr><td data-label="Propiedad"><code>req.query</code></td><td data-label="De dónde sale">Lo que va tras <code>?</code></td><td data-label="Ejemplo"><code>?orden=precio</code> <span class="arrow">→</span> <code>{ orden: 'precio' }</code></td></tr>
+<tr><td data-label="Propiedad"><code>req.body</code></td><td data-label="De dónde sale">El cuerpo de la petición</td><td data-label="Ejemplo">JSON enviado desde Postman o el Front</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b1--res">
+<h2><a href="#b1--res"><span class="ses">1.3</span>Construir la respuesta: <code>res</code></a></h2>
+<figure class="code"><figcaption><span class="file">respuestas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>res.send('texto plano o HTML simple');
+res.json({ mensaje: 'objeto convertido a JSON automáticamente' });
+res.status(201).json({ id: 5 });       // encadenar código de estado + cuerpo
+res.status(404).send('No encontrado');
+res.sendStatus(204);                    // solo un código, sin cuerpo
+res.status(400).json({ error: 'Faltan datos' });</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>una petición, <strong>una</strong> respuesta. Si respondes dos veces sale «Cannot set headers after they are sent to the client». Usa <code>return res...</code> para salir de la función.</p>
+</article>
+
+<article class="receta" id="b1--rest">
+<h2><a href="#b1--rest"><span class="ses">1.4</span>Diseñar rutas REST</a></h2>
+<p>REST no es una tecnología, es un estilo: <strong>recursos en plural</strong> (sustantivos) y el <strong>verbo HTTP</strong> dice la acción.</p>
+<figure class="code"><figcaption><span class="file">Mal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.get('/obtenerProductos', ...);
+app.post('/crearProducto', ...);
+app.post('/borrarProducto/:id', ...); // usar POST para borrar es confuso
+app.get('/borrarLibro/5', ...);       // un GET nunca debe modificar datos</code></pre></figure>
+<figure class="code"><figcaption><span class="file">Bien</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.get('/productos', ...);        // listar
+app.get('/productos/:id', ...);    // leer uno
+app.post('/productos', ...);       // crear
+app.put('/productos/:id', ...);    // reemplazar completo
+app.patch('/productos/:id', ...);  // actualizar parcial
+app.delete('/productos/:id', ...); // borrar</code></pre></figure>
+<div class="table"><table><thead><tr><th>Verbo</th><th>Para qué</th><th>¿Lleva body?</th><th>Respuesta típica</th></tr></thead><tbody>
+<tr><td data-label="Verbo"><code>GET</code></td><td data-label="Para qué">Leer</td><td data-label="¿Lleva body?">No</td><td data-label="Respuesta típica">200</td></tr>
+<tr><td data-label="Verbo"><code>POST</code></td><td data-label="Para qué">Crear</td><td data-label="¿Lleva body?">Sí</td><td data-label="Respuesta típica">201 + el recurso creado</td></tr>
+<tr><td data-label="Verbo"><code>PUT</code></td><td data-label="Para qué">Reemplazar entero</td><td data-label="¿Lleva body?">Sí, completo</td><td data-label="Respuesta típica">200</td></tr>
+<tr><td data-label="Verbo"><code>PATCH</code></td><td data-label="Para qué">Cambiar algunos campos</td><td data-label="¿Lleva body?">Sí, parcial</td><td data-label="Respuesta típica">200</td></tr>
+<tr><td data-label="Verbo"><code>DELETE</code></td><td data-label="Para qué">Borrar</td><td data-label="¿Lleva body?">No</td><td data-label="Respuesta típica">204 sin cuerpo</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b1--codigos">
+<h2><a href="#b1--codigos"><span class="ses">1.4</span>Códigos de estado</a></h2>
+<div class="table"><table><thead><tr><th>Código</th><th>Nombre</th><th>Cuándo</th></tr></thead><tbody>
+<tr><td data-label="Código"><code>200</code></td><td data-label="Nombre">OK</td><td data-label="Cuándo">Lectura o actualización correcta</td></tr>
+<tr><td data-label="Código"><code>201</code></td><td data-label="Nombre">Created</td><td data-label="Cuándo">Recurso creado (POST)</td></tr>
+<tr><td data-label="Código"><code>204</code></td><td data-label="Nombre">No Content</td><td data-label="Cuándo">Borrado correcto, sin cuerpo</td></tr>
+<tr><td data-label="Código"><code>400</code></td><td data-label="Nombre">Bad Request</td><td data-label="Cuándo">Datos inválidos o que faltan</td></tr>
+<tr><td data-label="Código"><code>401</code></td><td data-label="Nombre">Unauthorized</td><td data-label="Cuándo">Falta autenticarse</td></tr>
+<tr><td data-label="Código"><code>403</code></td><td data-label="Nombre">Forbidden</td><td data-label="Cuándo">Autenticado pero sin permiso</td></tr>
+<tr><td data-label="Código"><code>404</code></td><td data-label="Nombre">Not Found</td><td data-label="Cuándo">El recurso o la ruta no existe</td></tr>
+<tr><td data-label="Código"><code>500</code></td><td data-label="Nombre">Internal Server Error</td><td data-label="Cuándo">Ha fallado tu código o una dependencia</td></tr>
+</tbody></table></div>
+<p>Regla rápida: <strong>2xx</strong> ha ido bien, <strong>4xx</strong> la culpa es del cliente, <strong>5xx</strong> la culpa es del servidor.</p>
+</article>
+
+<article class="receta" id="b1--crud-memoria">
+<h2><a href="#b1--crud-memoria"><span class="ses">1.4</span>CRUD completo en memoria</a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const express = require('express');
+const app = express();
+app.use(express.json());
+
+let tareas = [
+  { id: 1, titulo: 'Instalar Node', hecha: true },
+  { id: 2, titulo: 'Leer sobre REST', hecha: false }
+];
+let siguienteId = 3;
+
+// Listar: 200
+app.get('/tareas', (req, res) =&gt; res.json(tareas));
+
+// Leer una: 200 o 404
+app.get('/tareas/:id', (req, res) =&gt; {
+  const tarea = tareas.find(t =&gt; t.id === Number(req.params.id));
+  if (!tarea) return res.status(404).json({ error: 'Tarea no encontrada' });
+  res.json(tarea);
+});
+
+// Crear: 201 o 400
+app.post('/tareas', (req, res) =&gt; {
+  const { titulo } = req.body;
+  if (!titulo) return res.status(400).json({ error: 'titulo es obligatorio' });
+  const nueva = { id: siguienteId++, titulo, hecha: false };
+  tareas.push(nueva);
+  res.status(201).json(nueva);
+});
+
+// Reemplazar: 200 o 404
+app.put('/tareas/:id', (req, res) =&gt; {
+  const indice = tareas.findIndex(t =&gt; t.id === Number(req.params.id));
+  if (indice === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
+  const { titulo, hecha } = req.body;
+  tareas[indice] = { id: tareas[indice].id, titulo, hecha };
+  res.json(tareas[indice]);
+});
+
+// Actualizar parcial: 200 o 404
+app.patch('/tareas/:id', (req, res) =&gt; {
+  const tarea = tareas.find(t =&gt; t.id === Number(req.params.id));
+  if (!tarea) return res.status(404).json({ error: 'Tarea no encontrada' });
+  Object.assign(tarea, req.body, { id: tarea.id });   // el id no se toca
+  res.json(tarea);
+});
+
+// Borrar: 204 o 404
+app.delete('/tareas/:id', (req, res) =&gt; {
+  const indice = tareas.findIndex(t =&gt; t.id === Number(req.params.id));
+  if (indice === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
+  tareas.splice(indice, 1);
+  res.sendStatus(204);
+});
+
+module.exports = app;</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong><code>t.id === req.params.id</code> nunca encuentra nada: uno es número y el otro texto. Siempre <code>Number(req.params.id)</code>.</p>
+</article>
+
+<article class="receta" id="b1--anidar">
+<h2><a href="#b1--anidar"><span class="ses">1.4</span>Recursos anidados en la URL</a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// Los pedidos de un usuario concreto
+app.get('/usuarios/:usuarioId/pedidos', (req, res) =&gt; {
+  const usuarioId = Number(req.params.usuarioId);
+  res.json(pedidos.filter(p =&gt; p.usuarioId === usuarioId));
+});
+
+// Un pedido concreto de ese usuario
+app.get('/usuarios/:usuarioId/pedidos/:pedidoId', (req, res) =&gt; {
+  const { usuarioId, pedidoId } = req.params;
+  const pedido = pedidos.find(p =&gt; p.id === Number(pedidoId) &amp;&amp; p.usuarioId === Number(usuarioId));
+  if (!pedido) return res.status(404).json({ error: 'Pedido no encontrado' });
+  res.json(pedido);
+});</code></pre></figure>
+<p>No anides más de dos niveles: <code>/usuarios/1/pedidos/4/lineas/2</code> ya es difícil de mantener.</p>
+</article>
+
+<article class="receta" id="b1--middleware">
+<h2><a href="#b1--middleware"><span class="ses">1.5</span>Qué es un middleware</a></h2>
+<p>Una función <code>(req, res, next)</code> que se ejecuta <strong>antes</strong> de la ruta. Puede mirar o cambiar <code>req</code>, responder y cortar, o llamar a <code>next()</code> para pasar al siguiente.</p>
+<figure class="code"><figcaption><span class="file">src/middlewares/logger.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function logger(req, res, next) {
+  const inicio = Date.now();
+  console.log(`--&gt; ${req.method} ${req.url}`);
+
+  res.on('finish', () =&gt; {   // cuando ya se ha enviado la respuesta
+    console.log(`&lt;-- ${req.method} ${req.url} ${res.statusCode} (${Date.now() - inicio} ms)`);
+  });
+
+  next(); // IMPRESCINDIBLE: pasa el control al siguiente middleware o ruta
+}
+
+module.exports = logger;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const logger = require('./middlewares/logger');
+app.use(logger);</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>si un middleware ni responde ni llama a <code>next()</code>, la petición se queda colgada en Postman hasta el timeout.</p>
+</article>
+
+<article class="receta" id="b1--alcance">
+<h2><a href="#b1--alcance"><span class="ses">1.5</span>Dónde se aplica un middleware</a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.use(miMiddleware);                    // a TODAS las rutas
+app.use('/admin', miMiddleware);          // solo a rutas que empiecen por /admin
+app.get('/privado', miMiddleware, (req, res) =&gt; { /* ... */ }); // solo a esta ruta
+app.post('/tareas', mw1, mw2, mw3, handler); // varios en cadena, en ese orden</code></pre></figure>
+</article>
+
+<article class="receta" id="b1--cortar">
+<h2><a href="#b1--cortar"><span class="ses">1.5</span>Middleware que corta la cadena</a></h2>
+<figure class="code"><figcaption><span class="file">src/middlewares/requiere-clave.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function requiereClave(req, res, next) {
+  if (req.headers['x-api-key'] !== 'secreto123') {
+    return res.status(401).json({ error: 'Falta o es incorrecta la cabecera x-api-key' });
+    // no se llama a next(): la ruta nunca se ejecuta
+  }
+  next();
+}
+
+module.exports = requiereClave;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/middlewares/horario.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// Bloquea escrituras fuera de horario, deja pasar las lecturas
+function soloEnHorario(req, res, next) {
+  const hora = new Date().getHours();
+  if (req.method !== 'GET' &amp;&amp; (hora &lt; 8 || hora &gt;= 20)) {
+    return res.status(403).json({ error: 'Solo se puede modificar de 8:00 a 20:00' });
+  }
+  next();
+}</code></pre></figure>
+</article>
+
+<article class="receta" id="b1--enriquecer">
+<h2><a href="#b1--enriquecer"><span class="ses">1.5</span>Middleware que enriquece <code>req</code></a></h2>
+<p>Prepara datos para que la ruta los reciba ya listos.</p>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function enriquecerBody(req, res, next) {
+  if (req.method === 'POST' &amp;&amp; req.body) {
+    if (typeof req.body.titulo === 'string') req.body.titulo = req.body.titulo.trim(); // datos limpios
+    delete req.body.id;                              // el id no lo decide el cliente
+    req.body.creadoEn = new Date().toISOString();    // dato que añade el servidor
+  }
+  next();
+}
+
+function marcarPeticion(req, res, next) {
+  req.idPeticion = Math.random().toString(36).slice(2, 8);   // propiedad nueva en req
+  next();
+}
+
+app.use(express.json());   // primero: sin él, req.body todavía no existe
+app.use(enriquecerBody);
+app.use(marcarPeticion);
+
+app.post('/tareas', (req, res) =&gt; {
+  // el título ya viene limpio y con la fecha de creación puesta
+  const nueva = { id: siguienteId++, ...req.body };
+  tareas.push(nueva);
+  res.status(201).json({ ...nueva, peticion: req.idPeticion });
+});</code></pre></figure>
+</article>
+
+<article class="receta" id="b1--incorporados">
+<h2><a href="#b1--incorporados"><span class="ses">1.5</span>Middleware incorporados</a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const path = require('path');
+
+app.use(express.json());                         // JSON del body -&gt; req.body
+app.use(express.urlencoded({ extended: true })); // formularios HTML clásicos
+app.use(express.static(path.join(__dirname, 'public'))); // sirve public/index.html, css, imágenes...</code></pre></figure>
+<p>Con <code>express.static('public')</code>, el archivo <code>public/logo.png</code> se ve en <code>http://localhost:3000/logo.png</code>.</p>
+</article>
+<nav class="pasar"><a href="#b0">← Node.js</a><a href="#b2">Rutas y middleware →</a></nav>
+</section>
+
+<!-- ============================ BLOQUE 2 ============================ -->
+<section class="tab" id="b2" data-tab="b2" hidden>
+<p class="kicker">Bloque 2</p><h1>Rutas, middleware y peticiones HTTP</h1>
+<p class="intro">Router modular, validación, orden de middleware, errores centralizados, Zod, CORS y multer.</p>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b2--router">Separar rutas con <code>express.Router</code></a><a href="#b2--varios-routers">Varios recursos y prefijo <code>/api/v1</code></a><a href="#b2--validar-manual">Validar el body a mano</a><a href="#b2--paginacion">Paginación con query string</a><a href="#b2--body-vacio"><code>req.body</code> es <code>undefined</code></a><a href="#b2--orden">El orden de los middleware</a><a href="#b2--cadena">Varios middleware en una ruta</a><a href="#b2--errores">Middleware de errores (4 argumentos)</a><a href="#b2--404">Capturar rutas que no existen (404)</a><a href="#b2--next-error">Rutas async con <code>next(error)</code></a><a href="#b2--errorhttp">Clase <code>ErrorHTTP</code> propia</a><a href="#b2--zod">Esquema con Zod</a><a href="#b2--zod-middleware">Middleware <code>validar(esquema)</code></a><a href="#b2--cors">Habilitar CORS</a><a href="#b2--multer">Subir archivos con multer</a><a href="#b2--multer-limites">Limitar tipo y tamaño</a><a href="#b2--cierre">Cierre: <code>app.js</code> completo</a></nav>
+
+<article class="receta" id="b2--router">
+<h2><a href="#b2--router"><span class="ses">2.1</span>Separar rutas con <code>express.Router</code></a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const express = require('express');
+const router = express.Router();
+
+let productos = [{ id: 1, nombre: 'Teclado mecánico', precio: 49.9 }];
+
+router.get('/', (req, res) =&gt; res.json(productos));          // GET /productos
+router.get('/:id', (req, res) =&gt; {                           // GET /productos/:id
+  const p = productos.find(p =&gt; p.id === Number(req.params.id));
+  if (!p) return res.status(404).json({ error: 'No encontrado' });
+  res.json(p);
+});
+router.post('/', (req, res) =&gt; { /* ... */ });               // POST /productos
+
+module.exports = router;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const productosRouter = require('./routes/productos.routes');
+
+app.use('/productos', productosRouter);
+// router.get('/')    responde en GET /productos
+// router.get('/:id') responde en GET /productos/:id</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>dentro del router las rutas <strong>no</strong> repiten el prefijo: <code>router.get('/productos')</code> respondería en <code>/productos/productos</code>.</p>
+</article>
+
+<article class="receta" id="b2--varios-routers">
+<h2><a href="#b2--varios-routers"><span class="ses">2.1</span>Varios recursos y prefijo <code>/api/v1</code></a></h2>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.use('/productos', require('./routes/productos.routes'));
+app.use('/usuarios', require('./routes/usuarios.routes'));
+app.use('/pedidos', require('./routes/pedidos.routes'));</code></pre></figure>
+<p>Versionar todo con un router intermedio:</p>
+<figure class="code"><figcaption><span class="file">src/routes/index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const router = require('express').Router();
+
+router.use('/productos', require('./productos.routes'));
+router.use('/usuarios', require('./usuarios.routes'));
+
+module.exports = router;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.use('/api/v1', require('./routes'));   // GET /api/v1/productos</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--validar-manual">
+<h2><a href="#b2--validar-manual"><span class="ses">2.2</span>Validar el body a mano</a></h2>
+<p>Nunca confíes en lo que llega del cliente. Comprueba <strong>que exista</strong>, <strong>el tipo</strong> y <strong>el rango</strong>, y responde 400 antes de guardar nada.</p>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.post('/', (req, res) =&gt; {
+  const { titulo, precio } = req.body;
+
+  if (!titulo || typeof titulo !== 'string') {
+    return res.status(400).json({ error: 'titulo es obligatorio y debe ser texto' });
+  }
+  if (precio === undefined || typeof precio !== 'number' || precio &lt; 0) {
+    return res.status(400).json({ error: 'precio es obligatorio y debe ser un número positivo' });
+  }
+
+  const nuevo = { id: Date.now(), titulo: titulo.trim(), precio };
+  productos.push(nuevo);
+  res.status(201).json(nuevo);
+});</code></pre></figure>
+<p>Validar el parámetro de la ruta:</p>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.get('/:id', (req, res) =&gt; {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id &lt;= 0) {
+    return res.status(400).json({ error: 'El id debe ser un entero positivo' });
+  }
+  // ...
+});</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--paginacion">
+<h2><a href="#b2--paginacion"><span class="ses">2.2</span>Paginación con query string</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// GET /productos?pagina=2&amp;limite=5&amp;categoria=audio
+router.get('/', (req, res) =&gt; {
+  const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+  const limite = Math.min(50, parseInt(req.query.limite) || 10);
+  const { categoria } = req.query;
+
+  let resultado = productos;
+  if (categoria) resultado = resultado.filter(p =&gt; p.categoria === categoria);
+
+  const inicio = (pagina - 1) * limite;
+  res.json({
+    pagina,
+    limite,
+    total: resultado.length,
+    datos: resultado.slice(inicio, inicio + limite)
+  });
+});</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--body-vacio">
+<h2><a href="#b2--body-vacio"><span class="ses">2.2</span><code>req.body</code> es <code>undefined</code></a></h2>
+<p>Tres causas, por orden de probabilidad:</p>
+<ol class="pasos">
+<li>Falta <code>app.use(express.json())</code>.</li>
+<li>Está, pero <strong>después</strong> de los routers (ver <a href="#b2--orden">orden</a>).</li>
+<li>En Postman no has elegido <em>Body <span class="arrow">→</span> raw <span class="arrow">→</span> JSON</em>, y no se manda <code>Content-Type: application/json</code>.</li>
+</ol>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// MAL: el router se ejecuta antes de que exista req.body
+app.use('/tareas', require('./routes/tareas.routes'));
+app.use(express.json());
+
+// BIEN
+app.use(express.json());
+app.use('/tareas', require('./routes/tareas.routes'));</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--orden">
+<h2><a href="#b2--orden"><span class="ses">2.3</span>El orden de los middleware</a></h2>
+<p>El orden en que se declaran es el orden en que se ejecutan. Este es el esquema que hay que seguir siempre:</p>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>app.use(logger);                          // 1. siempre, para toda petición
+app.use(cors());                          // 2. cabeceras CORS
+app.use(express.json());                  // 3. parsea el body
+app.use('/admin', requiereAdmin);         // 4. solo rutas que empiecen por /admin
+app.use('/productos', productosRouter);   // 5. las rutas de cada recurso
+app.use(noEncontrado);                    // 6. 404: ninguna ruta ha respondido
+app.use(manejadorErrores);                // 7. SIEMPRE el último (4 argumentos)</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--cadena">
+<h2><a href="#b2--cadena"><span class="ses">2.3</span>Varios middleware en una ruta</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/pedidos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function validarDatos(req, res, next) {
+  if (!Array.isArray(req.body.lineas) || req.body.lineas.length === 0) {
+    return res.status(400).json({ error: 'El pedido necesita al menos una línea' });
+  }
+  next();
+}
+
+let pedidosHoy = 0;
+function comprobarLimiteDiario(req, res, next) {
+  if (pedidosHoy &gt;= 100) return res.status(429).json({ error: 'Límite diario alcanzado' });
+  next();
+}
+
+function registrarAuditoria(req, res, next) {
+  console.log(`[AUDITORÍA] ${new Date().toISOString()} pedido con ${req.body.lineas.length} líneas`);
+  next();
+}
+
+router.post('/', validarDatos, comprobarLimiteDiario, registrarAuditoria, (req, res) =&gt; {
+  // aquí ya han pasado los tres controles anteriores, en ese orden
+  pedidosHoy++;
+  res.status(201).json({ mensaje: 'Pedido creado' });
+});</code></pre></figure>
+<p>Middleware solo para un grupo de rutas: <code>app.use('/admin', requiereAdmin)</code> antes de <code>app.use('/admin', adminRouter)</code>.</p>
+</article>
+
+<article class="receta" id="b2--errores">
+<h2><a href="#b2--errores"><span class="ses">2.4</span>Middleware de errores (4 argumentos)</a></h2>
+<p>Express lo reconoce porque tiene <strong>cuatro</strong> parámetros. Recoge todo lo que se pase con <code>next(error)</code> o se lance en código síncrono.</p>
+<figure class="code"><figcaption><span class="file">src/middlewares/errores.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function manejadorErrores(err, req, res, next) {
+  console.error(err.stack);
+  const status = err.status || 500;
+  res.status(status).json({
+    error: status === 500 ? 'Error interno del servidor' : err.message
+  });
+}
+
+module.exports = manejadorErrores;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// al final de app.js, después de todas las rutas
+app.use(require('./middlewares/errores'));</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>aunque no uses <code>next</code>, tienes que ponerlo. Con tres parámetros Express lo trata como un middleware normal.</p>
+</article>
+
+<article class="receta" id="b2--404">
+<h2><a href="#b2--404"><span class="ses">2.4</span>Capturar rutas que no existen (404)</a></h2>
+<figure class="code"><figcaption><span class="file">src/middlewares/no-encontrado.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function noEncontrado(req, res, next) {
+  res.status(404).json({ error: `No existe la ruta ${req.method} ${req.originalUrl}` });
+}
+
+module.exports = noEncontrado;</code></pre></figure>
+<p>Va <strong>después</strong> de todos los routers y <strong>antes</strong> del manejador de errores: si la petición llega aquí es que ninguna ruta respondió.</p>
+</article>
+
+<article class="receta" id="b2--next-error">
+<h2><a href="#b2--next-error"><span class="ses">2.4</span>Rutas async con <code>next(error)</code></a></h2>
+<figure class="code"><figcaption><span class="file">Repetido en cada ruta (evitar)</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.get('/:id', async (req, res) =&gt; {
+  try {
+    const producto = await BaseDeDatos.buscar(req.params.id);
+    if (!producto) return res.status(404).json({ error: 'No encontrado' });
+    res.json(producto);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error interno' }); // repetido en cada ruta
+  }
+});</code></pre></figure>
+<figure class="code"><figcaption><span class="file">Delegando en el manejador (bien)</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.get('/:id', async (req, res, next) =&gt; {
+  try {
+    const producto = await BaseDeDatos.buscar(req.params.id);
+    if (!producto) return res.status(404).json({ error: 'No encontrado' });
+    res.json(producto);
+  } catch (error) {
+    next(error); // el middleware de errores decide el formato final
+  }
+});</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>en Express 4, una ruta <code>async</code> <strong>sin</strong> <code>try/catch</code> que lanza un error no llega al manejador: la petición se queda colgada o el proceso avisa de una promesa rechazada.</p>
+</article>
+
+<article class="receta" id="b2--errorhttp">
+<h2><a href="#b2--errorhttp"><span class="ses">2.4</span>Clase <code>ErrorHTTP</code> propia</a></h2>
+<figure class="code"><figcaption><span class="file">src/utils/ErrorHTTP.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>class ErrorHTTP extends Error {
+  constructor(status, mensaje) {
+    super(mensaje);
+    this.status = status;
+  }
+}
+
+module.exports = ErrorHTTP;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const ErrorHTTP = require('../utils/ErrorHTTP');
+
+router.get('/:id', async (req, res, next) =&gt; {
+  try {
+    const producto = productos.find(p =&gt; p.id === Number(req.params.id));
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    res.json(producto);
+  } catch (error) {
+    next(error);   // llega con status 404 y el mensaje
+  }
+});
+
+router.delete('/:id', (req, res, next) =&gt; {
+  if (req.headers['x-rol'] !== 'admin') return next(new ErrorHTTP(403, 'Solo administradores'));
+  // ...
+});</code></pre></figure>
+<p>El <a href="#b2--errores">manejador de errores</a> lee <code>err.status</code> y <code>err.message</code>, así que todas las rutas responden con el mismo formato.</p>
+</article>
+
+<article class="receta" id="b2--zod">
+<h2><a href="#b2--zod"><span class="ses">2.5</span>Esquema con Zod</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install zod</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/esquemas/tarea.esquema.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { z } = require('zod');
+
+const esquemaTarea = z.object({
+  titulo: z.string().trim().min(1, 'El título no puede estar vacío'),
+  hecha: z.boolean().optional()
+});
+
+module.exports = esquemaTarea;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/esquemas/producto.esquema.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { z } = require('zod');
+
+const esquemaProducto = z.object({
+  nombre: z.string().trim().min(2, 'Mínimo 2 caracteres').max(100),
+  precio: z.number({ message: 'El precio debe ser un número' }).positive('El precio debe ser positivo'),
+  stock: z.number().int().min(0).default(0),
+  categoria: z.enum(['perifericos', 'pantallas', 'audio']),
+  email: z.string().email('Email no válido').optional()
+});
+
+// Para PATCH: todos los campos opcionales
+const esquemaProductoParcial = esquemaProducto.partial();
+
+module.exports = { esquemaProducto, esquemaProductoParcial };</code></pre></figure>
+<figure class="code"><figcaption><span class="file">Usarlo a mano</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const resultado = esquemaTarea.safeParse(req.body);
+
+if (!resultado.success) {
+  console.log(resultado.error.issues); // array con cada problema encontrado
+} else {
+  console.log(resultado.data); // datos ya validados y transformados (trim aplicado)
+}</code></pre></figure>
+<p><code>safeParse</code> devuelve <code>{ success, data | error }</code> y nunca lanza. <code>parse</code> lanza una excepción si no es válido.</p>
+</article>
+
+<article class="receta" id="b2--zod-middleware">
+<h2><a href="#b2--zod-middleware"><span class="ses">2.5</span>Middleware <code>validar(esquema)</code></a></h2>
+<p>Una función que <strong>recibe el esquema y devuelve un middleware</strong>. Sirve para cualquier recurso.</p>
+<figure class="code"><figcaption><span class="file">src/middlewares/validar.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function validar(esquema) {
+  return (req, res, next) =&gt; {
+    const resultado = esquema.safeParse(req.body);
+    if (!resultado.success) {
+      return res.status(400).json({ errores: resultado.error.issues.map(i =&gt; i.message) });
+    }
+    req.body = resultado.data; // datos ya limpios (trim, tipos correctos) para el handler
+    next();
+  };
+}
+
+module.exports = validar;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/tareas.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const validar = require('../middlewares/validar');
+const esquemaTarea = require('../esquemas/tarea.esquema');
+
+router.post('/', validar(esquemaTarea), (req, res) =&gt; {
+  // req.body ya ha pasado la validación completa
+  const nueva = { id: siguienteId++, hecha: false, ...req.body };
+  tareas.push(nueva);
+  res.status(201).json(nueva);
+});
+
+router.patch('/:id', validar(esquemaTarea.partial()), (req, res) =&gt; { /* ... */ });</code></pre></figure>
+</article>
+
+<article class="receta" id="b2--cors">
+<h2><a href="#b2--cors"><span class="ses">2.6</span>Habilitar CORS</a></h2>
+<p>El <strong>navegador</strong> bloquea que una página en <code>localhost:4200</code> (Angular) lea respuestas de <code>localhost:3000</code> si la API no lo permite con cabeceras. Postman no lo nota porque no es un navegador.</p>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install cors</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const cors = require('cors');
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:4200', // el origen real del Front
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+}));
+
+// app.use(cors());  // permite cualquier origen: solo para pruebas</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>el error «blocked by CORS policy» sale en la consola del navegador, no en el servidor. Va antes de los routers.</p>
+</article>
+
+<article class="receta" id="b2--multer">
+<h2><a href="#b2--multer"><span class="ses">2.6</span>Subir archivos con multer</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install multer</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
+// Postman: Body -&gt; form-data, campo "imagen" de tipo File + campos de texto
+router.post('/', upload.single('imagen'), (req, res) =&gt; {
+  console.log(req.file);  // { originalname, filename, path, size, mimetype... }
+  console.log(req.body);  // el resto de campos del formulario, como texto
+  if (!req.file) return res.status(400).json({ error: 'Falta la imagen' });
+  res.status(201).json({ mensaje: 'Producto creado', archivo: req.file.filename });
+});
+
+// Varios archivos del mismo campo: upload.array('fotos', 5) -&gt; req.files</code></pre></figure>
+<p>Para que se puedan ver: <code>app.use('/uploads', express.static('uploads'))</code>.</p>
+<p class="ojo"><strong>Ojo</strong>con <code>multipart/form-data</code>, <code>express.json()</code> no hace nada: es multer quien rellena <code>req.body</code>, y todo llega como texto (<code>Number(req.body.precio)</code>).</p>
+</article>
+
+<article class="receta" id="b2--multer-limites">
+<h2><a href="#b2--multer-limites"><span class="ses">2.6</span>Limitar tipo y tamaño</a></h2>
+<figure class="code"><figcaption><span class="file">src/middlewares/subida.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const multer = require('multer');
+const path = require('path');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) =&gt; cb(null, 'uploads/'),
+  filename: (req, file, cb) =&gt; {
+    const unico = Date.now() + '-' + Math.round(Math.random() * 1e6);
+    cb(null, unico + path.extname(file.originalname));   // conserva la extensión
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 },   // 2 MB
+  fileFilter: (req, file, cb) =&gt; {
+    const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (permitidos.includes(file.mimetype)) cb(null, true);
+    else cb(new ErrorHTTP(400, 'Solo se permiten imágenes JPG, PNG o WEBP'));
+  }
+});
+
+module.exports = upload;</code></pre></figure>
+<p>Si el archivo es demasiado grande, multer llama a <code>next</code> con un error <code>LIMIT_FILE_SIZE</code>; en el manejador: <code>if (err.code === 'LIMIT_FILE_SIZE') status = 400</code>.</p>
+</article>
+
+<article class="receta" id="b2--cierre">
+<h2><a href="#b2--cierre"><span class="ses">2.7</span>Cierre: <code>app.js</code> completo</a></h2>
+<p>Todas las piezas del bloque juntas, en el orden correcto. Es la base que el bloque 3 conecta a la base de datos.</p>
+<figure class="code"><figcaption><span class="file">src/app.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const express = require('express');
+const cors = require('cors');
+const logger = require('./middlewares/logger');
+const noEncontrado = require('./middlewares/no-encontrado');
+const manejadorErrores = require('./middlewares/errores');
+
+const app = express();
+
+app.use(logger);
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:4200' }));
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+app.use('/categorias', require('./routes/categorias.routes'));
+app.use('/productos', require('./routes/productos.routes'));
+
+app.use(noEncontrado);
+app.use(manejadorErrores);
+
+module.exports = app;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const router = require('express').Router();
+const validar = require('../middlewares/validar');
+const { esquemaProducto } = require('../esquemas/producto.esquema');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+let productos = [];
+let siguienteId = 1;
+
+router.get('/', (req, res) =&gt; res.json(productos));
+
+router.get('/:id', (req, res, next) =&gt; {
+  const p = productos.find(p =&gt; p.id === Number(req.params.id));
+  if (!p) return next(new ErrorHTTP(404, 'Producto no encontrado'));
+  res.json(p);
+});
+
+router.post('/', validar(esquemaProducto), (req, res) =&gt; {
+  const nuevo = { id: siguienteId++, ...req.body };
+  productos.push(nuevo);
+  res.status(201).json(nuevo);
+});
+
+router.delete('/:id', (req, res, next) =&gt; {
+  const i = productos.findIndex(p =&gt; p.id === Number(req.params.id));
+  if (i === -1) return next(new ErrorHTTP(404, 'Producto no encontrado'));
+  productos.splice(i, 1);
+  res.sendStatus(204);
+});
+
+module.exports = router;</code></pre></figure>
+</article>
+<nav class="pasar"><a href="#b1">← Express</a><a href="#b3">Sequelize →</a></nav>
+</section>
+
+<!-- ============================ BLOQUE 3 ============================ -->
+<section class="tab" id="b3" data-tab="b3" hidden>
+<p class="kicker">Bloque 3</p><h1>Persistencia SQL con ORM (Sequelize)</h1>
+<p class="intro">SQLite + Sequelize: conexión, modelos, CRUD, relaciones 1:N y N:M, transacciones y la API final en capas.</p>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b3--orm">Por qué una base de datos y un ORM</a><a href="#b3--instalar">Instalar y conectar a SQLite</a><a href="#b3--logging">Ver el SQL que genera</a><a href="#b3--modelo">Definir un modelo</a><a href="#b3--sync">Crear las tablas: <code>sync()</code></a><a href="#b3--migraciones">Migraciones con sequelize-cli</a><a href="#b3--crud">CRUD con el modelo</a><a href="#b3--where">Filtrar con <code>where</code> y <code>Op</code></a><a href="#b3--paginar">Ordenar y paginar</a><a href="#b3--rutas">El CRUD dentro de las rutas</a><a href="#b3--uno-muchos">Relación 1:N</a><a href="#b3--include">Traer datos relacionados: <code>include</code></a><a href="#b3--fk-existe">Crear comprobando la FK</a><a href="#b3--muchos-muchos">Relación N:M con tabla intermedia</a><a href="#b3--nm-usar">Añadir y consultar en N:M</a><a href="#b3--transaccion-manual">Transacción manual</a><a href="#b3--transaccion-gestionada">Transacción gestionada</a><a href="#b3--capas">Ruta, controlador, servicio, modelo</a><a href="#b3--arranque">Arrancar con la base de datos</a></nav>
+
+<article class="receta" id="b3--orm">
+<h2><a href="#b3--orm"><span class="ses">3.1</span>Por qué una base de datos y un ORM</a></h2>
+<p>El array del bloque 2 se borra al reiniciar el servidor. Una base de datos <strong>persiste</strong>, permite consultas y garantiza integridad. Un <strong>ORM</strong> traduce entre objetos JavaScript y tablas SQL.</p>
+<div class="table"><table><thead><tr><th>SQL</th><th>Sequelize</th></tr></thead><tbody>
+<tr><td data-label="SQL"><code>SELECT * FROM Productos</code></td><td data-label="Sequelize"><code>Producto.findAll()</code></td></tr>
+<tr><td data-label="SQL"><code>SELECT * FROM Productos WHERE id = 3</code></td><td data-label="Sequelize"><code>Producto.findByPk(3)</code></td></tr>
+<tr><td data-label="SQL"><code>... WHERE precio &gt; 100</code></td><td data-label="Sequelize"><code>findAll({ where: { precio: { [Op.gt]: 100 } } })</code></td></tr>
+<tr><td data-label="SQL"><code>INSERT INTO Productos ...</code></td><td data-label="Sequelize"><code>Producto.create({ ... })</code></td></tr>
+<tr><td data-label="SQL"><code>UPDATE Productos SET ...</code></td><td data-label="Sequelize"><code>producto.update({ ... })</code></td></tr>
+<tr><td data-label="SQL"><code>DELETE FROM Productos ...</code></td><td data-label="Sequelize"><code>producto.destroy()</code></td></tr>
+<tr><td data-label="SQL"><code>... JOIN Categorias ...</code></td><td data-label="Sequelize"><code>findAll({ include: Categoria })</code></td></tr>
+</tbody></table></div>
+<p>Ventajas: no escribes SQL a mano, te protege de <strong>inyección SQL</strong>, y cambiar de SQLite a MySQL/PostgreSQL es cambiar la configuración.</p>
+</article>
+
+<article class="receta" id="b3--instalar">
+<h2><a href="#b3--instalar"><span class="ses">3.1</span>Instalar y conectar a SQLite</a></h2>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install sequelize sqlite3</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/config/database.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { Sequelize } = require('sequelize');
+const path = require('path');
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(__dirname, '..', '..', 'datos.sqlite'),   // archivo de la BD
+  logging: false                                               // true para ver el SQL
+});
+
+module.exports = sequelize;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">probar-conexion.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const sequelize = require('./src/config/database');
+
+async function probar() {
+  try {
+    await sequelize.authenticate();
+    console.log('Conexión con la base de datos correcta');
+  } catch (error) {
+    console.error('No se pudo conectar:', error.message);
+  } finally {
+    await sequelize.close();
+  }
+}
+probar();</code></pre></figure>
+<p>Con MySQL sería <code>new Sequelize('bd', 'usuario', 'clave', { host: 'localhost', dialect: 'mysql' })</code> e instalar <code>mysql2</code>.</p>
+</article>
+
+<article class="receta" id="b3--logging">
+<h2><a href="#b3--logging"><span class="ses">3.1</span>Ver el SQL que genera</a></h2>
+<figure class="code"><figcaption><span class="file">src/config/database.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: 'datos.sqlite',
+  logging: console.log      // o: (sql) =&gt; console.log('[SQL]', sql)
+});</code></pre></figure>
+<figure class="code" data-lang="term"><figcaption><span class="file">Salida</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>Executing (default): SELECT `id`, `nombre`, `precio`, `categoria`, `createdAt`, `updatedAt` FROM `Productos` AS `Producto` WHERE `Producto`.`precio` &gt; 100;</code></pre></figure>
+<p>También por consulta: <code>Producto.findAll({ logging: console.log })</code>.</p>
+</article>
+
+<article class="receta" id="b3--modelo">
+<h2><a href="#b3--modelo"><span class="ses">3.2</span>Definir un modelo</a></h2>
+<p>Un modelo es una tabla descrita en JavaScript. Sequelize añade solo <code>id</code>, <code>createdAt</code> y <code>updatedAt</code>, y pone el nombre de la tabla en plural (<code>Productos</code>).</p>
+<figure class="code"><figcaption><span class="file">src/models/producto.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+
+const Producto = sequelize.define('Producto', {
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { notEmpty: true, len: [2, 100] }
+  },
+  precio: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    validate: { min: 0 }
+  },
+  stock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  categoria: { type: DataTypes.STRING },
+  activo: { type: DataTypes.BOOLEAN, defaultValue: true },
+  codigo: { type: DataTypes.STRING, unique: true }
+});
+
+module.exports = Producto;</code></pre></figure>
+<div class="table"><table><thead><tr><th>DataTypes</th><th>SQL</th></tr></thead><tbody>
+<tr><td data-label="DataTypes"><code>STRING</code> / <code>TEXT</code></td><td data-label="SQL"><code>VARCHAR(255)</code> / texto largo</td></tr>
+<tr><td data-label="DataTypes"><code>INTEGER</code></td><td data-label="SQL">Entero</td></tr>
+<tr><td data-label="DataTypes"><code>FLOAT</code> / <code>DECIMAL(10,2)</code></td><td data-label="SQL">Decimal</td></tr>
+<tr><td data-label="DataTypes"><code>BOOLEAN</code></td><td data-label="SQL">Booleano</td></tr>
+<tr><td data-label="DataTypes"><code>DATE</code> / <code>DATEONLY</code></td><td data-label="SQL">Fecha con hora / solo fecha</td></tr>
+<tr><td data-label="DataTypes"><code>ENUM('a', 'b')</code></td><td data-label="SQL">Uno de una lista de valores</td></tr>
+</tbody></table></div>
+<p>Opciones del modelo (tercer argumento): <code>{ tableName: 'productos', timestamps: false }</code>.</p>
+</article>
+
+<article class="receta" id="b3--sync">
+<h2><a href="#b3--sync"><span class="ses">3.2</span>Crear las tablas: <code>sync()</code></a></h2>
+<figure class="code"><figcaption><span class="file">sync.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>await sequelize.sync();                // crea las tablas que falten, no toca las existentes
+await sequelize.sync({ alter: true }); // intenta ajustar las tablas al modelo
+await sequelize.sync({ force: true }); // BORRA las tablas y las crea de nuevo (pierdes los datos)
+
+await Producto.sync();                 // solo esa tabla</code></pre></figure>
+<div class="table"><table><thead><tr><th>Opción</th><th>Si la tabla existe</th><th>Cuándo</th></tr></thead><tbody>
+<tr><td data-label="Opción"><code>sync()</code></td><td data-label="Si la tabla existe">No hace nada (no añade columnas nuevas)</td><td data-label="Cuándo">Desarrollo, uso normal</td></tr>
+<tr><td data-label="Opción"><code>{ alter: true }</code></td><td data-label="Si la tabla existe">La modifica para que cuadre</td><td data-label="Cuándo">Desarrollo, al cambiar un modelo</td></tr>
+<tr><td data-label="Opción"><code>{ force: true }</code></td><td data-label="Si la tabla existe">DROP + CREATE: datos perdidos</td><td data-label="Cuándo">Seeds y pruebas. Nunca en producción</td></tr>
+</tbody></table></div>
+<p class="ojo"><strong>Ojo</strong>si añades un campo al modelo y usas <code>sync()</code> normal, la columna no aparece en la tabla: usa <code>alter</code> o una migración.</p>
+</article>
+
+<article class="receta" id="b3--migraciones">
+<h2><a href="#b3--migraciones"><span class="ses">3.2</span>Migraciones con sequelize-cli</a></h2>
+<p>Una migración es un cambio de estructura versionado y reproducible: lo que se usa en producción en vez de <code>sync</code>.</p>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install --save-dev sequelize-cli
+npx sequelize-cli init                 # crea config/, models/, migrations/, seeders/
+npx sequelize-cli model:generate --name Producto --attributes nombre:string,precio:float
+npx sequelize-cli db:migrate           # aplica las migraciones pendientes
+npx sequelize-cli db:migrate:undo      # deshace la última migración aplicada
+npx sequelize-cli seed:generate --name productos-demo
+npx sequelize-cli db:seed:all          # inserta los datos de ejemplo</code></pre></figure>
+<figure class="code"><figcaption><span class="file">migrations/XXXX-create-producto.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('Productos', {
+      id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true, allowNull: false },
+      nombre: { type: Sequelize.STRING, allowNull: false },
+      precio: { type: Sequelize.FLOAT, allowNull: false },
+      createdAt: { type: Sequelize.DATE, allowNull: false },
+      updatedAt: { type: Sequelize.DATE, allowNull: false }
+    });
+  },
+  async down(queryInterface) {
+    await queryInterface.dropTable('Productos');
+  }
+};</code></pre></figure>
+<p><code>up</code> aplica el cambio, <code>down</code> lo deshace.</p>
+</article>
+
+<article class="receta" id="b3--crud">
+<h2><a href="#b3--crud"><span class="ses">3.3</span>CRUD con el modelo</a></h2>
+<p>Todos los métodos son <strong>asíncronos</strong>: siempre con <code>await</code>.</p>
+<figure class="code"><figcaption><span class="file">crud.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// Crear
+const nuevo = await Producto.create({ nombre: 'Teclado', precio: 25, categoria: 'perifericos' });
+console.log(nuevo.id);          // ya tiene id
+
+// Varios a la vez
+await Producto.bulkCreate([
+  { nombre: 'Ratón', precio: 19.5 },
+  { nombre: 'Monitor 4K', precio: 229 }
+]);
+
+// Leer todos
+const todos = await Producto.findAll();
+
+// Leer uno por su clave primaria (id): null si no existe
+const producto = await Producto.findByPk(3);
+
+// Leer el primero que cumpla una condición
+const teclado = await Producto.findOne({ where: { nombre: 'Teclado' } });
+
+// Contar
+const total = await Producto.count({ where: { categoria: 'audio' } });
+
+// Actualizar (sobre una instancia ya encontrada)
+await producto.update({ precio: 22 });
+
+// Borrar (sobre una instancia ya encontrada)
+await producto.destroy();
+
+// Actualizar o borrar varios sin cargarlos
+await Producto.update({ activo: false }, { where: { stock: 0 } });
+await Producto.destroy({ where: { activo: false } });</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>si <code>findByPk</code> devuelve <code>null</code> y llamas a <code>.update()</code> sale «Cannot read properties of null». Comprueba siempre antes y devuelve 404.</p>
+</article>
+
+<article class="receta" id="b3--where">
+<h2><a href="#b3--where"><span class="ses">3.3</span>Filtrar con <code>where</code> y <code>Op</code></a></h2>
+<figure class="code"><figcaption><span class="file">filtros.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { Op } = require('sequelize');
+
+await Producto.findAll({ where: { categoria: 'perifericos' } });              // =
+await Producto.findAll({ where: { precio: { [Op.gt]: 50 } } });               // &gt; 50
+await Producto.findAll({ where: { precio: { [Op.between]: [10, 100] } } });   // entre
+await Producto.findAll({ where: { nombre: { [Op.like]: '%monitor%' } } });    // contiene
+await Producto.findAll({ where: { categoria: { [Op.in]: ['audio', 'pantallas'] } } });
+await Producto.findAll({ where: { CategoriaId: { [Op.is]: null } } });        // IS NULL
+
+// Varias condiciones: AND por defecto
+await Producto.findAll({ where: { categoria: 'audio', precio: { [Op.lt]: 50 } } });
+
+// OR
+await Producto.findAll({
+  where: { [Op.or]: [{ categoria: 'audio' }, { precio: { [Op.lt]: 20 } }] }
+});
+
+// Solo algunas columnas
+await Producto.findAll({ attributes: ['id', 'nombre'] });</code></pre></figure>
+<div class="table"><table><thead><tr><th><code>Op</code></th><th>SQL</th></tr></thead><tbody>
+<tr><td data-label="Op"><code>Op.eq</code> / <code>Op.ne</code></td><td data-label="SQL"><code>=</code> / <code>!=</code></td></tr>
+<tr><td data-label="Op"><code>Op.gt</code> / <code>Op.gte</code></td><td data-label="SQL"><code>&gt;</code> / <code>&gt;=</code></td></tr>
+<tr><td data-label="Op"><code>Op.lt</code> / <code>Op.lte</code></td><td data-label="SQL"><code>&lt;</code> / <code>&lt;=</code></td></tr>
+<tr><td data-label="Op"><code>Op.between</code></td><td data-label="SQL"><code>BETWEEN a AND b</code></td></tr>
+<tr><td data-label="Op"><code>Op.like</code></td><td data-label="SQL"><code>LIKE '%texto%'</code></td></tr>
+<tr><td data-label="Op"><code>Op.in</code></td><td data-label="SQL"><code>IN (...)</code></td></tr>
+<tr><td data-label="Op"><code>Op.or</code> / <code>Op.and</code></td><td data-label="SQL"><code>OR</code> / <code>AND</code></td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b3--paginar">
+<h2><a href="#b3--paginar"><span class="ses">3.3</span>Ordenar y paginar</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { Op } = require('sequelize');
+
+// GET /productos?categoria=audio&amp;min=10&amp;orden=precio&amp;dir=DESC&amp;pagina=2&amp;limite=5
+router.get('/', async (req, res, next) =&gt; {
+  try {
+    const { categoria, min, orden = 'id', dir = 'ASC' } = req.query;
+    const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+    const limite = Math.min(50, parseInt(req.query.limite) || 10);
+
+    const where = {};
+    if (categoria) where.categoria = categoria;
+    if (min) where.precio = { [Op.gte]: Number(min) };
+
+    const { count, rows } = await Producto.findAndCountAll({
+      where,
+      order: [[orden, dir.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']],
+      limit: limite,
+      offset: (pagina - 1) * limite
+    });
+
+    res.json({ total: count, pagina, paginas: Math.ceil(count / limite), datos: rows });
+  } catch (error) {
+    next(error);
+  }
+});</code></pre></figure>
+<p><code>findAndCountAll</code> devuelve el total (sin <code>limit</code>) y las filas de la página en una sola llamada.</p>
+</article>
+
+<article class="receta" id="b3--rutas">
+<h2><a href="#b3--rutas"><span class="ses">3.3</span>El CRUD dentro de las rutas</a></h2>
+<p>El mismo router del bloque 2, cambiando el array por el modelo. Validación y errores no cambian.</p>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const router = require('express').Router();
+const Producto = require('../models/producto.model');
+const validar = require('../middlewares/validar');
+const { esquemaProducto, esquemaProductoParcial } = require('../esquemas/producto.esquema');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+router.get('/', async (req, res, next) =&gt; {
+  try {
+    res.json(await Producto.findAll());
+  } catch (error) { next(error); }
+});
+
+router.get('/:id', async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findByPk(req.params.id);
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    res.json(producto);
+  } catch (error) { next(error); }
+});
+
+router.post('/', validar(esquemaProducto), async (req, res, next) =&gt; {
+  try {
+    const nuevo = await Producto.create(req.body);
+    res.status(201).json(nuevo);
+  } catch (error) { next(error); }
+});
+
+router.patch('/:id', validar(esquemaProductoParcial), async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findByPk(req.params.id);
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    await producto.update(req.body);
+    res.json(producto);
+  } catch (error) { next(error); }
+});
+
+router.delete('/:id', async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findByPk(req.params.id);
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    await producto.destroy();
+    res.sendStatus(204);
+  } catch (error) { next(error); }
+});
+
+module.exports = router;</code></pre></figure>
+<p>Para que un error de validación de Sequelize salga como 400 y no 500, en el manejador de errores:</p>
+<figure class="code"><figcaption><span class="file">src/middlewares/errores.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function manejadorErrores(err, req, res, next) {
+  if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+    return res.status(400).json({ errores: err.errors.map(e =&gt; e.message) });
+  }
+  if (err.name === 'SequelizeForeignKeyConstraintError') {
+    return res.status(400).json({ error: 'La referencia a otro registro no es válida' });
+  }
+  const status = err.status || 500;
+  if (status === 500) console.error(err);
+  res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
+}</code></pre></figure>
+</article>
+
+<article class="receta" id="b3--uno-muchos">
+<h2><a href="#b3--uno-muchos"><span class="ses">3.4</span>Relación 1:N</a></h2>
+<p>Una categoría tiene muchos productos; un producto pertenece a una categoría. La clave ajena (<code>CategoriaId</code>) va en el lado «muchos».</p>
+<figure class="code"><figcaption><span class="file">src/models/categoria.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+
+const Categoria = sequelize.define('Categoria', {
+  nombre: { type: DataTypes.STRING, allowNull: false, unique: true }
+}, {
+  name: { singular: 'Categoria', plural: 'Categorias' },   // evita "Categorium"
+  tableName: 'Categorias'
+});
+
+module.exports = Categoria;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/models/index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const Categoria = require('./categoria.model');
+const Producto = require('./producto.model');
+
+Categoria.hasMany(Producto);       // una categoría tiene muchos productos
+Producto.belongsTo(Categoria);     // un producto pertenece a una categoría (añade CategoriaId)
+
+module.exports = { Categoria, Producto };</code></pre></figure>
+<p>Declara la relación en los <strong>dos sentidos</strong>: cada uno habilita sus consultas. Las asociaciones en un <code>models/index.js</code> evitan imports circulares.</p>
+<p>Opciones útiles: <code>Categoria.hasMany(Producto, { foreignKey: 'categoriaId', onDelete: 'CASCADE' })</code> y <code>Producto.belongsTo(Categoria, { foreignKey: 'categoriaId' })</code> (el mismo <code>foreignKey</code> en los dos lados).</p>
+</article>
+
+<article class="receta" id="b3--include">
+<h2><a href="#b3--include"><span class="ses">3.4</span>Traer datos relacionados: <code>include</code></a></h2>
+<figure class="code"><figcaption><span class="file">consultas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { Categoria, Producto } = require('./models');
+
+const productos = await Producto.findAll({ include: Categoria });
+// cada producto tiene .Categoria con el objeto completo
+
+const categoria = await Categoria.findByPk(1, { include: Producto });
+// categoria.Productos es un array con todos sus productos
+
+// Elegir columnas y filtrar dentro del include
+await Producto.findAll({
+  attributes: ['id', 'nombre', 'precio'],
+  include: { model: Categoria, attributes: ['nombre'], where: { nombre: 'audio' } }
+});
+
+// Métodos que añade la relación
+const susProductos = await categoria.getProductos();
+const suCategoria = await producto.getCategoria();</code></pre></figure>
+<figure class="code" data-lang="json"><figcaption><span class="file">GET /productos/1</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{
+  "id": 1,
+  "nombre": "Teclado mecánico",
+  "precio": 49.9,
+  "CategoriaId": 1,
+  "Categoria": { "id": 1, "nombre": "perifericos" }
+}</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>no hagas un <code>findByPk</code> de la categoría dentro de un bucle por cada producto (problema <strong>N+1</strong>: una consulta por fila). <code>include</code> lo hace con un solo JOIN.</p>
+</article>
+
+<article class="receta" id="b3--fk-existe">
+<h2><a href="#b3--fk-existe"><span class="ses">3.4</span>Crear comprobando la FK</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.post('/', validar(esquemaProducto), async (req, res, next) =&gt; {
+  try {
+    const categoria = await Categoria.findByPk(req.body.CategoriaId);
+    if (!categoria) throw new ErrorHTTP(400, 'La categoría indicada no existe');
+
+    const producto = await Producto.create(req.body);   // { nombre, precio, CategoriaId: 3 }
+    res.status(201).json(producto);
+  } catch (error) { next(error); }
+});
+
+// Alternativa: crear desde la categoría, la FK se pone sola
+const nuevo = await categoria.createProducto({ nombre: 'Teclado', precio: 25 });
+
+// GET /categorias/:id/productos
+router.get('/:id/productos', async (req, res, next) =&gt; {
+  try {
+    const categoria = await Categoria.findByPk(req.params.id, { include: Producto });
+    if (!categoria) throw new ErrorHTTP(404, 'Categoría no encontrada');
+    res.json(categoria);
+  } catch (error) { next(error); }
+});</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>SQLite no comprueba las claves ajenas igual de estricto que MySQL: valida tú que la categoría existe antes de crear.</p>
+</article>
+
+<article class="receta" id="b3--muchos-muchos">
+<h2><a href="#b3--muchos-muchos"><span class="ses">3.5</span>Relación N:M con tabla intermedia</a></h2>
+<p>Un pedido tiene muchos productos y un producto está en muchos pedidos. Hace falta una <strong>tabla intermedia</strong> con las dos claves ajenas, y puede llevar datos propios (<code>cantidad</code>).</p>
+<figure class="code"><figcaption><span class="file">src/models/pedido.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+
+const Pedido = sequelize.define('Pedido', {
+  cliente: { type: DataTypes.STRING, allowNull: false }
+});
+
+module.exports = Pedido;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/models/index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+const Categoria = require('./categoria.model');
+const Producto = require('./producto.model');
+const Pedido = require('./pedido.model');
+
+const PedidoProducto = sequelize.define('PedidoProducto', {
+  cantidad: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 }
+});
+
+Categoria.hasMany(Producto);
+Producto.belongsTo(Categoria);
+
+Pedido.belongsToMany(Producto, { through: PedidoProducto });
+Producto.belongsToMany(Pedido, { through: PedidoProducto });
+
+module.exports = { sequelize, Categoria, Producto, Pedido, PedidoProducto };</code></pre></figure>
+<p>Tabla intermedia <code>PedidoProductos</code> que crea Sequelize:</p>
+<div class="table"><table><thead><tr><th>PedidoId</th><th>ProductoId</th><th>cantidad</th></tr></thead><tbody>
+<tr><td data-label="PedidoId">1</td><td data-label="ProductoId">1</td><td data-label="cantidad">1</td></tr>
+<tr><td data-label="PedidoId">1</td><td data-label="ProductoId">2</td><td data-label="cantidad">2</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b3--nm-usar">
+<h2><a href="#b3--nm-usar"><span class="ses">3.5</span>Añadir y consultar en N:M</a></h2>
+<figure class="code"><figcaption><span class="file">pedidos.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const pedido = await Pedido.findByPk(1);
+const producto = await Producto.findByPk(3);
+
+// Añadir con dato en la tabla intermedia
+await pedido.addProducto(producto, { through: { cantidad: 2 } });
+
+// Leer los productos del pedido (cada uno con .PedidoProducto.cantidad)
+const productosDelPedido = await pedido.getProductos();
+
+// Quitar o reemplazar
+await pedido.removeProducto(producto);
+await pedido.setProductos([p1, p2]);
+
+// Pedido con sus productos y la cantidad, sin las columnas de fecha de la intermedia
+const completo = await Pedido.findByPk(1, {
+  include: {
+    model: Producto,
+    attributes: ['id', 'nombre', 'precio'],
+    through: { attributes: ['cantidad'] }
+  }
+});</code></pre></figure>
+<figure class="code" data-lang="json"><figcaption><span class="file">GET /pedidos/1</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{
+  "id": 1,
+  "cliente": "Ana",
+  "Productos": [
+    { "id": 1, "nombre": "Teclado mecánico", "precio": 49.9, "PedidoProducto": { "cantidad": 1 } },
+    { "id": 2, "nombre": "Ratón", "precio": 19.5, "PedidoProducto": { "cantidad": 2 } }
+  ]
+}</code></pre></figure>
+<p>Calcular el total: <code>completo.Productos.reduce((s, p) =&gt; s + p.precio * p.PedidoProducto.cantidad, 0)</code>.</p>
+</article>
+
+<article class="receta" id="b3--transaccion-manual">
+<h2><a href="#b3--transaccion-manual"><span class="ses">3.6</span>Transacción manual</a></h2>
+<p>Varias escrituras que deben salir <strong>todas o ninguna</strong>. Sin transacción, si falla la tercera línea te queda un pedido a medias.</p>
+<figure class="code"><figcaption><span class="file">src/services/pedidos.service.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { sequelize, Pedido, Producto } = require('../models');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+async function crearPedidoConLineas(datosPedido, lineas) {
+  const t = await sequelize.transaction();
+  try {
+    const pedido = await Pedido.create(datosPedido, { transaction: t });
+    for (const linea of lineas) {
+      const producto = await Producto.findByPk(linea.id, { transaction: t });
+      if (!producto) throw new ErrorHTTP(400, `El producto ${linea.id} no existe`);
+      await pedido.addProducto(producto, { through: { cantidad: linea.cantidad }, transaction: t });
+    }
+    await t.commit();   // confirma todos los cambios de golpe
+    return pedido;
+  } catch (error) {
+    await t.rollback(); // deshace todo lo hecho hasta el momento del fallo
+    throw error;
+  }
+}</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>hay que pasar <code>{ transaction: t }</code> a <strong>cada</strong> operación. La que no lo lleve va por fuera y no se deshace.</p>
+</article>
+
+<article class="receta" id="b3--transaccion-gestionada">
+<h2><a href="#b3--transaccion-gestionada"><span class="ses">3.6</span>Transacción gestionada</a></h2>
+<p>La forma recomendada: pasas una función a <code>sequelize.transaction()</code>. Si termina bien hace <code>commit</code>; si algo lanza, <code>rollback</code> solo.</p>
+<figure class="code"><figcaption><span class="file">src/services/pedidos.service.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>async function crearPedido(datosPedido, lineas) {
+  return sequelize.transaction(async (t) =&gt; {
+    const pedido = await Pedido.create(datosPedido, { transaction: t });
+
+    for (const linea of lineas) {
+      const producto = await Producto.findByPk(linea.id, { transaction: t });
+      if (!producto) throw new ErrorHTTP(400, `El producto ${linea.id} no existe`);
+      if (producto.stock &lt; linea.cantidad) throw new ErrorHTTP(400, `No hay stock de ${producto.nombre}`);
+
+      await producto.decrement('stock', { by: linea.cantidad, transaction: t });
+      await pedido.addProducto(producto, { through: { cantidad: linea.cantidad }, transaction: t });
+    }
+
+    return pedido; // si llega aquí sin error: commit automático
+  });              // si algo lanza dentro: rollback automático
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/pedidos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// POST /pedidos  { "cliente": "Ana", "lineas": [{ "id": 1, "cantidad": 2 }, { "id": 3, "cantidad": 1 }] }
+router.post('/', validar(esquemaPedido), async (req, res, next) =&gt; {
+  try {
+    const { lineas, ...datos } = req.body;
+    const pedido = await pedidosService.crearPedido(datos, lineas);
+    res.status(201).json(pedido);
+  } catch (error) { next(error); }
+});</code></pre></figure>
+<p>Para comprobar que el rollback funciona: manda un pedido con un id de producto que no existe en la última línea y mira que no se ha creado el pedido ni ha bajado el stock de las primeras.</p>
+</article>
+
+<article class="receta" id="b3--capas">
+<h2><a href="#b3--capas"><span class="ses">3.7</span>Ruta, controlador, servicio, modelo</a></h2>
+<p>Cada capa hace una cosa. Así, cambiar el array por Sequelize solo toca el <strong>servicio</strong>: las rutas, la validación y los errores no cambian.</p>
+<div class="table"><table><thead><tr><th>Capa</th><th>Hace</th><th>No hace</th></tr></thead><tbody>
+<tr><td data-label="Capa">Ruta</td><td data-label="Hace">URL + verbo + middleware <span class="arrow">→</span> controlador</td><td data-label="No hace">No tiene lógica</td></tr>
+<tr><td data-label="Capa">Controlador</td><td data-label="Hace">Lee <code>req</code>, llama al servicio, responde con <code>res</code></td><td data-label="No hace">No toca el modelo</td></tr>
+<tr><td data-label="Capa">Servicio</td><td data-label="Hace">Lógica de negocio, lanza <code>ErrorHTTP</code></td><td data-label="No hace">No sabe nada de <code>req</code> ni <code>res</code></td></tr>
+<tr><td data-label="Capa">Modelo</td><td data-label="Hace">Habla con la base de datos</td><td data-label="No hace">—</td></tr>
+</tbody></table></div>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const router = require('express').Router();
+const controlador = require('../controllers/productos.controller');
+const validar = require('../middlewares/validar');
+const { esquemaProducto } = require('../esquemas/producto.esquema');
+
+router.get('/', controlador.listar);
+router.get('/:id', controlador.obtenerUno);
+router.post('/', validar(esquemaProducto), controlador.crear);
+router.delete('/:id', controlador.borrar);
+
+module.exports = router;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/controllers/productos.controller.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const productosService = require('../services/productos.service');
+
+async function listar(req, res, next) {
+  try {
+    res.json(await productosService.buscarTodos(req.query));
+  } catch (error) { next(error); }
+}
+
+async function obtenerUno(req, res, next) {
+  try {
+    const producto = await productosService.buscarPorId(req.params.id);
+    res.json(producto);
+  } catch (error) { next(error); }
+}
+
+async function crear(req, res, next) {
+  try {
+    res.status(201).json(await productosService.crear(req.body));
+  } catch (error) { next(error); }
+}
+
+async function borrar(req, res, next) {
+  try {
+    await productosService.borrar(req.params.id);
+    res.sendStatus(204);
+  } catch (error) { next(error); }
+}
+
+module.exports = { listar, obtenerUno, crear, borrar };</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/services/productos.service.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { Op } = require('sequelize');
+const { Producto, Categoria } = require('../models');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+async function buscarTodos({ categoria, min } = {}) {
+  const where = {};
+  if (min) where.precio = { [Op.gte]: Number(min) };
+  return Producto.findAll({
+    where,
+    include: categoria ? { model: Categoria, where: { nombre: categoria } } : Categoria
+  });
+}
+
+async function buscarPorId(id) {
+  const producto = await Producto.findByPk(id, { include: Categoria });
+  if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+  return producto;
+}
+
+async function crear(datos) {
+  if (datos.CategoriaId &amp;&amp; !(await Categoria.findByPk(datos.CategoriaId))) {
+    throw new ErrorHTTP(400, 'La categoría no existe');
+  }
+  return Producto.create(datos);
+}
+
+async function borrar(id) {
+  const producto = await buscarPorId(id);
+  await producto.destroy();
+}
+
+module.exports = { buscarTodos, buscarPorId, crear, borrar };</code></pre></figure>
+</article>
+
+<article class="receta" id="b3--arranque">
+<h2><a href="#b3--arranque"><span class="ses">3.7</span>Arrancar con la base de datos</a></h2>
+<p>Conectar y sincronizar <strong>antes</strong> de abrir el puerto. Si la base de datos falla, el servidor no arranca a medias.</p>
+<figure class="code"><figcaption><span class="file">index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>require('dotenv').config();
+const app = require('./src/app');
+const { sequelize } = require('./src/models');   // carga modelos y relaciones
+
+const PUERTO = process.env.PORT || 3000;
+
+async function arrancar() {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();               // { alter: true } mientras cambias modelos
+    console.log('Base de datos lista');
+    app.listen(PUERTO, () =&gt; console.log(`API en http://localhost:${PUERTO}`));
+  } catch (error) {
+    console.error('No se pudo arrancar:', error.message);
+    process.exit(1);
+  }
+}
+
+arrancar();</code></pre></figure>
+<figure class="code"><figcaption><span class="file">seed.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const { sequelize, Categoria, Producto } = require('./src/models');
+
+async function seed() {
+  await sequelize.sync({ force: true });   // borra y crea: solo para datos de prueba
+  const [perifericos, pantallas] = await Categoria.bulkCreate([
+    { nombre: 'perifericos' }, { nombre: 'pantallas' }
+  ]);
+  await Producto.bulkCreate([
+    { nombre: 'Teclado mecánico', precio: 49.9, stock: 10, CategoriaId: perifericos.id },
+    { nombre: 'Monitor 4K', precio: 229, stock: 3, CategoriaId: pantallas.id }
+  ]);
+  console.log('Datos de prueba insertados');
+  await sequelize.close();
+}
+
+seed();</code></pre></figure>
+<p>Checklist del cierre del bloque: relaciones declaradas en los dos sentidos, <code>include</code> en vez de N+1, al menos una transacción justificada, y los códigos 201 / 400 / 404 igual que en el bloque 2.</p>
+</article>
+<nav class="pasar"><a href="#b2">← Rutas y middleware</a><a href="#b4">MongoDB →</a></nav>
+</section>
+
+<!-- ============================ BLOQUE 4 ============================ -->
+<section class="tab" id="b4" data-tab="b4" hidden>
+<p class="kicker">Bloque 4</p><h1>Persistencia NoSQL con ODM (Mongoose)</h1>
+<p class="intro">MongoDB y Mongoose: esquemas, CRUD, embebidos frente a referencias, proyecciones, agregaciones y cuándo elegir SQL o NoSQL.</p>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b4--modelo-datos">Documentos y colecciones</a><a href="#b4--sql-nosql">SQL o MongoDB: cuándo cada uno</a><a href="#b4--conectar">Instalar y conectar</a><a href="#b4--esquema">Definir un esquema y un modelo</a><a href="#b4--validacion">Validaciones del esquema</a><a href="#b4--crud">CRUD con Mongoose</a><a href="#b4--castError">El <code>_id</code> y el <code>CastError</code></a><a href="#b4--find">Filtrar con operadores <code>$</code></a><a href="#b4--paginar">Ordenar y paginar</a><a href="#b4--rutas">El CRUD dentro de las rutas</a><a href="#b4--errores">Errores de Mongoose en el manejador</a><a href="#b4--embebidos">Documentos embebidos</a><a href="#b4--referencias">Referencias y <code>populate</code></a><a href="#b4--embeber-o-referenciar">¿Embeber o referenciar?</a><a href="#b4--proyecciones">Proyecciones</a><a href="#b4--aggregate">Agregaciones: <code>aggregate</code></a><a href="#b4--migrar">Cierre: migrar un recurso de Sequelize a Mongoose</a></nav>
+
+<article class="receta" id="b4--modelo-datos">
+<h2><a href="#b4--modelo-datos"><span class="ses">4.1</span>Documentos y colecciones</a></h2>
+<p>MongoDB guarda <strong>documentos</strong> (objetos tipo JSON) dentro de <strong>colecciones</strong>. No es «mejor» ni «peor» que SQL: es otro modelo de datos.</p>
+<div class="table"><table><thead><tr><th>SQL (bloque 3)</th><th>MongoDB</th></tr></thead><tbody>
+<tr><td data-label="SQL (bloque 3)">Base de datos</td><td data-label="MongoDB">Base de datos</td></tr>
+<tr><td data-label="SQL (bloque 3)">Tabla</td><td data-label="MongoDB">Colección</td></tr>
+<tr><td data-label="SQL (bloque 3)">Fila</td><td data-label="MongoDB">Documento</td></tr>
+<tr><td data-label="SQL (bloque 3)">Columna</td><td data-label="MongoDB">Campo</td></tr>
+<tr><td data-label="SQL (bloque 3)"><code>id</code> autoincremental</td><td data-label="MongoDB"><code>_id</code> de tipo <code>ObjectId</code> (24 caracteres hex)</td></tr>
+<tr><td data-label="SQL (bloque 3)">JOIN</td><td data-label="MongoDB">Documento embebido o <code>populate</code></td></tr>
+<tr><td data-label="SQL (bloque 3)">ORM (Sequelize)</td><td data-label="MongoDB">ODM (Mongoose)</td></tr>
+</tbody></table></div>
+<figure class="code" data-lang="json"><figcaption><span class="file">Un documento de la colección posts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{
+  "_id": "66f2b1c0a1e4d5f6a7b8c901",
+  "titulo": "Primeros pasos con Mongoose",
+  "comentarios": [
+    { "_id": "66f2b1c0a1e4d5f6a7b8d001", "autor": "Ana", "texto": "¡Muy claro!" },
+    { "_id": "66f2b1c0a1e4d5f6a7b8d002", "autor": "Luis", "texto": "¿Y con populate?" }
+  ]
+}</code></pre></figure>
+<p>MongoDB no impone esquema, pero <strong>Mongoose sí lo pone</strong> desde el código: tipos, obligatorios y validaciones.</p>
+</article>
+
+<article class="receta" id="b4--sql-nosql">
+<h2><a href="#b4--sql-nosql"><span class="ses">4.1</span>SQL o MongoDB: cuándo cada uno</a></h2>
+<div class="table"><table><thead><tr><th>Situación</th><th>Encaja mejor</th></tr></thead><tbody>
+<tr><td data-label="Situación">Estructura estable y relaciones claras (usuarios, pedidos, líneas con cantidades)</td><td data-label="Encaja mejor">SQL</td></tr>
+<tr><td data-label="Situación">Transacciones estrictas entre varias tablas</td><td data-label="Encaja mejor">SQL</td></tr>
+<tr><td data-label="Situación">Documentos que varían entre sí o cambian a menudo</td><td data-label="Encaja mejor">MongoDB</td></tr>
+<tr><td data-label="Situación">Datos que siempre se leen juntos (comentarios de un post)</td><td data-label="Encaja mejor">MongoDB, embebidos</td></tr>
+<tr><td data-label="Situación">Datos jerárquicos o semiestructurados (catálogos, configuraciones, logs)</td><td data-label="Encaja mejor">MongoDB</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b4--conectar">
+<h2><a href="#b4--conectar"><span class="ses">4.2</span>Instalar y conectar</a></h2>
+<p>Necesitas MongoDB en local (<code>mongodb://127.0.0.1:27017</code>) o un clúster gratuito en MongoDB Atlas.</p>
+<figure class="code" data-lang="term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>npm install mongoose</code></pre></figure>
+<figure class="code" data-lang="env"><figcaption><span class="file">.env</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/tienda</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/config/mongo.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const mongoose = require('mongoose');
+
+async function conectar() {
+  await mongoose.connect(process.env.MONGODB_URI);
+  console.log('Conectado a MongoDB con Mongoose');
+}
+
+module.exports = conectar;</code></pre></figure>
+<figure class="code"><figcaption><span class="file">index.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>require('dotenv').config();
+const app = require('./src/app');
+const conectar = require('./src/config/mongo');
+
+const PUERTO = process.env.PORT || 3000;
+
+conectar()
+  .then(() =&gt; app.listen(PUERTO, () =&gt; console.log(`API en http://localhost:${PUERTO}`)))
+  .catch(error =&gt; {
+    console.error('No se pudo conectar a MongoDB:', error.message);
+    process.exit(1);
+  });</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>en Windows usa <code>127.0.0.1</code> en vez de <code>localhost</code>: con <code>localhost</code> a veces intenta IPv6 y da <code>ECONNREFUSED ::1:27017</code>.</p>
+</article>
+
+<article class="receta" id="b4--esquema">
+<h2><a href="#b4--esquema"><span class="ses">4.2</span>Definir un esquema y un modelo</a></h2>
+<figure class="code"><figcaption><span class="file">src/models/producto.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const mongoose = require('mongoose');
+
+const esquemaProducto = new mongoose.Schema({
+  nombre: { type: String, required: true, trim: true },
+  precio: { type: Number, required: true, min: 0 },
+  categoria: { type: String, enum: ['perifericos', 'pantallas', 'audio'] },
+  stock: { type: Number, default: 0 },
+  etiquetas: [String],                 // array de textos
+  activo: { type: Boolean, default: true }
+}, { timestamps: true });              // añade createdAt y updatedAt
+
+const Producto = mongoose.model('Producto', esquemaProducto);
+module.exports = Producto;</code></pre></figure>
+<p><code>mongoose.model('Producto', ...)</code> guarda en la colección <code>productos</code> (minúsculas y plural). No hace falta crear nada: la colección aparece con el primer documento.</p>
+</article>
+
+<article class="receta" id="b4--validacion">
+<h2><a href="#b4--validacion"><span class="ses">4.2</span>Validaciones del esquema</a></h2>
+<div class="table"><table><thead><tr><th>Tipo / validador</th><th>Uso</th></tr></thead><tbody>
+<tr><td data-label="Tipo / validador"><code>String</code>, <code>Number</code>, <code>Boolean</code>, <code>Date</code></td><td data-label="Uso">Tipos básicos</td></tr>
+<tr><td data-label="Tipo / validador"><code>required: true</code></td><td data-label="Uso">Campo obligatorio (o <code>[true, 'mensaje']</code>)</td></tr>
+<tr><td data-label="Tipo / validador"><code>min</code> / <code>max</code></td><td data-label="Uso">Rango numérico</td></tr>
+<tr><td data-label="Tipo / validador"><code>minlength</code> / <code>maxlength</code></td><td data-label="Uso">Longitud de un texto</td></tr>
+<tr><td data-label="Tipo / validador"><code>enum: [...]</code></td><td data-label="Uso">Solo uno de un conjunto de valores</td></tr>
+<tr><td data-label="Tipo / validador"><code>default: valor</code></td><td data-label="Uso">Valor si no se proporciona</td></tr>
+<tr><td data-label="Tipo / validador"><code>unique: true</code></td><td data-label="Uso">No se repite (crea un índice, no es un validador)</td></tr>
+<tr><td data-label="Tipo / validador"><code>match: /regex/</code></td><td data-label="Uso">El texto cumple un patrón</td></tr>
+</tbody></table></div>
+<figure class="code"><figcaption><span class="file">probar-validacion.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>try {
+  await Producto.create({ nombre: 'Alfombrilla', precio: -3, categoria: 'juguetes' });
+} catch (error) {
+  console.log(error.name);   // 'ValidationError' (no llega a enviarse ninguna consulta)
+  console.log(Object.values(error.errors).map(e =&gt; e.message));
+  // [ 'Path `precio` (-3) is less than minimum allowed value (0).',
+  //   '`juguetes` is not a valid enum value for path `categoria`.' ]
+}</code></pre></figure>
+<p>Mensajes propios: <code>precio: { type: Number, min: [0, 'El precio no puede ser negativo'] }</code>.</p>
+</article>
+
+<article class="receta" id="b4--crud">
+<h2><a href="#b4--crud"><span class="ses">4.3</span>CRUD con Mongoose</a></h2>
+<div class="table"><table><thead><tr><th>Operación</th><th>Sequelize (bloque 3)</th><th>Mongoose</th></tr></thead><tbody>
+<tr><td data-label="Operación">Crear</td><td data-label="Sequelize"><code>Modelo.create({...})</code></td><td data-label="Mongoose"><code>Modelo.create({...})</code> (igual)</td></tr>
+<tr><td data-label="Operación">Leer todos</td><td data-label="Sequelize"><code>Modelo.findAll()</code></td><td data-label="Mongoose"><code>Modelo.find()</code></td></tr>
+<tr><td data-label="Operación">Leer por id</td><td data-label="Sequelize"><code>Modelo.findByPk(id)</code></td><td data-label="Mongoose"><code>Modelo.findById(id)</code></td></tr>
+<tr><td data-label="Operación">Leer uno por condición</td><td data-label="Sequelize"><code>Modelo.findOne({ where })</code></td><td data-label="Mongoose"><code>Modelo.findOne({...})</code></td></tr>
+<tr><td data-label="Operación">Actualizar</td><td data-label="Sequelize"><code>instancia.update({...})</code></td><td data-label="Mongoose"><code>Modelo.findByIdAndUpdate(id, {...}, { new: true })</code></td></tr>
+<tr><td data-label="Operación">Borrar</td><td data-label="Sequelize"><code>instancia.destroy()</code></td><td data-label="Mongoose"><code>Modelo.findByIdAndDelete(id)</code></td></tr>
+<tr><td data-label="Operación">Contar</td><td data-label="Sequelize"><code>Modelo.count({ where })</code></td><td data-label="Mongoose"><code>Modelo.countDocuments({...})</code></td></tr>
+</tbody></table></div>
+<figure class="code"><figcaption><span class="file">crud.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const Producto = require('./src/models/producto.model');
+
+const nuevo = await Producto.create({ nombre: 'Teclado', precio: 25 });
+console.log(nuevo._id);                     // ObjectId generado
+
+const todos = await Producto.find();
+const uno = await Producto.findById('64f1a2b3c4d5e6f7a8b9c0d1');   // null si no existe
+
+const actualizado = await Producto.findByIdAndUpdate(
+  id,
+  { precio: 22 },
+  { new: true, runValidators: true }        // devuelve el nuevo y valida
+);
+
+await Producto.findByIdAndDelete(id);       // devuelve el borrado o null
+
+// Varios a la vez
+await Producto.insertMany([{ nombre: 'Ratón', precio: 19.5 }, { nombre: 'Webcam', precio: 35 }]);
+await Producto.updateMany({ stock: 0 }, { activo: false });
+await Producto.deleteMany({ activo: false });
+
+// Otra forma de actualizar: cambiar el documento y guardar
+const p = await Producto.findById(id);
+p.precio = 30;
+await p.save();                             // aquí sí se validan siempre</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>sin <code>{ new: true }</code>, <code>findByIdAndUpdate</code> devuelve el documento <strong>como era antes</strong>. Y sin <code>runValidators: true</code> no comprueba <code>min</code>, <code>enum</code>…</p>
+</article>
+
+<article class="receta" id="b4--castError">
+<h2><a href="#b4--castError"><span class="ses">4.3</span>El <code>_id</code> y el <code>CastError</code></a></h2>
+<p>Un <code>_id</code> válido tiene 24 caracteres hexadecimales. Si llega <code>/productos/123</code>, Mongoose no puede convertirlo y lanza <code>CastError</code>: es un 400, no un 404 ni un 500.</p>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>router.get('/:id', async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findById(req.params.id);
+    if (!producto) return res.status(404).json({ error: 'No encontrado' });
+    res.json(producto);
+  } catch (error) {
+    if (error.name === 'CastError') return res.status(400).json({ error: 'Id con formato inválido' });
+    next(error);
+  }
+});</code></pre></figure>
+<p>Comprobarlo antes, sin consultar: <code>mongoose.Types.ObjectId.isValid(req.params.id)</code> (o <code>mongoose.isValidObjectId(id)</code>).</p>
+<figure class="code"><figcaption><span class="file">src/middlewares/validar-id.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const mongoose = require('mongoose');
+
+function validarId(req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ error: 'Id con formato inválido' });
+  }
+  next();
+}
+
+module.exports = validarId;
+// router.get('/:id', validarId, controlador.obtenerUno);</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>aquí <strong>no</strong> hay que hacer <code>Number(req.params.id)</code>: el <code>_id</code> es un texto.</p>
+</article>
+
+<article class="receta" id="b4--find">
+<h2><a href="#b4--find"><span class="ses">4.3</span>Filtrar con operadores <code>$</code></a></h2>
+<figure class="code"><figcaption><span class="file">filtros.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>await Producto.find({ categoria: 'perifericos' });                 // igual
+await Producto.find({ precio: { $gt: 50 } });                      // mayor que
+await Producto.find({ precio: { $gte: 10, $lte: 100 } });          // entre dos valores
+await Producto.find({ categoria: { $in: ['audio', 'pantallas'] } });
+await Producto.find({ categoria: { $ne: 'audio' } });              // distinto
+await Producto.find({ nombre: { $regex: 'monitor', $options: 'i' } }); // contiene, sin mayúsculas
+await Producto.find({ etiquetas: 'oferta' });                      // el array contiene 'oferta'
+
+// AND: varias condiciones en el mismo objeto
+await Producto.find({ categoria: 'audio', precio: { $lt: 50 } });
+
+// OR
+await Producto.find({ $or: [{ categoria: 'audio' }, { precio: { $lt: 20 } }] });</code></pre></figure>
+<div class="table"><table><thead><tr><th>Mongoose</th><th>Sequelize</th><th>Significado</th></tr></thead><tbody>
+<tr><td data-label="Mongoose"><code>$gt</code> / <code>$gte</code></td><td data-label="Sequelize"><code>Op.gt</code> / <code>Op.gte</code></td><td data-label="Significado"><code>&gt;</code> / <code>&gt;=</code></td></tr>
+<tr><td data-label="Mongoose"><code>$lt</code> / <code>$lte</code></td><td data-label="Sequelize"><code>Op.lt</code> / <code>Op.lte</code></td><td data-label="Significado"><code>&lt;</code> / <code>&lt;=</code></td></tr>
+<tr><td data-label="Mongoose"><code>$ne</code></td><td data-label="Sequelize"><code>Op.ne</code></td><td data-label="Significado">distinto</td></tr>
+<tr><td data-label="Mongoose"><code>$in</code></td><td data-label="Sequelize"><code>Op.in</code></td><td data-label="Significado">uno de la lista</td></tr>
+<tr><td data-label="Mongoose"><code>$regex</code></td><td data-label="Sequelize"><code>Op.like</code></td><td data-label="Significado">contiene un texto</td></tr>
+<tr><td data-label="Mongoose"><code>$or</code></td><td data-label="Sequelize"><code>Op.or</code></td><td data-label="Significado">O lógico</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="b4--paginar">
+<h2><a href="#b4--paginar"><span class="ses">4.3</span>Ordenar y paginar</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// GET /productos?categoria=audio&amp;min=10&amp;orden=precio&amp;dir=desc&amp;pagina=2&amp;limite=5
+router.get('/', async (req, res, next) =&gt; {
+  try {
+    const { categoria, min, orden = 'nombre', dir = 'asc' } = req.query;
+    const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
+    const limite = Math.min(50, parseInt(req.query.limite) || 10);
+
+    const filtro = {};
+    if (categoria) filtro.categoria = categoria;
+    if (min) filtro.precio = { $gte: Number(min) };
+
+    const [datos, total] = await Promise.all([
+      Producto.find(filtro)
+        .sort({ [orden]: dir === 'desc' ? -1 : 1 })   // 1 ascendente, -1 descendente
+        .skip((pagina - 1) * limite)
+        .limit(limite),
+      Producto.countDocuments(filtro)
+    ]);
+
+    res.json({ total, pagina, paginas: Math.ceil(total / limite), datos });
+  } catch (error) { next(error); }
+});</code></pre></figure>
+<p><code>skip</code> + <code>limit</code> es el equivalente de <code>offset</code> + <code>limit</code> de Sequelize.</p>
+</article>
+
+<article class="receta" id="b4--rutas">
+<h2><a href="#b4--rutas"><span class="ses">4.3</span>El CRUD dentro de las rutas</a></h2>
+<figure class="code"><figcaption><span class="file">src/routes/productos.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const router = require('express').Router();
+const Producto = require('../models/producto.model');
+const validarId = require('../middlewares/validar-id');
+const ErrorHTTP = require('../utils/ErrorHTTP');
+
+router.get('/', async (req, res, next) =&gt; {
+  try {
+    res.json(await Producto.find());
+  } catch (error) { next(error); }
+});
+
+router.get('/:id', validarId, async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findById(req.params.id);
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    res.json(producto);
+  } catch (error) { next(error); }
+});
+
+router.post('/', async (req, res, next) =&gt; {
+  try {
+    const nuevo = await Producto.create(req.body);   // el esquema valida
+    res.status(201).json(nuevo);
+  } catch (error) { next(error); }
+});
+
+router.patch('/:id', validarId, async (req, res, next) =&gt; {
+  try {
+    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body,
+      { new: true, runValidators: true });
+    if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+    res.json(producto);
+  } catch (error) { next(error); }
+});
+
+router.delete('/:id', validarId, async (req, res, next) =&gt; {
+  try {
+    const borrado = await Producto.findByIdAndDelete(req.params.id);
+    if (!borrado) throw new ErrorHTTP(404, 'Producto no encontrado');
+    res.sendStatus(204);
+  } catch (error) { next(error); }
+});
+
+module.exports = router;</code></pre></figure>
+<p>Puedes seguir poniendo <code>validar(esquemaZod)</code> delante: Zod revisa la petición y Mongoose vuelve a validar al guardar.</p>
+</article>
+
+<article class="receta" id="b4--errores">
+<h2><a href="#b4--errores"><span class="ses">4.3</span>Errores de Mongoose en el manejador</a></h2>
+<figure class="code"><figcaption><span class="file">src/middlewares/errores.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>function manejadorErrores(err, req, res, next) {
+  if (err.name === 'ValidationError') {               // no cumple el esquema
+    return res.status(400).json({ errores: Object.values(err.errors).map(e =&gt; e.message) });
+  }
+  if (err.name === 'CastError') {                     // _id con formato inválido
+    return res.status(400).json({ error: `Valor inválido para ${err.path}` });
+  }
+  if (err.code === 11000) {                           // unique repetido
+    return res.status(409).json({ error: `Ya existe: ${Object.keys(err.keyValue).join(', ')}` });
+  }
+  const status = err.status || 500;
+  if (status === 500) console.error(err);
+  res.status(status).json({ error: status === 500 ? 'Error interno del servidor' : err.message });
+}
+
+module.exports = manejadorErrores;</code></pre></figure>
+</article>
+
+<article class="receta" id="b4--embebidos">
+<h2><a href="#b4--embebidos"><span class="ses">4.4</span>Documentos embebidos</a></h2>
+<p>Los datos relacionados viven <strong>dentro</strong> del mismo documento. Una sola lectura lo trae todo, sin joins.</p>
+<figure class="code"><figcaption><span class="file">src/models/post.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const mongoose = require('mongoose');
+
+const esquemaComentario = new mongoose.Schema({
+  autor: { type: String, required: true },
+  texto: { type: String, required: true }
+}, { _id: true, timestamps: true });
+
+const esquemaPost = new mongoose.Schema({
+  titulo: { type: String, required: true },
+  comentarios: [esquemaComentario]   // array de subdocumentos, dentro del mismo documento
+});
+
+module.exports = mongoose.model('Post', esquemaPost);</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/routes/posts.routes.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// POST /posts/:id/comentarios  { "autor": "Ana", "texto": "¡Muy claro!" }
+router.post('/:id/comentarios', validarId, async (req, res, next) =&gt; {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) throw new ErrorHTTP(404, 'Post no encontrado');
+    post.comentarios.push(req.body);
+    await post.save();
+    res.status(201).json(post.comentarios.at(-1));
+  } catch (error) { next(error); }
+});
+
+// DELETE /posts/:id/comentarios/:comentarioId
+router.delete('/:id/comentarios/:comentarioId', async (req, res, next) =&gt; {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) throw new ErrorHTTP(404, 'Post no encontrado');
+    const comentario = post.comentarios.id(req.params.comentarioId);   // buscar subdocumento
+    if (!comentario) throw new ErrorHTTP(404, 'Comentario no encontrado');
+    comentario.deleteOne();
+    await post.save();
+    res.sendStatus(204);
+  } catch (error) { next(error); }
+});</code></pre></figure>
+<p>Sin cargar el documento: <code>Post.findByIdAndUpdate(id, { $push: { comentarios: datos } }, { new: true })</code> y <code>{ $pull: { comentarios: { _id: cid } } }</code>.</p>
+</article>
+
+<article class="receta" id="b4--referencias">
+<h2><a href="#b4--referencias"><span class="ses">4.4</span>Referencias y <code>populate</code></a></h2>
+<p>Colecciones separadas unidas por un <code>ObjectId</code>, como una clave ajena. <code>populate</code> sustituye el id por el documento completo.</p>
+<figure class="code"><figcaption><span class="file">src/models/autor.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const mongoose = require('mongoose');
+
+const esquemaAutor = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  email: { type: String, unique: true }
+});
+
+module.exports = mongoose.model('Autor', esquemaAutor);</code></pre></figure>
+<figure class="code"><figcaption><span class="file">src/models/post.model.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>const esquemaPost = new mongoose.Schema({
+  titulo: { type: String, required: true },
+  autor: { type: mongoose.Schema.Types.ObjectId, ref: 'Autor', required: true },  // uno
+  etiquetas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Etiqueta' }]           // varios
+});</code></pre></figure>
+<figure class="code"><figcaption><span class="file">consultas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// Crear con la referencia (comprobando que existe)
+const autor = await Autor.findById(req.body.autor);
+if (!autor) throw new ErrorHTTP(400, 'El autor no existe');
+const post = await Post.create({ titulo: 'Hola Mongo', autor: autor._id });
+
+// Sin populate: solo el ObjectId
+const p1 = await Post.findById(id);
+console.log(p1.autor);                 // 66f2b1c0a1e4d5f6a7b8c777
+
+// Con populate: el documento completo
+const p2 = await Post.findById(id).populate('autor');
+console.log(p2.autor.nombre);          // 'Ana'
+
+// Solo algunos campos del referenciado, y varios populate
+await Post.find().populate('autor', 'nombre').populate('etiquetas');
+
+// El otro sentido: los posts de un autor
+const postsDeAna = await Post.find({ autor: autorId });</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>el <code>ref</code> es el nombre del <strong>modelo</strong> (<code>'Autor'</code>), no el de la colección (<code>autors</code>). Si no coincide da «Schema hasn't been registered for model».</p>
+</article>
+
+<article class="receta" id="b4--embeber-o-referenciar">
+<h2><a href="#b4--embeber-o-referenciar"><span class="ses">4.4</span>¿Embeber o referenciar?</a></h2>
+<div class="table"><table><thead><tr><th>Embeber si…</th><th>Referenciar si…</th></tr></thead><tbody>
+<tr><td data-label="Embeber si…">Siempre se leen junto al padre (comentarios de un post)</td><td data-label="Referenciar si…">Se consultan solos o desde varios sitios (autores)</td></tr>
+<tr><td data-label="Embeber si…">Pertenecen solo a ese padre</td><td data-label="Referenciar si…">Se comparten entre muchos documentos</td></tr>
+<tr><td data-label="Embeber si…">Son pocos y no crecen sin límite</td><td data-label="Referenciar si…">Pueden crecer mucho (el documento tiene un máximo de 16 MB)</td></tr>
+<tr><td data-label="Embeber si…">Se actualizan poco por separado</td><td data-label="Referenciar si…">Cambian a menudo y no quieres repetir el cambio en muchos sitios</td></tr>
+</tbody></table></div>
+<p>Regla rápida: relación <strong>1:pocos</strong> que se lee junta <span class="arrow">→</span> embeber; <strong>1:muchos</strong> o <strong>N:M</strong> <span class="arrow">→</span> referenciar.</p>
+</article>
+
+<article class="receta" id="b4--proyecciones">
+<h2><a href="#b4--proyecciones"><span class="ses">4.5</span>Proyecciones</a></h2>
+<p>Pedir solo los campos que hacen falta (como <code>attributes</code> en Sequelize).</p>
+<figure class="code"><figcaption><span class="file">proyecciones.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>await Producto.find({}, 'nombre precio');          // solo nombre y precio (+ _id)
+await Producto.find({}, '-descripcion -__v');       // todo MENOS descripcion y __v
+await Producto.find({}, { nombre: 1, precio: 1, _id: 0 });   // formato objeto, sin _id
+await Producto.find().select('nombre precio');      // lo mismo encadenado
+
+// .lean(): devuelve objetos JS planos, más ligeros (solo lectura)
+const lista = await Producto.find({}, 'nombre precio').lean();</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>no mezcles incluir y excluir en la misma proyección (<code>'nombre -precio'</code> da error). La única excepción es <code>_id</code>.</p>
+</article>
+
+<article class="receta" id="b4--aggregate">
+<h2><a href="#b4--aggregate"><span class="ses">4.5</span>Agregaciones: <code>aggregate</code></a></h2>
+<p>Un <strong>pipeline</strong>: un array de etapas por las que pasan los documentos en orden. Sirve para cálculos que <code>find</code> no hace (medias, totales por grupo).</p>
+<figure class="code"><figcaption><span class="file">estadisticas.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>// Precio medio y total de productos por categoría
+const resultado = await Producto.aggregate([
+  { $group: {
+      _id: '$categoria',                 // agrupar por este campo ($ = valor del campo)
+      totalProductos: { $sum: 1 },
+      precioMedio: { $avg: '$precio' },
+      masCaro: { $max: '$precio' }
+  }},
+  { $sort: { precioMedio: -1 } }
+]);
+// [{ _id: 'pantallas', totalProductos: 4, precioMedio: 210.5, masCaro: 299 }, ...]
+
+// Filtrar ANTES de agrupar con $match, y dar forma al resultado con $project
+const caros = await Producto.aggregate([
+  { $match: { precio: { $gt: 30 } } },
+  { $group: { _id: '$categoria', total: { $sum: 1 }, media: { $avg: '$precio' } } },
+  { $project: { _id: 0, categoria: '$_id', total: 1, media: { $round: ['$media', 2] } } },
+  { $sort: { total: -1 } },
+  { $limit: 3 }
+]);</code></pre></figure>
+<div class="table"><table><thead><tr><th>Etapa</th><th>Qué hace</th><th>SQL parecido</th></tr></thead><tbody>
+<tr><td data-label="Etapa"><code>$match</code></td><td data-label="Qué hace">Filtra documentos</td><td data-label="SQL parecido"><code>WHERE</code></td></tr>
+<tr><td data-label="Etapa"><code>$group</code></td><td data-label="Qué hace">Agrupa y calcula (<code>$sum</code>, <code>$avg</code>, <code>$min</code>, <code>$max</code>)</td><td data-label="SQL parecido"><code>GROUP BY</code></td></tr>
+<tr><td data-label="Etapa"><code>$sort</code></td><td data-label="Qué hace">Ordena</td><td data-label="SQL parecido"><code>ORDER BY</code></td></tr>
+<tr><td data-label="Etapa"><code>$project</code></td><td data-label="Qué hace">Elige o transforma campos</td><td data-label="SQL parecido"><code>SELECT a, b</code></td></tr>
+<tr><td data-label="Etapa"><code>$limit</code></td><td data-label="Qué hace">Limita resultados</td><td data-label="SQL parecido"><code>LIMIT</code></td></tr>
+</tbody></table></div>
+<p class="ojo"><strong>Ojo</strong>pon <code>$match</code> lo antes posible: filtra antes de agrupar y el pipeline procesa menos documentos.</p>
+</article>
+
+<article class="receta" id="b4--migrar">
+<h2><a href="#b4--migrar"><span class="ses">4.6</span>Cierre: migrar un recurso de Sequelize a Mongoose</a></h2>
+<p>Si la API está en capas (<a href="#b3--capas">bloque 3.7</a>), cambiar de motor solo toca el <strong>modelo</strong> y el <strong>servicio</strong>. Rutas, controladores, validación y errores se quedan igual.</p>
+<figure class="code"><figcaption><span class="file">Sequelize: src/services/productos.service.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>async function buscarPorId(id) {
+  const producto = await Producto.findByPk(id, { include: Categoria });
+  if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+  return producto;
+}
+
+async function buscarTodos({ min } = {}) {
+  const where = min ? { precio: { [Op.gte]: Number(min) } } : {};
+  return Producto.findAll({ where, include: Categoria });
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">Mongoose: src/services/productos.service.js</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>async function buscarPorId(id) {
+  if (!mongoose.isValidObjectId(id)) throw new ErrorHTTP(400, 'Id con formato inválido');
+  const producto = await Producto.findById(id).populate('categoria');
+  if (!producto) throw new ErrorHTTP(404, 'Producto no encontrado');
+  return producto;
+}
+
+async function buscarTodos({ min } = {}) {
+  const filtro = min ? { precio: { $gte: Number(min) } } : {};
+  return Producto.find(filtro).populate('categoria');
+}</code></pre></figure>
+<div class="table"><table><thead><tr><th>Cambia</th><th>Sequelize</th><th>Mongoose</th></tr></thead><tbody>
+<tr><td data-label="Cambia">Id</td><td data-label="Sequelize"><code>id</code> numérico, <code>Number()</code></td><td data-label="Mongoose"><code>_id</code> texto, <code>isValidObjectId</code></td></tr>
+<tr><td data-label="Cambia">Relación 1:N</td><td data-label="Sequelize"><code>hasMany</code> + <code>belongsTo</code></td><td data-label="Mongoose"><code>ref</code> en el hijo (o embebido)</td></tr>
+<tr><td data-label="Cambia">Traer relacionados</td><td data-label="Sequelize"><code>include</code></td><td data-label="Mongoose"><code>populate</code></td></tr>
+<tr><td data-label="Cambia">Crear tablas</td><td data-label="Sequelize"><code>sync()</code> o migraciones</td><td data-label="Mongoose">Nada: la colección aparece sola</td></tr>
+<tr><td data-label="Cambia">Error de formato de id</td><td data-label="Sequelize">—</td><td data-label="Mongoose"><code>CastError</code> <span class="arrow">→</span> 400</td></tr>
+<tr><td data-label="Cambia">Transacciones</td><td data-label="Sequelize">Sencillas (<a href="#b3--transaccion-gestionada">3.6</a>)</td><td data-label="Mongoose">Requieren replica set; se evitan embebiendo</td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b3">← Sequelize</a><a href="#chuletas">Chuletas →</a></nav>
+</section>
+
+<!-- ============================ CHULETAS ============================ -->
+<section class="tab" id="chuletas" data-tab="chuletas" hidden>
+<h1>Chuletas</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#chuletas--comandos">Comandos</a><a href="#chuletas--paquetes">Qué paquete y cómo se importa</a><a href="#chuletas--donde">Dónde va cada cosa</a><a href="#chuletas--sequelize">Métodos de Sequelize</a><a href="#chuletas--mongoose">Métodos de Mongoose</a><a href="#chuletas--errores">Errores típicos</a></nav>
+
+<article class="receta" id="chuletas--comandos">
+<h2><a href="#chuletas--comandos">Comandos</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Comando</th></tr></thead><tbody>
+<tr><td data-label="Quiero">Ejecutar un archivo</td><td data-label="Comando"><code>node archivo.js</code></td></tr>
+<tr><td data-label="Quiero">Proyecto nuevo</td><td data-label="Comando"><code>npm init -y</code></td></tr>
+<tr><td data-label="Quiero">Instalar un paquete</td><td data-label="Comando"><code>npm install express</code></td></tr>
+<tr><td data-label="Quiero">Instalar solo para desarrollo</td><td data-label="Comando"><code>npm install --save-dev nodemon</code></td></tr>
+<tr><td data-label="Quiero">Reinstalar tras clonar</td><td data-label="Comando"><code>npm install</code></td></tr>
+<tr><td data-label="Quiero">Arrancar</td><td data-label="Comando"><code>npm start</code></td></tr>
+<tr><td data-label="Quiero">Arrancar con recarga</td><td data-label="Comando"><code>npm run dev</code></td></tr>
+<tr><td data-label="Quiero">Todo lo de la API de golpe</td><td data-label="Comando"><code>npm install express cors dotenv zod multer sequelize sqlite3</code></td></tr>
+<tr><td data-label="Quiero">ODM para MongoDB</td><td data-label="Comando"><code>npm install mongoose</code></td></tr>
+<tr><td data-label="Quiero">Aplicar migraciones</td><td data-label="Comando"><code>npx sequelize-cli db:migrate</code></td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="chuletas--paquetes">
+<h2><a href="#chuletas--paquetes">Qué paquete y cómo se importa</a></h2>
+<div class="table"><table><thead><tr><th>Para</th><th>Import</th><th>Uso</th></tr></thead><tbody>
+<tr><td data-label="Para">Archivos</td><td data-label="Import"><code>const fs = require('fs/promises')</code></td><td data-label="Uso"><code>await fs.readFile(r, 'utf-8')</code></td></tr>
+<tr><td data-label="Para">Rutas de archivo</td><td data-label="Import"><code>const path = require('path')</code></td><td data-label="Uso"><code>path.join(__dirname, 'x')</code></td></tr>
+<tr><td data-label="Para">Servidor</td><td data-label="Import"><code>const express = require('express')</code></td><td data-label="Uso"><code>const app = express()</code></td></tr>
+<tr><td data-label="Para">Router</td><td data-label="Import"><code>const router = require('express').Router()</code></td><td data-label="Uso"><code>app.use('/x', router)</code></td></tr>
+<tr><td data-label="Para"><code>.env</code></td><td data-label="Import"><code>require('dotenv').config()</code></td><td data-label="Uso"><code>process.env.PORT</code></td></tr>
+<tr><td data-label="Para">Validación</td><td data-label="Import"><code>const { z } = require('zod')</code></td><td data-label="Uso"><code>z.object({...}).safeParse()</code></td></tr>
+<tr><td data-label="Para">CORS</td><td data-label="Import"><code>const cors = require('cors')</code></td><td data-label="Uso"><code>app.use(cors({ origin }))</code></td></tr>
+<tr><td data-label="Para">Subidas</td><td data-label="Import"><code>const multer = require('multer')</code></td><td data-label="Uso"><code>upload.single('campo')</code></td></tr>
+<tr><td data-label="Para">ORM</td><td data-label="Import"><code>const { Sequelize, DataTypes, Op } = require('sequelize')</code></td><td data-label="Uso"><code>sequelize.define(...)</code></td></tr>
+<tr><td data-label="Para">ODM MongoDB</td><td data-label="Import"><code>const mongoose = require('mongoose')</code></td><td data-label="Uso"><code>mongoose.model('X', new mongoose.Schema({...}))</code></td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="chuletas--donde">
+<h2><a href="#chuletas--donde">Dónde va cada cosa</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Archivo</th></tr></thead><tbody>
+<tr><td data-label="Quiero"><code>dotenv</code> y <code>app.listen</code></td><td data-label="Archivo"><code>index.js</code></td></tr>
+<tr><td data-label="Quiero">Middleware globales, montar routers, 404 y errores</td><td data-label="Archivo"><code>src/app.js</code></td></tr>
+<tr><td data-label="Quiero">Las rutas de un recurso</td><td data-label="Archivo"><code>src/routes/nombre.routes.js</code></td></tr>
+<tr><td data-label="Quiero">Leer <code>req</code> y responder</td><td data-label="Archivo"><code>src/controllers/nombre.controller.js</code></td></tr>
+<tr><td data-label="Quiero">Lógica y consultas</td><td data-label="Archivo"><code>src/services/nombre.service.js</code></td></tr>
+<tr><td data-label="Quiero">Conexión a la base de datos</td><td data-label="Archivo"><code>src/config/database.js</code></td></tr>
+<tr><td data-label="Quiero">Un modelo</td><td data-label="Archivo"><code>src/models/nombre.model.js</code></td></tr>
+<tr><td data-label="Quiero">Relaciones entre modelos</td><td data-label="Archivo"><code>src/models/index.js</code></td></tr>
+<tr><td data-label="Quiero">Esquemas Zod</td><td data-label="Archivo"><code>src/esquemas/nombre.esquema.js</code></td></tr>
+<tr><td data-label="Quiero">Logger, <code>validar</code>, errores</td><td data-label="Archivo"><code>src/middlewares/</code></td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="chuletas--sequelize">
+<h2><a href="#chuletas--sequelize">Métodos de Sequelize</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Método</th><th>Devuelve</th></tr></thead><tbody>
+<tr><td data-label="Quiero">Todos</td><td data-label="Método"><code>Modelo.findAll({ where, order, limit, include })</code></td><td data-label="Devuelve">Array (vacío si no hay)</td></tr>
+<tr><td data-label="Quiero">Por id</td><td data-label="Método"><code>Modelo.findByPk(id)</code></td><td data-label="Devuelve">Instancia o <code>null</code></td></tr>
+<tr><td data-label="Quiero">El primero que cumpla</td><td data-label="Método"><code>Modelo.findOne({ where })</code></td><td data-label="Devuelve">Instancia o <code>null</code></td></tr>
+<tr><td data-label="Quiero">Total + página</td><td data-label="Método"><code>Modelo.findAndCountAll({ limit, offset })</code></td><td data-label="Devuelve"><code>{ count, rows }</code></td></tr>
+<tr><td data-label="Quiero">Crear</td><td data-label="Método"><code>Modelo.create(datos)</code></td><td data-label="Devuelve">La instancia con id</td></tr>
+<tr><td data-label="Quiero">Actualizar uno</td><td data-label="Método"><code>instancia.update(datos)</code></td><td data-label="Devuelve">La instancia</td></tr>
+<tr><td data-label="Quiero">Borrar uno</td><td data-label="Método"><code>instancia.destroy()</code></td><td data-label="Devuelve">—</td></tr>
+<tr><td data-label="Quiero">1:N</td><td data-label="Método"><code>A.hasMany(B)</code> + <code>B.belongsTo(A)</code></td><td data-label="Devuelve"><code>getBs()</code>, <code>createB()</code>, <code>getA()</code></td></tr>
+<tr><td data-label="Quiero">N:M</td><td data-label="Método"><code>A.belongsToMany(B, { through })</code> en los dos lados</td><td data-label="Devuelve"><code>addB()</code>, <code>getBs()</code>, <code>removeB()</code>, <code>setBs()</code></td></tr>
+<tr><td data-label="Quiero">Transacción</td><td data-label="Método"><code>sequelize.transaction(async t =&gt; {...})</code></td><td data-label="Devuelve">Lo que devuelva la función</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="chuletas--mongoose">
+<h2><a href="#chuletas--mongoose">Métodos de Mongoose</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Método</th><th>Devuelve</th></tr></thead><tbody>
+<tr><td data-label="Quiero">Conectar</td><td data-label="Método"><code>mongoose.connect(process.env.MONGODB_URI)</code></td><td data-label="Devuelve">Promesa</td></tr>
+<tr><td data-label="Quiero">Todos / filtrados</td><td data-label="Método"><code>Modelo.find(filtro, proyeccion)</code></td><td data-label="Devuelve">Array (vacío si no hay)</td></tr>
+<tr><td data-label="Quiero">Por id</td><td data-label="Método"><code>Modelo.findById(id)</code></td><td data-label="Devuelve">Documento o <code>null</code> (<code>CastError</code> si el id no es válido)</td></tr>
+<tr><td data-label="Quiero">El primero que cumpla</td><td data-label="Método"><code>Modelo.findOne(filtro)</code></td><td data-label="Devuelve">Documento o <code>null</code></td></tr>
+<tr><td data-label="Quiero">Crear</td><td data-label="Método"><code>Modelo.create(datos)</code></td><td data-label="Devuelve">El documento con <code>_id</code></td></tr>
+<tr><td data-label="Quiero">Actualizar</td><td data-label="Método"><code>Modelo.findByIdAndUpdate(id, datos, { new: true, runValidators: true })</code></td><td data-label="Devuelve">El nuevo o <code>null</code></td></tr>
+<tr><td data-label="Quiero">Borrar</td><td data-label="Método"><code>Modelo.findByIdAndDelete(id)</code></td><td data-label="Devuelve">El borrado o <code>null</code></td></tr>
+<tr><td data-label="Quiero">Contar</td><td data-label="Método"><code>Modelo.countDocuments(filtro)</code></td><td data-label="Devuelve">Número</td></tr>
+<tr><td data-label="Quiero">Ordenar y paginar</td><td data-label="Método"><code>.sort({ precio: -1 }).skip(n).limit(m)</code></td><td data-label="Devuelve">—</td></tr>
+<tr><td data-label="Quiero">Traer referenciados</td><td data-label="Método"><code>.populate('campo', 'nombre')</code></td><td data-label="Devuelve">El id cambiado por el documento</td></tr>
+<tr><td data-label="Quiero">Cálculos por grupo</td><td data-label="Método"><code>Modelo.aggregate([{ $match }, { $group }, { $sort }])</code></td><td data-label="Devuelve">Array de resultados</td></tr>
+</tbody></table></div>
+</article>
+
+<article class="receta" id="chuletas--errores">
+<h2><a href="#chuletas--errores">Errores típicos</a></h2>
+<div class="table"><table><thead><tr><th>Error</th><th>Causa</th></tr></thead><tbody>
+<tr><td data-label="Error"><code>ReferenceError: document is not defined</code></td><td data-label="Causa">Usas una API del navegador en Node</td></tr>
+<tr><td data-label="Error"><code>Cannot find module './x'</code></td><td data-label="Causa">Ruta mal escrita o falta <code>./</code>; si es un paquete, falta <code>npm install</code></td></tr>
+<tr><td data-label="Error"><code>require is not defined in ES module scope</code></td><td data-label="Causa">Tienes <code>"type": "module"</code>: usa <code>import</code> o quítalo</td></tr>
+<tr><td data-label="Error"><code>EADDRINUSE: address already in use :::3000</code></td><td data-label="Causa">Ya hay otro servidor en ese puerto: ciérralo o cambia <code>PORT</code></td></tr>
+<tr><td data-label="Error"><code>req.body</code> es <code>undefined</code></td><td data-label="Causa">Falta <code>express.json()</code> o está después de los routers</td></tr>
+<tr><td data-label="Error"><code>Cannot set headers after they are sent</code></td><td data-label="Causa">Respondes dos veces: falta un <code>return</code></td></tr>
+<tr><td data-label="Error">La petición se queda colgada</td><td data-label="Causa">Un middleware no llama a <code>next()</code> ni responde, o una ruta async falla sin <code>try/catch</code></td></tr>
+<tr><td data-label="Error">El manejador de errores no se ejecuta</td><td data-label="Causa">No tiene 4 parámetros o no está al final</td></tr>
+<tr><td data-label="Error"><code>find</code> no encuentra el id</td><td data-label="Causa">Falta <code>Number(req.params.id)</code></td></tr>
+<tr><td data-label="Error"><code>Promise { &lt;pending&gt; }</code></td><td data-label="Causa">Falta un <code>await</code></td></tr>
+<tr><td data-label="Error"><code>blocked by CORS policy</code></td><td data-label="Causa">Falta <code>cors()</code> o el <code>origin</code> no coincide</td></tr>
+<tr><td data-label="Error"><code>SQLITE_ERROR: no such table</code></td><td data-label="Causa">No has hecho <code>sync()</code> o no se ha cargado el modelo antes</td></tr>
+<tr><td data-label="Error"><code>SQLITE_ERROR: no such column</code></td><td data-label="Causa">Cambiaste el modelo y <code>sync()</code> no lo aplica: <code>alter: true</code></td></tr>
+<tr><td data-label="Error"><code>X is not associated to Y</code></td><td data-label="Causa">Usas <code>include</code> sin haber declarado la relación (o no se ha importado <code>models/index.js</code>)</td></tr>
+<tr><td data-label="Error"><code>Cannot read properties of null</code> tras <code>findByPk</code></td><td data-label="Causa">El registro no existe: comprueba y lanza 404</td></tr>
+<tr><td data-label="Error"><code>MongooseServerSelectionError: connect ECONNREFUSED</code></td><td data-label="Causa">MongoDB no está arrancado, o usa <code>127.0.0.1</code> en vez de <code>localhost</code></td></tr>
+<tr><td data-label="Error"><code>CastError: Cast to ObjectId failed</code></td><td data-label="Causa">El id de la URL no tiene formato de <code>ObjectId</code>: responde 400</td></tr>
+<tr><td data-label="Error"><code>ValidationError</code> de Mongoose</td><td data-label="Causa">El documento no cumple el esquema: responde 400</td></tr>
+<tr><td data-label="Error"><code>E11000 duplicate key error</code></td><td data-label="Causa">Repites un campo <code>unique</code>: responde 409</td></tr>
+<tr><td data-label="Error"><code>findByIdAndUpdate</code> devuelve los datos viejos</td><td data-label="Causa">Falta <code>{ new: true }</code></td></tr>
+<tr><td data-label="Error"><code>Schema hasn't been registered for model</code></td><td data-label="Causa">El <code>ref</code> no coincide con el nombre del modelo, o no se ha importado ese modelo</td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b4">← MongoDB</a><a href="#problemas">Problemas →</a></nav>
+</section>
+
+<!-- ============================ PROBLEMAS ============================ -->
+<section class="tab" id="problemas" data-tab="problemas" hidden>
+<h1>Problemas</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#problemas--como">Cómo usarlo</a><a href="#problemas--p0">Bloque 0</a><a href="#problemas--p1">Bloque 1</a><a href="#problemas--p2">Bloque 2</a><a href="#problemas--p3">Bloque 3</a><a href="#problemas--p4">Bloque 4</a></nav>
+<article class="receta" id="problemas--como">
+<h2><a href="#problemas--como">Cómo usarlo</a></h2>
+<p>Lee el problema, escríbelo <strong>sin mirar</strong> (en papel o en un archivo vacío), pruébalo con <code>node</code> o Postman y luego compara con la receta enlazada. Lo que falles, repítelo otro día.</p>
+</article>
+<article class="receta" id="problemas--p0">
+<h2><a href="#problemas--p0">Bloque 0</a></h2>
+<ul class="items"><li><div>Script que muestre la versión de Node, la plataforma, la carpeta actual y los argumentos que le pases.<span class="ver">Receta: <a href="#b0--ejecutar">Ejecutar un script y usar process</a></span></div></li><li><div>Di en qué orden salen un <code>console.log</code>, un <code>setTimeout(…, 0)</code> y un <code>Promise.resolve().then(…)</code>, y por qué.<span class="ver">Receta: <a href="#b0--event-loop">Event loop</a></span></div></li><li><div>Convierte <code>consultaLenta(valor, callback)</code> en una función que devuelva una promesa y úsala con <code>async/await</code>.<span class="ver">Receta: <a href="#b0--callback-await">De callback a promesa a async/await</a></span></div></li><li><div>Módulo <code>matematicas.js</code> con <code>sumar</code> y <code>restar</code> en CommonJS; luego pásalo a ESM.<span class="ver">Receta: <a href="#b0--commonjs">CommonJS</a> y <a href="#b0--esm">ESM</a></span></div></li><li><div>Guarda una línea de log con la fecha en <code>logs/app.log</code> cada vez que se ejecute el script, y luego muestra el archivo entero.<span class="ver">Receta: <a href="#b0--fs">fs/promises</a> y <a href="#b0--path">path</a></span></div></li><li><div>Servidor <code>http</code> sin Express con <code>/</code> en texto, <code>/tareas</code> leyendo un JSON del disco y 404 para lo demás.<span class="ver">Receta: <a href="#b0--http">Servidor con http a pelo</a></span></div></li><li><div>Tres llamadas simuladas de 300 ms: mide el tiempo en serie y con <code>Promise.all</code>. Después haz que una falle y usa <code>allSettled</code>.<span class="ver">Receta: <a href="#b0--promise-all">Promise.all y allSettled</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p1">
+<h2><a href="#problemas--p1">Bloque 1</a></h2>
+<ul class="items"><li><div>Pasa el servidor <code>http</code> anterior a Express.<span class="ver">Receta: <a href="#b1--primer-servidor">Primer servidor Express</a></span></div></li><li><div>Separa el proyecto en <code>src/app.js</code> e <code>index.js</code>, con el puerto en <code>.env</code> y scripts <code>start</code> y <code>dev</code>.<span class="ver">Receta: <a href="#b1--app-index">app.js e index.js</a>, <a href="#b1--dotenv">dotenv</a> y <a href="#b1--nodemon">nodemon</a></span></div></li><li><div>Rediseña en REST: <code>GET /obtenerTodosLosLibros</code>, <code>GET /obtenerLibroPorId?id=3</code>, <code>POST /nuevoLibro</code>, <code>GET /borrarLibro/5</code>.<span class="ver">Receta: <a href="#b1--rest">Diseñar rutas REST</a></span></div></li><li><div>CRUD completo de <code>libros</code> en memoria con 200, 201, 204, 400 y 404 donde toque.<span class="ver">Receta: <a href="#b1--crud-memoria">CRUD completo en memoria</a></span></div></li><li><div><code>GET /productos/:id?moneda=usd</code> que use el parámetro y el query a la vez.<span class="ver">Receta: <a href="#b1--req">Leer la petición</a></span></div></li><li><div>Middleware que registre método, URL, código de respuesta y milisegundos de cada petición.<span class="ver">Receta: <a href="#b1--middleware">Qué es un middleware</a></span></div></li><li><div>Middleware que corte con 401 si no llega la cabecera <code>x-api-key</code> correcta, solo en <code>/admin</code>.<span class="ver">Receta: <a href="#b1--cortar">Middleware que corta</a> y <a href="#b1--alcance">dónde se aplica</a></span></div></li><li><div>Middleware que limpie el título, borre el <code>id</code> del body y añada <code>creadoEn</code> antes de crear.<span class="ver">Receta: <a href="#b1--enriquecer">Middleware que enriquece req</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p2">
+<h2><a href="#problemas--p2">Bloque 2</a></h2>
+<ul class="items"><li><div>Saca las rutas de <code>tareas</code> y <code>usuarios</code> a dos routers y móntalos bajo <code>/api/v1</code>.<span class="ver">Receta: <a href="#b2--router">express.Router</a> y <a href="#b2--varios-routers">prefijo</a></span></div></li><li><div>Valida a mano que <code>titulo</code> sea texto y <code>precio</code> un número positivo; responde 400 con un mensaje claro.<span class="ver">Receta: <a href="#b2--validar-manual">Validar el body a mano</a></span></div></li><li><div><code>GET /productos?pagina=2&amp;limite=5</code> que devuelva <code>{ pagina, limite, total, datos }</code>.<span class="ver">Receta: <a href="#b2--paginacion">Paginación</a></span></div></li><li><div>Arregla un <code>app.js</code> donde el router va antes de <code>express.json()</code> y explica qué pasaba.<span class="ver">Receta: <a href="#b2--body-vacio">req.body undefined</a> y <a href="#b2--orden">orden</a></span></div></li><li><div>Manejador de errores centralizado, un 404 para rutas inexistentes y una clase <code>ErrorHTTP</code> usada en dos rutas.<span class="ver">Receta: <a href="#b2--errores">Errores</a>, <a href="#b2--404">404</a> y <a href="#b2--errorhttp">ErrorHTTP</a></span></div></li><li><div>Esquema Zod de <code>producto</code> (nombre mínimo 2, precio positivo, stock entero ≥ 0) y middleware <code>validar(esquema)</code> reutilizado en dos recursos.<span class="ver">Receta: <a href="#b2--zod">Zod</a> y <a href="#b2--zod-middleware">validar(esquema)</a></span></div></li><li><div>Habilita CORS solo para <code>http://localhost:4200</code>.<span class="ver">Receta: <a href="#b2--cors">CORS</a></span></div></li><li><div>Subida de imagen de producto con multer: solo JPG/PNG, máximo 2 MB, conservando la extensión.<span class="ver">Receta: <a href="#b2--multer">multer</a> y <a href="#b2--multer-limites">límites</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p3">
+<h2><a href="#problemas--p3">Bloque 3</a></h2>
+<ul class="items"><li><div>Conecta Sequelize a SQLite, comprueba la conexión con <code>authenticate()</code> y activa el log del SQL.<span class="ver">Receta: <a href="#b3--instalar">Instalar y conectar</a> y <a href="#b3--logging">ver el SQL</a></span></div></li><li><div>Modelo <code>Producto</code> (nombre obligatorio, precio ≥ 0, stock por defecto 0) y explica la diferencia entre <code>sync()</code>, <code>alter</code> y <code>force</code>.<span class="ver">Receta: <a href="#b3--modelo">Definir un modelo</a> y <a href="#b3--sync">sync</a></span></div></li><li><div>Pasa el CRUD de productos del array a Sequelize sin tocar la validación ni el manejador de errores.<span class="ver">Receta: <a href="#b3--rutas">El CRUD dentro de las rutas</a></span></div></li><li><div><code>GET /productos?min=20&amp;orden=precio&amp;dir=DESC&amp;pagina=1&amp;limite=5</code> con <code>Op</code> y <code>findAndCountAll</code>.<span class="ver">Receta: <a href="#b3--where">where y Op</a> y <a href="#b3--paginar">paginar</a></span></div></li><li><div>Relación 1:N <code>Categoria</code>–<code>Producto</code>; <code>GET /productos</code> con su categoría y <code>GET /categorias/:id/productos</code>.<span class="ver">Receta: <a href="#b3--uno-muchos">Relación 1:N</a> e <a href="#b3--include">include</a></span></div></li><li><div>Al crear un producto, responde 400 si la categoría no existe.<span class="ver">Receta: <a href="#b3--fk-existe">Crear comprobando la FK</a></span></div></li><li><div>Relación N:M <code>Pedido</code>–<code>Producto</code> con <code>cantidad</code>; <code>GET /pedidos/:id</code> con productos, cantidades y total.<span class="ver">Receta: <a href="#b3--muchos-muchos">N:M</a> y <a href="#b3--nm-usar">consultar</a></span></div></li><li><div><code>POST /pedidos</code> con varias líneas en una transacción que descuente stock; demuestra que si falla una línea no se guarda nada.<span class="ver">Receta: <a href="#b3--transaccion-gestionada">Transacción gestionada</a></span></div></li><li><div>Reorganiza el recurso productos en ruta, controlador y servicio, y arranca el servidor solo cuando la base de datos esté lista.<span class="ver">Receta: <a href="#b3--capas">Capas</a> y <a href="#b3--arranque">arrancar</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p4">
+<h2><a href="#problemas--p4">Bloque 4</a></h2>
+<ul class="items"><li><div>Explica con un ejemplo cuándo elegirías SQL y cuándo MongoDB para guardar pedidos, comentarios de un blog y logs.<span class="ver">Receta: <a href="#b4--sql-nosql">SQL o MongoDB</a></span></div></li><li><div>Conecta Express a MongoDB con la URI en <code>.env</code> y no abras el puerto hasta que la conexión esté lista.<span class="ver">Receta: <a href="#b4--conectar">Instalar y conectar</a></span></div></li><li><div>Esquema <code>Producto</code>: nombre obligatorio, precio ≥ 0, categoría de una lista y <code>timestamps</code>. Prueba a crear uno inválido y muestra los mensajes.<span class="ver">Receta: <a href="#b4--esquema">Esquema</a> y <a href="#b4--validacion">validaciones</a></span></div></li><li><div>CRUD completo de productos con Mongoose: 201, 204, 404 si no existe y 400 si el id no tiene formato válido.<span class="ver">Receta: <a href="#b4--rutas">El CRUD dentro de las rutas</a> y <a href="#b4--castError">CastError</a></span></div></li><li><div><code>GET /productos?min=20&amp;orden=precio&amp;dir=desc&amp;pagina=2&amp;limite=5</code> con <code>$gte</code>, <code>sort</code>, <code>skip</code> y <code>limit</code>.<span class="ver">Receta: <a href="#b4--find">Operadores $</a> y <a href="#b4--paginar">paginar</a></span></div></li><li><div>Modelo <code>Post</code> con comentarios embebidos y rutas para añadir y borrar un comentario.<span class="ver">Receta: <a href="#b4--embebidos">Documentos embebidos</a></span></div></li><li><div>Relación <code>Autor</code>–<code>Post</code> por referencia; <code>GET /posts</code> con el nombre del autor usando <code>populate</code>.<span class="ver">Receta: <a href="#b4--referencias">Referencias y populate</a></span></div></li><li><div>Lista de productos con solo <code>nombre</code> y <code>precio</code>.<span class="ver">Receta: <a href="#b4--proyecciones">Proyecciones</a></span></div></li><li><div>Agregación: total y precio medio por categoría de los productos de más de 30 €, ordenado por total.<span class="ver">Receta: <a href="#b4--aggregate">aggregate</a></span></div></li><li><div>Migra el servicio de productos con categoría del bloque 3 a Mongoose sin tocar rutas ni controladores.<span class="ver">Receta: <a href="#b4--migrar">Migrar un recurso</a></span></div></li></ul>
+</article>
+<nav class="pasar"><a href="#chuletas">← Chuletas</a></nav>
+</section>
+</main>
+<script>
+// Resaltado de sintaxis sencillo (JS, JSON, terminal, .env)
+const KW = /^(const|let|var|function|return|if|else|for|of|in|while|await|async|new|class|extends|constructor|super|this|throw|try|catch|finally|require|module|exports|import|export|from|default|typeof|delete|true|false|null|undefined)$/;
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function pintarJS(src) {
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|('(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`)|\b(\d+(?:\.\d+)?(?:e\d+)?)\b|([A-Za-z_$][\w$]*)(\s*\()?/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    if (m[1]) out += '<span class="t-com">' + esc(m[1]) + '</span>';
+    else if (m[2]) out += '<span class="t-str">' + esc(m[2]) + '</span>';
+    else if (m[3]) out += '<span class="t-num">' + m[3] + '</span>';
+    else if (KW.test(m[4])) out += '<span class="t-kw">' + m[4] + '</span>' + (m[5] || '');
+    else if (m[5]) out += '<span class="t-fn">' + m[4] + '</span>' + m[5];
+    else out += esc(m[0]);
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+function pintarJSON(src) {
+  return esc(src).replace(/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\b\d+(?:\.\d+)?\b)/g, (t, s, c, k, n) =>
+    s ? (c ? '<span class="t-bind">' + s + '</span>' + c : '<span class="t-str">' + s + '</span>')
+      : k ? '<span class="t-kw">' + k + '</span>' : '<span class="t-num">' + n + '</span>');
+}
+function pintarTerm(src) {
+  return src.split('\n').map(l => {
+    const i = l.indexOf('#');
+    if (i === -1) return '<span class="t-cmd">' + esc(l) + '</span>';
+    return '<span class="t-cmd">' + esc(l.slice(0, i)) + '</span><span class="t-com">' + esc(l.slice(i)) + '</span>';
+  }).join('\n');
+}
+function pintarEnv(src) {
+  return src.split('\n').map(l => {
+    const i = l.indexOf('=');
+    return i === -1 ? esc(l) : '<span class="t-bind">' + esc(l.slice(0, i)) + '</span>=<span class="t-str">' + esc(l.slice(i + 1)) + '</span>';
+  }).join('\n');
+}
+document.querySelectorAll('figure.code pre code').forEach(c => {
+  const lang = c.closest('figure').dataset.lang || 'js';
+  const src = c.textContent;
+  c.innerHTML = lang === 'json' ? pintarJSON(src) : lang === 'term' ? pintarTerm(src) : lang === 'env' ? pintarEnv(src) : pintarJS(src);
+});
+
+// Pestañas: #b2 abre el bloque 2; #b2--zod abre el bloque 2 y baja a esa receta
+const tabsIds = ["b0","b1","b2","b3","b4","chuletas","problemas"];
+function mostrar(destinoHash) {
+  const hash = destinoHash ?? decodeURIComponent(location.hash.slice(1));
+  let id = hash.split('--')[0];
+  if (!tabsIds.includes(id)) { try { id = localStorage.getItem('recetario-psp-pestana'); } catch (e) {} }
+  if (!tabsIds.includes(id)) id = tabsIds[0];
+  document.querySelectorAll('section.tab').forEach(s => s.hidden = s.id !== id);
+  document.querySelectorAll('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === id));
+  document.querySelector('.tabs a.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  try { localStorage.setItem('recetario-psp-pestana', id); } catch (e) {}
+  const destino = hash.includes('--') && document.getElementById(hash);
+  if (destino) destino.scrollIntoView(); else scrollTo(0, 0);
+}
+addEventListener('hashchange', () => mostrar());
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  e.preventDefault();
+  const h = a.getAttribute('href').slice(1);
+  mostrar(h);
+  try { history.pushState(null, '', '#' + h); } catch (err) {}
+});
+addEventListener('popstate', () => mostrar());
+mostrar();
+
+// Modo claro / oscuro (se recuerda)
+const SOL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const LUNA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const btn = document.getElementById('theme');
+function pintarBoton() {
+  const oscuro = document.documentElement.dataset.theme === 'dark';
+  btn.innerHTML = oscuro ? SOL + 'Modo claro' : LUNA + 'Modo oscuro';
+}
+btn.addEventListener('click', () => {
+  const nuevo = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nuevo;
+  try { localStorage.setItem('recetario-psp-tema', nuevo); } catch (e) {}
+  pintarBoton();
+});
+pintarBoton();
+
+// Botón copiar
+document.querySelectorAll('figure.code').forEach(f => {
+  const b = f.querySelector('.copy');
+  b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(f.querySelector('pre').innerText); b.textContent = 'Copiado'; }
+    catch (e) { b.textContent = 'No se pudo'; }
+    setTimeout(() => b.textContent = 'Copiar', 1400);
+  });
+});
+</script>
+</body>
+</html>

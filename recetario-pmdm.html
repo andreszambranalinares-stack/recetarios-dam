@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recetario Angular PMDM</title>
+<script>try { document.documentElement.dataset.theme = localStorage.getItem('recetario-tema') || 'light'; } catch (e) {}</script>
+<style>
+:root, [data-theme="light"] {
+  --bg: #f4f1eb; --card: #fffdf9; --bar: #fbf9f4; --text: #23232a; --soft: #6c6760; --rule: #e2dcd0;
+  --accent: #b5441f; --link: #2c5b8c; --chip: #efe9de; --chip-hover: #e6ddcd;
+  --inline-bg: #f0e8dc; --inline-text: #9a3412; --ojo-bg: #fdf1e7; --thead: #f3eee5;
+  --code-bg: #24273a; --code-cap: #2e3248; --code-text: #e3e6f0; --code-soft: #a3a8c3;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #16171b; --card: #1e2026; --bar: #1a1b20; --text: #e6e4df; --soft: #9c988f; --rule: #30323a;
+  --accent: #f08a5d; --link: #8fb8e6; --chip: #262830; --chip-hover: #30333d;
+  --inline-bg: #2a2c34; --inline-text: #f3a27c; --ojo-bg: #2a221e; --thead: #23252c;
+  --code-bg: #121319; --code-cap: #1b1c24; --code-text: #e3e6f0; --code-soft: #8d92ab;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 7.5rem; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+a { color: var(--link); text-underline-offset: 2px; }
+
+/* barra superior y pestañas */
+.bar { position: sticky; top: 0; z-index: 10; background: var(--bar); border-bottom: 1px solid var(--rule); }
+.bar-in, .tabs { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem; }
+.bar-in { display: flex; align-items: center; gap: .8rem; padding-top: .7rem; padding-bottom: .4rem; }
+.brand { font-weight: 750; font-size: 1.05rem; color: var(--text); text-decoration: none; }
+.sub { color: var(--soft); font-size: .85rem; }
+#theme { margin-left: auto; display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .85rem;
+  color: var(--text); background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+#theme:hover { background: var(--chip-hover); }
+#theme svg { width: 16px; height: 16px; }
+.tabs { display: flex; gap: .25rem; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { flex: none; display: inline-flex; align-items: center; gap: .4rem; padding: .55rem .8rem .6rem;
+  color: var(--soft); text-decoration: none; font-size: .93rem; border-bottom: 3px solid transparent; }
+.tabs a:hover { color: var(--text); }
+.tabs a b { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 50%;
+  background: var(--chip); color: var(--soft); font-size: .75rem; }
+.tabs a.on { color: var(--text); font-weight: 650; border-bottom-color: var(--accent); }
+.tabs a.on b { background: var(--accent); color: #fff; }
+
+/* contenido */
+main { max-width: 56rem; margin: 0 auto; padding: 1.8rem 1.25rem 5rem; }
+h1 { font-size: 1.65rem; line-height: 1.2; margin: .3rem 0 1rem; }
+.kicker { margin: .3rem 0 0; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.kicker + h1 { margin-top: .1rem; }
+.indice { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 2rem; }
+.indice a { background: var(--chip); color: var(--text); text-decoration: none; font-size: .88rem;
+  padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--rule); }
+.indice a:hover { background: var(--chip-hover); }
+.receta { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 1.3rem 1.5rem 1.1rem; margin: 0 0 1.4rem; }
+.receta h2 { font-size: 1.2rem; line-height: 1.3; margin: 0 0 .7rem; }
+.receta h2 a { color: var(--text); text-decoration: none; }
+.receta h2 a:hover { color: var(--accent); }
+p { margin: .7rem 0; }
+code { font-family: ui-monospace, "Cascadia Code", Consolas, "SF Mono", monospace; font-size: .86em;
+  background: var(--inline-bg); color: var(--inline-text); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+.ojo { background: var(--ojo-bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: .55rem .85rem; }
+.ojo strong { color: var(--accent); margin-right: .45rem; }
+.arrow { color: var(--soft); }
+
+/* código */
+figure.code { margin: .9rem 0; border-radius: 10px; overflow: hidden; background: var(--code-bg); }
+figure.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  background: var(--code-cap); padding: .4rem .6rem .4rem .9rem; font-size: .8rem; }
+.file { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--code-soft); }
+.copy { font: inherit; color: var(--code-soft); background: none; border: 1px solid #ffffff22; border-radius: 6px; padding: .15rem .55rem; cursor: pointer; }
+.copy:hover { color: #fff; border-color: #ffffff55; }
+pre { margin: 0; padding: .9rem 1rem 1rem; color: var(--code-text); line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+pre code { background: none; color: inherit; padding: 0; font-size: .86rem; }
+.t-com { color: #8a90a8; font-style: italic; }
+.t-str, .t-cmd { color: #a9d38a; }
+.t-kw { color: #c99cf3; }
+.t-deco { color: #f4a95f; }
+.t-tag { color: #f07c82; }
+.t-bind { color: #78cfe4; }
+.t-interp, .t-num { color: #f4c86a; }
+.t-fn { color: #82aaff; }
+
+/* tablas */
+.table { margin: .9rem 0; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.45; }
+th, td { text-align: left; vertical-align: top; padding: .55rem .8rem; }
+thead th { background: var(--thead); font-weight: 650; }
+tbody tr { border-top: 1px solid var(--rule); }
+
+/* listas sin viñetas */
+ul.items { list-style: none; margin: .6rem 0; padding: 0; counter-reset: n; }
+ul.items li { padding: .6rem 0; border-top: 1px solid var(--rule); }
+ul.items li:first-child { border-top: 0; }
+#problemas ul.items li { counter-increment: n; display: grid; grid-template-columns: 2rem minmax(0, 1fr); align-items: baseline; }
+#problemas ul.items li::before { content: counter(n); font-weight: 700; color: var(--accent); }
+.ver { display: block; margin-top: .2rem; font-size: .88rem; color: var(--soft); }
+
+.pasar { display: flex; justify-content: space-between; margin-top: 2rem; font-size: .95rem; }
+.pasar a { text-decoration: none; font-weight: 600; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  html { scroll-padding-top: 7rem; }
+  .sub { display: none; }
+  .bar-in, .tabs { padding-left: 1rem; padding-right: 1rem; }
+  main { padding: 1.3rem .75rem 4rem; }
+  h1 { font-size: 1.35rem; }
+  .receta { padding: 1rem 1rem .8rem; border-radius: 10px; }
+  pre { padding: .75rem .8rem; }
+  pre code { font-size: .8rem; }
+  /* en móvil cada fila de tabla es una ficha */
+  .table { border: 0; border-radius: 0; }
+  .table table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table thead { display: none; }
+  .table tr { border: 1px solid var(--rule); border-radius: 8px; padding: .5rem .7rem; margin: 0 0 .5rem; }
+  .table td { padding: .15rem 0; }
+  .table td:first-child { font-weight: 650; }
+  .table td:not([data-label=""])::before { content: attr(data-label); display: block; font-size: .68rem;
+    font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--soft); }
+}
+@media print {
+  .bar, .indice, .pasar, .copy { display: none !important; }
+  .tab { display: block !important; }
+  body, .receta { background: #fff; color: #000; }
+  .receta { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+<div class="bar-in">
+<a class="brand" href="#b1">Recetario Angular</a><span class="sub">PMDM, examen el jueves 10/12</span>
+<button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
+</div>
+<nav class="tabs" aria-label="Bloques"><a href="#b1" data-tab="b1"><b>1</b>Componentes</a><a href="#b2" data-tab="b2"><b>2</b>Plantillas</a><a href="#b3" data-tab="b3"><b>3</b>Servicios</a><a href="#b4" data-tab="b4"><b>4</b>Rutas</a><a href="#b5" data-tab="b5"><b>5</b>Formularios</a><a href="#chuletas" data-tab="chuletas">Chuletas</a><a href="#problemas" data-tab="problemas">Problemas</a></nav>
+</header>
+<main>
+<section class="tab" id="b1" data-tab="b1" hidden>
+<p class="kicker">Bloque 1</p><h1>Componentes y binding</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b1--estructura">Qué hay en un proyecto</a><a href="#b1--componente">Crear un componente</a><a href="#b1--usar-componente">Usar un componente dentro de otro</a><a href="#b1--interpolacion">Mostrar un valor: interpolación <code>{{ }}</code></a><a href="#b1--property">Dar valor a una propiedad: property binding <code>[ ]</code></a><a href="#b1--class-style">Clase o estilo según una condición</a><a href="#b1--evento">Reaccionar a un clic: event binding <code>( )</code></a><a href="#b1--event">Leer lo que escribe el usuario con <code>$event</code></a><a href="#b1--ngmodel">Enlace en las dos direcciones: <code>[(ngModel)]</code></a><a href="#b1--cuatro-bindings">Las cuatro formas de binding, juntas</a><a href="#b1--oninit">Hacer algo al crearse el componente: <code>ngOnInit</code></a><a href="#b1--ondestroy">Limpiar al quitarse: <code>ngOnDestroy</code></a><a href="#b1--onchanges">Reaccionar cuando cambia un <code>@Input</code>: <code>ngOnChanges</code></a></nav>
+<article class="receta" id="b1--estructura">
+<h2><a href="#b1--estructura">Qué hay en un proyecto</a></h2>
+<p>Lo que crea <code>ng new</code> y para qué sirve cada archivo.</p>
+<div class="table"><table><thead><tr><th>Archivo</th><th>Para qué</th></tr></thead><tbody>
+<tr><td data-label="Archivo"><code>src/index.html</code></td><td data-label="Para qué">La única página HTML real. Tiene <code>&lt;app-root&gt;</code> dentro</td></tr>
+<tr><td data-label="Archivo"><code>src/main.ts</code></td><td data-label="Para qué">Arranca la app: <code>bootstrapApplication(App, appConfig)</code></td></tr>
+<tr><td data-label="Archivo"><code>src/app/app.config.ts</code></td><td data-label="Para qué">Configuración global: aquí va <code>provideRouter(routes)</code></td></tr>
+<tr><td data-label="Archivo"><code>src/app/app.routes.ts</code></td><td data-label="Para qué">Las rutas</td></tr>
+<tr><td data-label="Archivo"><code>src/app/app.ts</code> / <code>.html</code> / <code>.css</code></td><td data-label="Para qué">El componente raíz (<code>app-root</code>)</td></tr>
+<tr><td data-label="Archivo"><code>src/styles.css</code></td><td data-label="Para qué">Estilos globales</td></tr>
+<tr><td data-label="Archivo"><code>angular.json</code>, <code>package.json</code>, <code>tsconfig.json</code></td><td data-label="Para qué">Configuración del proyecto, dependencias y TypeScript</td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="b1--componente">
+<h2><a href="#b1--componente">Crear un componente</a></h2>
+<figure class="code term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-cmd">ng generate component productos/tarjeta-producto</span>
+<span class="t-cmd">ng g c productos/tarjeta-producto</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">productos/tarjeta-producto/tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-tarjeta-producto'</span>,
+  imports: [],
+  templateUrl: <span class="t-str">'./tarjeta-producto.html'</span>,
+  styleUrl: <span class="t-str">'./tarjeta-producto.css'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto {
+  nombre = <span class="t-str">'Zapatilla'</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">productos/tarjeta-producto/tarjeta-producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;h3</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/h3</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Plantilla y estilos dentro del <code>.ts</code> en vez de en archivos aparte:</p>
+<figure class="code"><figcaption><span class="file">saludo.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-saludo'</span>,
+  template: <span class="t-str">`&lt;h2&gt;Hola desde Angular&lt;/h2&gt;`</span>,
+  styles: <span class="t-str">`h2 { color: teal; }`</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> Saludo {}</code></pre></figure>
+</article>
+<article class="receta" id="b1--usar-componente">
+<h2><a href="#b1--usar-componente">Usar un componente dentro de otro</a></h2>
+<p>Dos pasos: meter la clase en <code>imports</code> del padre y poner su etiqueta (el <code>selector</code>) en el HTML del padre.</p>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { TarjetaProducto } <span class="t-kw">from</span> <span class="t-str">'./productos/tarjeta-producto/tarjeta-producto'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-root'</span>,
+  imports: [TarjetaProducto],
+  templateUrl: <span class="t-str">'./app.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> App {}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-tag">/&gt;</span>
+<span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>sin el <code>imports</code> sale «'app-tarjeta-producto' is not a known element».</p>
+</article>
+<article class="receta" id="b1--interpolacion">
+<h2><a href="#b1--interpolacion">Mostrar un valor: interpolación <code>{{ }}</code></a></h2>
+<figure class="code"><figcaption><span class="file">producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> Producto {
+  nombre = <span class="t-str">'Zapatilla running'</span>;
+  precio = <span class="t-num">59.99</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;h3</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/h3</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> precio <span class="t-interp">}}</span>€<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> precio * <span class="t-num">1.21</span> <span class="t-interp">}}</span>€ con IVA<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre.<span class="t-fn">toUpperCase</span>() <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Dentro de <code>{{ }}</code> puedes poner expresiones y llamar a métodos. No se permiten asignaciones (<code>{{ nombre = 'x' }}</code>) ni bucles.</p>
+</article>
+<article class="receta" id="b1--property">
+<h2><a href="#b1--property">Dar valor a una propiedad: property binding <code>[ ]</code></a></h2>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;img</span> <span class="t-bind">[src]</span>=<span class="t-str">"imagenUrl"</span> <span class="t-bind">[alt]</span>=<span class="t-str">"nombre"</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;button</span> <span class="t-bind">[disabled]</span>=<span class="t-str">"sinStock"</span><span class="t-tag">&gt;</span>Añadir al carrito<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-bind">[nombre]</span>=<span class="t-str">"'Zapatilla'"</span> <span class="t-bind">[precio]</span>=<span class="t-str">"59.99"</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> Producto {
+  nombre = <span class="t-str">'Zapatilla running'</span>;
+  imagenUrl = <span class="t-str">'https://ejemplo.com/zapatilla.jpg'</span>;
+  sinStock = <span class="t-kw">true</span>;
+}</code></pre></figure>
+<p>Dentro de <code>[ ]="..."</code> todo es TypeScript: las variables van sin comillas y los textos con comillas simples (<code>'Zapatilla'</code>).</p>
+<p class="ojo"><strong>Ojo</strong><code>[disabled]="'sinStock'"</code> es el texto «sinStock», no la propiedad.</p>
+</article>
+<article class="receta" id="b1--class-style">
+<h2><a href="#b1--class-style">Clase o estilo según una condición</a></h2>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span> <span class="t-bind">[class.agotado]</span>=<span class="t-str">"sinStock"</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span> <span class="t-bind">[style.color]</span>=<span class="t-str">"sinStock ? 'gray' : 'black'"</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> precio <span class="t-interp">}}</span>€<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span> <span class="t-bind">[style.font-size.px]</span>=<span class="t-str">"tamano"</span><span class="t-tag">&gt;</span>Texto<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>No hace falta importar nada. Para varias clases a la vez: <a href="#b2--ngclass">ngClass</a>.</p>
+</article>
+<article class="receta" id="b1--evento">
+<h2><a href="#b1--evento">Reaccionar a un clic: event binding <code>( )</code></a></h2>
+<figure class="code"><figcaption><span class="file">contador.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> Contador {
+  contador = <span class="t-num">0</span>;
+
+  <span class="t-fn">incrementar</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.contador++;
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">contador.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Valor: <span class="t-interp">{{</span> contador <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;button</span> <span class="t-bind">(click)</span>=<span class="t-str">"incrementar()"</span><span class="t-tag">&gt;</span>+<span class="t-num">1</span><span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;button</span> <span class="t-bind">(click)</span>=<span class="t-str">"contador = 0"</span><span class="t-tag">&gt;</span>Reiniciar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Otros eventos: <code>(input)</code>, <code>(change)</code>, <code>(submit)</code>, <code>(mouseenter)</code>, <code>(keyup.enter)</code>.</p>
+</article>
+<article class="receta" id="b1--event">
+<h2><a href="#b1--event">Leer lo que escribe el usuario con <code>$event</code></a></h2>
+<figure class="code"><figcaption><span class="file">buscador.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;input</span> <span class="t-bind">(input)</span>=<span class="t-str">"onCambio($event)"</span> placeholder=<span class="t-str">"Buscar producto..."</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Buscando: <span class="t-interp">{{</span> termino <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">buscador.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> Buscador {
+  termino = <span class="t-str">''</span>;
+
+  <span class="t-fn">onCambio</span>(evento: Event): <span class="t-kw">void</span> {
+    <span class="t-kw">const</span> input = evento.target <span class="t-kw">as</span> HTMLInputElement;
+    <span class="t-kw">this</span>.termino = input.value;
+  }
+}</code></pre></figure>
+<p><code>$event</code> es el evento del navegador. El texto está en <code>target.value</code>, pero hay que decirle a TypeScript que es un input (<code>as HTMLInputElement</code>).</p>
+</article>
+<article class="receta" id="b1--ngmodel">
+<h2><a href="#b1--ngmodel">Enlace en las dos direcciones: <code>[(ngModel)]</code></a></h2>
+<figure class="code"><figcaption><span class="file">buscador.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { FormsModule } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-buscador'</span>,
+  imports: [FormsModule],
+  templateUrl: <span class="t-str">'./buscador.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> Buscador {
+  termino = <span class="t-str">''</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">buscador.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;input</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"termino"</span> placeholder=<span class="t-str">"Buscar producto..."</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Buscando: <span class="t-interp">{{</span> termino <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Lo que escribes cambia <code>termino</code>, y si cambias <code>termino</code> desde el código cambia el input. Es lo mismo que <code>[ngModel]="termino" (ngModelChange)="termino = $event"</code>.</p>
+<p class="ojo"><strong>Ojo</strong>sin <code>FormsModule</code> en <code>imports</code> no funciona.</p>
+</article>
+<article class="receta" id="b1--cuatro-bindings">
+<h2><a href="#b1--cuatro-bindings">Las cuatro formas de binding, juntas</a></h2>
+<div class="table"><table><thead><tr><th>Sintaxis</th><th>Nombre</th><th>Dirección</th></tr></thead><tbody>
+<tr><td data-label="Sintaxis"><code>{{ valor }}</code></td><td data-label="Nombre">Interpolación</td><td data-label="Dirección">TS <span class="arrow">→</span> texto en pantalla</td></tr>
+<tr><td data-label="Sintaxis"><code>[prop]="valor"</code></td><td data-label="Nombre">Property binding</td><td data-label="Dirección">TS <span class="arrow">→</span> propiedad del elemento</td></tr>
+<tr><td data-label="Sintaxis"><code>(evento)="metodo()"</code></td><td data-label="Nombre">Event binding</td><td data-label="Dirección">elemento <span class="arrow">→</span> TS</td></tr>
+<tr><td data-label="Sintaxis"><code>[(ngModel)]="valor"</code></td><td data-label="Nombre">Two-way binding</td><td data-label="Dirección">las dos (necesita <code>FormsModule</code>)</td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="b1--oninit">
+<h2><a href="#b1--oninit">Hacer algo al crearse el componente: <code>ngOnInit</code></a></h2>
+<figure class="code"><figcaption><span class="file">perfil.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, OnInit } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({ selector: <span class="t-str">'app-perfil'</span>, template: <span class="t-str">`&lt;p&gt;{{ nombreUsuario }}&lt;/p&gt;`</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> Perfil <span class="t-kw">implements</span> OnInit {
+  nombreUsuario = <span class="t-str">''</span>;
+
+  <span class="t-fn">ngOnInit</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.nombreUsuario = <span class="t-str">'Cargando datos...'</span>;
+  }
+}</code></pre></figure>
+<p>Se ejecuta una vez cada vez que se crea <strong>ese</strong> componente, no al arrancar la app. Es el sitio para cargar datos.</p>
+</article>
+<article class="receta" id="b1--ondestroy">
+<h2><a href="#b1--ondestroy">Limpiar al quitarse: <code>ngOnDestroy</code></a></h2>
+<figure class="code"><figcaption><span class="file">reloj.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, OnDestroy, OnInit } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({ selector: <span class="t-str">'app-reloj'</span>, template: <span class="t-str">`&lt;p&gt;{{ horaActual }}&lt;/p&gt;`</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> Reloj <span class="t-kw">implements</span> OnInit, OnDestroy {
+  horaActual = <span class="t-str">''</span>;
+  <span class="t-kw">private</span> intervalo: <span class="t-kw">any</span>;
+
+  <span class="t-fn">ngOnInit</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.intervalo = <span class="t-fn">setInterval</span>(() =&gt; {
+      <span class="t-kw">this</span>.horaActual = <span class="t-kw">new</span> <span class="t-fn">Date</span>().<span class="t-fn">toLocaleTimeString</span>();
+    }, <span class="t-num">1000</span>);
+  }
+
+  <span class="t-fn">ngOnDestroy</span>(): <span class="t-kw">void</span> {
+    <span class="t-fn">clearInterval</span>(<span class="t-kw">this</span>.intervalo);
+  }
+}</code></pre></figure>
+<p>Se ejecuta cuando el componente desaparece: un <code>@if</code> que pasa a false, cambiar de ruta… Si no paras el <code>setInterval</code>, sigue funcionando por detrás.</p>
+</article>
+<article class="receta" id="b1--onchanges">
+<h2><a href="#b1--onchanges">Reaccionar cuando cambia un <code>@Input</code>: <code>ngOnChanges</code></a></h2>
+<figure class="code"><figcaption><span class="file">tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, Input, OnChanges, SimpleChanges } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto <span class="t-kw">implements</span> OnChanges {
+  <span class="t-deco">@Input</span>() precio = <span class="t-num">0</span>;
+
+  <span class="t-fn">ngOnChanges</span>(cambios: SimpleChanges): <span class="t-kw">void</span> {
+    <span class="t-kw">if</span> (cambios[<span class="t-str">'precio'</span>]) {
+      console.<span class="t-fn">log</span>(<span class="t-str">'Antes'</span>, cambios[<span class="t-str">'precio'</span>].previousValue, <span class="t-str">'ahora'</span>, cambios[<span class="t-str">'precio'</span>].currentValue);
+    }
+  }
+}</code></pre></figure>
+<p>Solo salta cuando el <strong>padre</strong> cambia un <code>@Input</code>. El orden es <code>ngOnChanges</code> <span class="arrow">→</span> <code>ngOnInit</code> <span class="arrow">→</span> … <span class="arrow">→</span> <code>ngOnDestroy</code>.</p>
+</article>
+<nav class="pasar"><span></span><a href="#b2">Plantillas →</a></nav>
+</section>
+<section class="tab" id="b2" data-tab="b2" hidden>
+<p class="kicker">Bloque 2</p><h1>Plantillas, directivas, pipes y comunicación</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b2--if">Mostrar u ocultar: <code>@if</code></a><a href="#b2--for">Recorrer una lista: <code>@for</code></a><a href="#b2--switch">Varias opciones: <code>@switch</code></a><a href="#b2--ngclass">Varias clases a la vez: <code>ngClass</code></a><a href="#b2--ngstyle">Varios estilos a la vez: <code>ngStyle</code></a><a href="#b2--directiva">Crear una directiva propia</a><a href="#b2--hostlistener"><code>@HostListener</code>: escuchar eventos</a><a href="#b2--hostbinding"><code>@HostBinding</code>: cambiar el elemento</a><a href="#b2--elementref">Usar <code>ElementRef</code> directamente</a><a href="#b2--host">Directiva con <code>host</code> (forma moderna)</a><a href="#b2--pipes">Formatear con pipes integrados</a><a href="#b2--pipe-propio">Crear un pipe propio</a><a href="#b2--input">Pasar datos del padre al hijo: <code>@Input</code></a><a href="#b2--input-senal"><code>input()</code>: la versión con señales</a><a href="#b2--output">Avisar al padre desde el hijo: <code>@Output</code></a><a href="#b2--output-senal"><code>output()</code>: la versión con señales</a></nav>
+<article class="receta" id="b2--if">
+<h2><a href="#b2--if">Mostrar u ocultar: <code>@if</code></a></h2>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@if</span> (disponible) {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>En stock<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+} <span class="t-deco">@else</span> {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Agotado<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+}
+
+<span class="t-deco">@if</span> (stock <span class="t-tag">&gt;</span> <span class="t-num">10</span>) {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Mucho stock<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+} <span class="t-deco">@else</span> <span class="t-kw">if</span> (stock <span class="t-tag">&gt;</span> <span class="t-num">0</span>) {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Últimas unidades<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+} <span class="t-deco">@else</span> {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Agotado<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+<p><code>@if</code>, <code>@for</code> y <code>@switch</code> son parte de la plantilla: no se importan.</p>
+</article>
+<article class="receta" id="b2--for">
+<h2><a href="#b2--for">Recorrer una lista: <code>@for</code></a></h2>
+<figure class="code"><figcaption><span class="file">lista-articulos.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> ListaArticulos {
+  articulos = [
+    { id: <span class="t-num">1</span>, nombre: <span class="t-str">'Leche'</span>, precio: <span class="t-num">1.2</span> },
+    { id: <span class="t-num">2</span>, nombre: <span class="t-str">'Pan'</span>, precio: <span class="t-num">0.9</span> },
+  ];
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">lista-articulos.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;ul</span><span class="t-tag">&gt;</span>
+  <span class="t-deco">@for</span> (articulo <span class="t-kw">of</span> articulos; track articulo.id) {
+    <span class="t-tag">&lt;li</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> articulo.nombre <span class="t-interp">}}</span> — <span class="t-interp">{{</span> articulo.precio <span class="t-interp">}}</span>€<span class="t-tag">&lt;/li</span><span class="t-tag">&gt;</span>
+  } <span class="t-deco">@empty</span> {
+    <span class="t-tag">&lt;li</span><span class="t-tag">&gt;</span>No hay artículos todavía<span class="t-tag">&lt;/li</span><span class="t-tag">&gt;</span>
+  }
+<span class="t-tag">&lt;/ul</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p><code>track</code> es obligatorio. Si no hay id, usa <code>track $index</code>. <code>@empty</code> se muestra cuando la lista está vacía.</p>
+<p>Variables que tienes dentro: <code>$index</code>, <code>$first</code>, <code>$last</code>, <code>$even</code>, <code>$odd</code>, <code>$count</code>.</p>
+<figure class="code"><figcaption><span class="file">lista-articulos.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@for</span> (articulo <span class="t-kw">of</span> articulos; track articulo.id; <span class="t-kw">let</span> i = $index, esUltimo = $last) {
+  <span class="t-tag">&lt;li</span> <span class="t-bind">[class.ultimo]</span>=<span class="t-str">"esUltimo"</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> i + <span class="t-num">1</span> <span class="t-interp">}}</span>. <span class="t-interp">{{</span> articulo.nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/li</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+</article>
+<article class="receta" id="b2--switch">
+<h2><a href="#b2--switch">Varias opciones: <code>@switch</code></a></h2>
+<figure class="code"><figcaption><span class="file">pedido.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@switch</span> (estadoPedido) {
+  <span class="t-deco">@case</span> (<span class="t-str">'pendiente'</span>) { <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Pendiente de confirmar<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span> }
+  <span class="t-deco">@case</span> (<span class="t-str">'enviado'</span>) { <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>En camino<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span> }
+  <span class="t-deco">@case</span> (<span class="t-str">'entregado'</span>) { <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Entregado<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span> }
+  <span class="t-deco">@default</span> { <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Estado desconocido<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span> }
+}</code></pre></figure>
+</article>
+<article class="receta" id="b2--ngclass">
+<h2><a href="#b2--ngclass">Varias clases a la vez: <code>ngClass</code></a></h2>
+<figure class="code"><figcaption><span class="file">producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { NgClass } <span class="t-kw">from</span> <span class="t-str">'@angular/common'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-producto'</span>,
+  imports: [NgClass],
+  templateUrl: <span class="t-str">'./producto.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> Producto {
+  disponible = <span class="t-kw">true</span>;
+  enOferta = <span class="t-kw">true</span>;
+  esDestacado = <span class="t-kw">false</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;div</span> <span class="t-bind">[ngClass]</span>=<span class="t-str">"{ agotado: !disponible, oferta: enOferta, destacado: esDestacado }"</span><span class="t-tag">&gt;</span>
+  <span class="t-interp">{{</span> nombre <span class="t-interp">}}</span>
+<span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>La <strong>clave</strong> es el nombre de la clase y el <strong>valor</strong>, la condición. Con una sola clase basta con <code>[class.agotado]="..."</code>.</p>
+</article>
+<article class="receta" id="b2--ngstyle">
+<h2><a href="#b2--ngstyle">Varios estilos a la vez: <code>ngStyle</code></a></h2>
+<figure class="code"><figcaption><span class="file">producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { NgStyle } <span class="t-kw">from</span> <span class="t-str">'@angular/common'</span>;
+
+<span class="t-deco">@Component</span>({ ..., imports: [NgStyle] })</code></pre></figure>
+<figure class="code"><figcaption><span class="file">producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span> <span class="t-bind">[ngStyle]</span>=<span class="t-str">"{ color: disponible ? 'black' : 'gray', 'font-weight': esDestacado ? 'bold' : 'normal' }"</span><span class="t-tag">&gt;</span>
+  <span class="t-interp">{{</span> nombre <span class="t-interp">}}</span>
+<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Los nombres con guion van entre comillas: <code>'font-weight'</code>, <code>'background-color'</code>.</p>
+</article>
+<article class="receta" id="b2--directiva">
+<h2><a href="#b2--directiva">Crear una directiva propia</a></h2>
+<p>Cambia el fondo de cualquier elemento al pasar el ratón. El color se le pasa desde fuera.</p>
+<figure class="code term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-cmd">ng generate directive resaltado</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">resaltado.directive.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Directive, ElementRef, HostBinding, HostListener, Input } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Directive</span>({
+  selector: <span class="t-str">'[appResaltado]'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> ResaltadoDirective {
+  <span class="t-deco">@Input</span>() appResaltado = <span class="t-str">'yellow'</span>;
+  <span class="t-deco">@HostBinding</span>(<span class="t-str">'style.backgroundColor'</span>) fondo = <span class="t-str">''</span>;
+
+  <span class="t-fn">constructor</span>(<span class="t-kw">private</span> el: ElementRef&lt;HTMLElement&gt;) {}
+
+  <span class="t-deco">@HostListener</span>(<span class="t-str">'mouseenter'</span>) <span class="t-fn">alEntrar</span>() {
+    <span class="t-kw">this</span>.fondo = <span class="t-kw">this</span>.appResaltado || <span class="t-str">'yellow'</span>;
+  }
+
+  <span class="t-deco">@HostListener</span>(<span class="t-str">'mouseleave'</span>) <span class="t-fn">alSalir</span>() {
+    <span class="t-kw">this</span>.fondo = <span class="t-str">''</span>;
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Component</span>({ ..., imports: [ResaltadoDirective] })</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span> appResaltado<span class="t-tag">&gt;</span>Amarillo por defecto<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span> appResaltado=<span class="t-str">"lightblue"</span><span class="t-tag">&gt;</span>Azul claro<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span> <span class="t-bind">[appResaltado]</span>=<span class="t-str">"colorElegido"</span><span class="t-tag">&gt;</span>El color de una variable<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<div class="table"><table><thead><tr><th>Pieza</th><th>Para qué</th></tr></thead><tbody>
+<tr><td data-label="Pieza"><code>selector: '[appResaltado]'</code></td><td data-label="Para qué">Entre corchetes porque se usa como <strong>atributo</strong></td></tr>
+<tr><td data-label="Pieza"><code>@Input() appResaltado</code></td><td data-label="Para qué">Mismo nombre que el selector: recibe el valor que pones en el atributo</td></tr>
+<tr><td data-label="Pieza"><code>@HostBinding('style.x')</code></td><td data-label="Para qué">Escribe una propiedad del elemento donde pones la directiva</td></tr>
+<tr><td data-label="Pieza"><code>@HostListener('evento')</code></td><td data-label="Para qué">Escucha un evento de ese elemento</td></tr>
+<tr><td data-label="Pieza"><code>ElementRef</code></td><td data-label="Para qué">El elemento HTML en sí: <code>this.el.nativeElement</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="b2--hostlistener">
+<h2><a href="#b2--hostlistener"><code>@HostListener</code>: escuchar eventos</a></h2>
+<figure class="code"><figcaption><span class="file">resaltado.directive.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@HostListener</span>(<span class="t-str">'mouseenter'</span>) <span class="t-fn">alEntrar</span>() { }
+<span class="t-deco">@HostListener</span>(<span class="t-str">'mouseleave'</span>) <span class="t-fn">alSalir</span>() { }
+
+<span class="t-com">// Recibir el evento: segundo argumento con '$event'</span>
+<span class="t-deco">@HostListener</span>(<span class="t-str">'click'</span>, [<span class="t-str">'$event'</span>])
+<span class="t-fn">alPulsar</span>(evento: MouseEvent) {
+  console.<span class="t-fn">log</span>(<span class="t-str">'Pulsado en'</span>, evento.clientX, evento.clientY);
+}
+
+<span class="t-com">// Una tecla concreta</span>
+<span class="t-deco">@HostListener</span>(<span class="t-str">'keydown.enter'</span>)
+<span class="t-fn">alPulsarEnter</span>() { }
+
+<span class="t-com">// En toda la ventana o el documento, no solo en el elemento</span>
+<span class="t-deco">@HostListener</span>(<span class="t-str">'window:resize'</span>)
+<span class="t-fn">alRedimensionar</span>() { }
+
+<span class="t-deco">@HostListener</span>(<span class="t-str">'document:click'</span>, [<span class="t-str">'$event.target'</span>])
+<span class="t-fn">clickEnCualquierSitio</span>(destino: HTMLElement) {
+  <span class="t-kw">const</span> dentro = <span class="t-kw">this</span>.el.nativeElement.<span class="t-fn">contains</span>(destino);
+}</code></pre></figure>
+</article>
+<article class="receta" id="b2--hostbinding">
+<h2><a href="#b2--hostbinding"><code>@HostBinding</code>: cambiar el elemento</a></h2>
+<figure class="code"><figcaption><span class="file">resaltado.directive.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@HostBinding</span>(<span class="t-str">'style.backgroundColor'</span>) fondo = <span class="t-str">''</span>;
+<span class="t-deco">@HostBinding</span>(<span class="t-str">'class.activo'</span>) activo = <span class="t-kw">false</span>;
+<span class="t-deco">@HostBinding</span>(<span class="t-str">'attr.aria-pressed'</span>) pulsado = <span class="t-str">'false'</span>;
+
+<span class="t-deco">@HostListener</span>(<span class="t-str">'mouseenter'</span>) <span class="t-fn">alEntrar</span>() { <span class="t-kw">this</span>.fondo = <span class="t-str">'yellow'</span>; <span class="t-kw">this</span>.activo = <span class="t-kw">true</span>; }
+<span class="t-deco">@HostListener</span>(<span class="t-str">'mouseleave'</span>) <span class="t-fn">alSalir</span>() { <span class="t-kw">this</span>.fondo = <span class="t-str">''</span>; <span class="t-kw">this</span>.activo = <span class="t-kw">false</span>; }</code></pre></figure>
+<p>Cambias la propiedad de la clase y Angular la aplica al elemento.</p>
+</article>
+<article class="receta" id="b2--elementref">
+<h2><a href="#b2--elementref">Usar <code>ElementRef</code> directamente</a></h2>
+<figure class="code"><figcaption><span class="file">resaltado.directive.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Directive, ElementRef, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Directive</span>({ selector: <span class="t-str">'[appResaltado]'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> ResaltadoDirective {
+  <span class="t-com">// por constructor: constructor(private el: ElementRef&lt;HTMLElement&gt;) {}</span>
+  <span class="t-kw">private</span> el: ElementRef&lt;HTMLElement&gt; = <span class="t-fn">inject</span>(ElementRef);
+
+  <span class="t-fn">constructor</span>() {
+    <span class="t-kw">this</span>.el.nativeElement.style.backgroundColor = <span class="t-str">'yellow'</span>;
+  }
+}</code></pre></figure>
+<p>Funciona, pero se prefiere <code>@HostBinding</code>, que no toca el DOM a mano.</p>
+</article>
+<article class="receta" id="b2--host">
+<h2><a href="#b2--host">Directiva con <code>host</code> (forma moderna)</a></h2>
+<p>Lo mismo que <code>@HostListener</code> y <code>@HostBinding</code>, pero dentro del decorador:</p>
+<figure class="code"><figcaption><span class="file">resaltado.directive.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Directive</span>({
+  selector: <span class="t-str">'[appResaltado]'</span>,
+  host: {
+    <span class="t-str">'(mouseenter)'</span>: <span class="t-str">'alEntrar()'</span>,
+    <span class="t-str">'(mouseleave)'</span>: <span class="t-str">'alSalir()'</span>,
+    <span class="t-str">'[style.backgroundColor]'</span>: <span class="t-str">'fondo'</span>,
+  },
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> ResaltadoDirective {
+  <span class="t-deco">@Input</span>() appResaltado = <span class="t-str">'yellow'</span>;
+  fondo = <span class="t-str">''</span>;
+  <span class="t-fn">alEntrar</span>() { <span class="t-kw">this</span>.fondo = <span class="t-kw">this</span>.appResaltado || <span class="t-str">'yellow'</span>; }
+  <span class="t-fn">alSalir</span>() { <span class="t-kw">this</span>.fondo = <span class="t-str">''</span>; }
+}</code></pre></figure>
+</article>
+<article class="receta" id="b2--pipes">
+<h2><a href="#b2--pipes">Formatear con pipes integrados</a></h2>
+<figure class="code"><figcaption><span class="file">ejemplos.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { CurrencyPipe, DatePipe, DecimalPipe, UpperCasePipe } <span class="t-kw">from</span> <span class="t-str">'@angular/common'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-ejemplos'</span>,
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, UpperCasePipe],
+  templateUrl: <span class="t-str">'./ejemplos.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> Ejemplos {
+  precio = <span class="t-num">59.9</span>;
+  fecha = <span class="t-kw">new</span> <span class="t-fn">Date</span>();
+  nombre = <span class="t-str">'zapatilla running'</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">ejemplos.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> precio | currency:<span class="t-str">'EUR'</span> <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> fecha | date:<span class="t-str">'dd/MM/yyyy'</span> <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> precio | <span class="t-kw">number</span>:<span class="t-str">'1.2-2'</span> <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre | uppercase <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> nombre | lowercase | titlecase <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<div class="table"><table><thead><tr><th>Pipe</th><th>Clase a importar</th><th>Ejemplo</th></tr></thead><tbody>
+<tr><td data-label="Pipe"><code>currency</code></td><td data-label="Clase a importar"><code>CurrencyPipe</code></td><td data-label="Ejemplo"><code>{{ 59.9 | currency:'EUR' }}</code> <span class="arrow">→</span> 59,90 €</td></tr>
+<tr><td data-label="Pipe"><code>date</code></td><td data-label="Clase a importar"><code>DatePipe</code></td><td data-label="Ejemplo"><code>{{ fecha | date:'dd/MM/yyyy' }}</code></td></tr>
+<tr><td data-label="Pipe"><code>number</code></td><td data-label="Clase a importar"><code>DecimalPipe</code></td><td data-label="Ejemplo"><code>'1.2-2'</code> = mínimo 1 entero, 2 decimales</td></tr>
+<tr><td data-label="Pipe"><code>uppercase</code> / <code>lowercase</code> / <code>titlecase</code></td><td data-label="Clase a importar"><code>UpperCasePipe</code>…</td><td data-label="Ejemplo">Mayúsculas, minúsculas, Cada Palabra</td></tr>
+<tr><td data-label="Pipe"><code>percent</code></td><td data-label="Clase a importar"><code>PercentPipe</code></td><td data-label="Ejemplo"><code>{{ 0.25 | percent }}</code> <span class="arrow">→</span> 25 %</td></tr>
+<tr><td data-label="Pipe"><code>slice</code></td><td data-label="Clase a importar"><code>SlicePipe</code></td><td data-label="Ejemplo"><code>{{ texto | slice:0:10 }}</code></td></tr>
+<tr><td data-label="Pipe"><code>json</code></td><td data-label="Clase a importar"><code>JsonPipe</code></td><td data-label="Ejemplo">Muestra un objeto entero, para depurar</td></tr>
+</tbody></table></div>
+<p>Los parámetros van detrás de <code>:</code>. Se encadenan de izquierda a derecha.</p>
+</article>
+<article class="receta" id="b2--pipe-propio">
+<h2><a href="#b2--pipe-propio">Crear un pipe propio</a></h2>
+<figure class="code term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-cmd">ng generate pipe truncar</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">truncar-pipe.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Pipe, PipeTransform } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Pipe</span>({
+  name: <span class="t-str">'truncar'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TruncarPipe <span class="t-kw">implements</span> PipeTransform {
+  <span class="t-fn">transform</span>(valor: <span class="t-kw">string</span>, longitud: <span class="t-kw">number</span> = <span class="t-num">50</span>): <span class="t-kw">string</span> {
+    <span class="t-kw">if</span> (valor.length &lt;= longitud) <span class="t-kw">return</span> valor;
+    <span class="t-kw">return</span> valor.<span class="t-fn">slice</span>(<span class="t-num">0</span>, longitud) + <span class="t-str">'...'</span>;
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">descripcion.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { TruncarPipe } <span class="t-kw">from</span> <span class="t-str">'./truncar-pipe'</span>;
+
+<span class="t-deco">@Component</span>({ selector: <span class="t-str">'app-descripcion'</span>, imports: [TruncarPipe], templateUrl: <span class="t-str">'./descripcion.html'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> Descripcion {
+  texto = <span class="t-str">'Una descripción muy larga de un producto...'</span>;
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">descripcion.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> texto | truncar:<span class="t-num">80</span> <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> texto | truncar <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>El primer parámetro de <code>transform</code> es lo que va <strong>antes</strong> de la <code>|</code>. Los siguientes son lo que va detrás de los <code>:</code>. En la plantilla se usa el <code>name</code>, no el nombre de la clase.</p>
+<p class="ojo"><strong>Ojo</strong>sin meterlo en <code>imports</code> sale «No pipe found with name 'truncar'».</p>
+<p>Otro ejemplo, un pipe que traduce un valor a texto:</p>
+<figure class="code"><figcaption><span class="file">estado-pedido-pipe.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">type</span> EstadoPedido = <span class="t-str">'pendiente'</span> | <span class="t-str">'enviado'</span> | <span class="t-str">'entregado'</span>;
+
+<span class="t-deco">@Pipe</span>({ name: <span class="t-str">'estadoPedido'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> EstadoPedidoPipe <span class="t-kw">implements</span> PipeTransform {
+  <span class="t-kw">private</span> textos: Record&lt;EstadoPedido, <span class="t-kw">string</span>&gt; = {
+    pendiente: <span class="t-str">'Pendiente de confirmación'</span>,
+    enviado: <span class="t-str">'En camino'</span>,
+    entregado: <span class="t-str">'Entregado'</span>,
+  };
+
+  <span class="t-fn">transform</span>(estado: EstadoPedido): <span class="t-kw">string</span> {
+    <span class="t-kw">return</span> <span class="t-kw">this</span>.textos[estado] ?? <span class="t-str">'Estado desconocido'</span>;
+  }
+}</code></pre></figure>
+</article>
+<article class="receta" id="b2--input">
+<h2><a href="#b2--input">Pasar datos del padre al hijo: <code>@Input</code></a></h2>
+<figure class="code"><figcaption><span class="file">tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, Input } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-tarjeta-producto'</span>,
+  template: <span class="t-str">`&lt;h3&gt;{{ nombre }}&lt;/h3&gt;&lt;p&gt;{{ precio }}€&lt;/p&gt;`</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto {
+  <span class="t-deco">@Input</span>() nombre = <span class="t-str">''</span>;
+  <span class="t-deco">@Input</span>() precio = <span class="t-num">0</span>;
+  <span class="t-deco">@Input</span>({ required: <span class="t-kw">true</span> }) id!: <span class="t-kw">number</span>;   <span class="t-com">// obligatorio</span>
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">catalogo.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-bind">[id]</span>=<span class="t-str">"1"</span> <span class="t-bind">[nombre]</span>=<span class="t-str">"'Zapatilla'"</span> <span class="t-bind">[precio]</span>=<span class="t-str">"59.99"</span> <span class="t-tag">/&gt;</span>
+
+<span class="t-deco">@for</span> (p <span class="t-kw">of</span> productos; track p.id) {
+  <span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-bind">[id]</span>=<span class="t-str">"p.id"</span> <span class="t-bind">[nombre]</span>=<span class="t-str">"p.nombre"</span> <span class="t-bind">[precio]</span>=<span class="t-str">"p.precio"</span> <span class="t-tag">/&gt;</span>
+}</code></pre></figure>
+<p>Los datos <strong>bajan</strong> con <code>[ ]</code>. El padre tiene que importar al hijo en <code>imports</code>.</p>
+</article>
+<article class="receta" id="b2--input-senal">
+<h2><a href="#b2--input-senal"><code>input()</code>: la versión con señales</a></h2>
+<figure class="code"><figcaption><span class="file">tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, input } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-tarjeta-producto'</span>,
+  template: <span class="t-str">`&lt;h3&gt;{{ nombre() }}&lt;/h3&gt;&lt;p&gt;{{ precio() }}€&lt;/p&gt;`</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto {
+  nombre = <span class="t-fn">input</span>(<span class="t-str">''</span>);
+  precio = <span class="t-fn">input</span>(<span class="t-num">0</span>);
+  id = input.required&lt;number&gt;();
+  redondeado = <span class="t-fn">input</span>(<span class="t-num">0</span>, { transform: (v: <span class="t-kw">number</span>) =&gt; Math.<span class="t-fn">round</span>(v * <span class="t-num">100</span>) / <span class="t-num">100</span> });
+}</code></pre></figure>
+<p>En la plantilla del hijo se leen <strong>con paréntesis</strong>: <code>nombre()</code>. El padre lo usa exactamente igual que con <code>@Input</code>.</p>
+</article>
+<article class="receta" id="b2--output">
+<h2><a href="#b2--output">Avisar al padre desde el hijo: <code>@Output</code></a></h2>
+<figure class="code"><figcaption><span class="file">tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, EventEmitter, Input, Output } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-tarjeta-producto'</span>,
+  template: <span class="t-str">`&lt;button (click)="onAnadir()"&gt;Añadir al carrito&lt;/button&gt;`</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto {
+  <span class="t-deco">@Input</span>() nombre = <span class="t-str">''</span>;
+  <span class="t-deco">@Output</span>() anadido = <span class="t-kw">new</span> EventEmitter&lt;string&gt;();
+
+  <span class="t-fn">onAnadir</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.anadido.<span class="t-fn">emit</span>(<span class="t-kw">this</span>.nombre);
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;app-tarjeta-producto</span> <span class="t-bind">[nombre]</span>=<span class="t-str">"'Zapatilla'"</span> <span class="t-bind">(anadido)</span>=<span class="t-str">"onProductoAnadido($event)"</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-fn">onProductoAnadido</span>(nombre: <span class="t-kw">string</span>): <span class="t-kw">void</span> {
+  console.<span class="t-fn">log</span>(<span class="t-str">`Se ha añadido: ${nombre}`</span>);
+}</code></pre></figure>
+<p>Los eventos <strong>suben</strong> con <code>( )</code>. Lo que pasas a <code>emit()</code> le llega al padre como <code>$event</code>.</p>
+</article>
+<article class="receta" id="b2--output-senal">
+<h2><a href="#b2--output-senal"><code>output()</code>: la versión con señales</a></h2>
+<figure class="code"><figcaption><span class="file">tarjeta-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, input, output } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-tarjeta-producto'</span>,
+  template: <span class="t-str">`&lt;button (click)="anadido.emit(nombre())"&gt;Añadir&lt;/button&gt;`</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> TarjetaProducto {
+  nombre = <span class="t-fn">input</span>(<span class="t-str">''</span>);
+  anadido = output&lt;string&gt;();
+}</code></pre></figure>
+<p>El padre lo escucha igual: <code>(anadido)="metodo($event)"</code>.</p>
+</article>
+<nav class="pasar"><a href="#b1">← Componentes</a><a href="#b3">Servicios →</a></nav>
+</section>
+<section class="tab" id="b3" data-tab="b3" hidden>
+<p class="kicker">Bloque 3</p><h1>Servicios</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b3--servicio">Crear un servicio</a><a href="#b3--usar-servicio">Usar un servicio en un componente</a><a href="#b3--constructor">Pedirlo por constructor (forma clásica)</a><a href="#b3--servicio-en-servicio">Un servicio que usa otro servicio</a><a href="#b3--compartir">Compartir datos entre dos componentes hermanos</a><a href="#b3--providers">Una instancia propia para un componente</a></nav>
+<article class="receta" id="b3--servicio">
+<h2><a href="#b3--servicio">Crear un servicio</a></h2>
+<figure class="code term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-cmd">ng generate service carrito</span>
+<span class="t-cmd">ng g s carrito</span></code></pre></figure>
+<p>En Angular 22 el comando crea la clase ya con <code>@Service()</code>. En el curso se le añade el sufijo: <code>CarritoService</code> en <code>carrito-service.ts</code>.</p>
+<figure class="code"><figcaption><span class="file">carrito-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Service } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Service</span>()
+<span class="t-kw">export</span> <span class="t-kw">class</span> CarritoService {
+  <span class="t-kw">private</span> items: <span class="t-kw">string</span>[] = [];
+
+  <span class="t-fn">anadir</span>(nombre: <span class="t-kw">string</span>): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.items = [...<span class="t-kw">this</span>.items, nombre];
+  }
+
+  <span class="t-fn">obtenerItems</span>(): <span class="t-kw">string</span>[] {
+    <span class="t-kw">return</span> <span class="t-kw">this</span>.items;
+  }
+
+  <span class="t-kw">get</span> <span class="t-fn">total</span>(): <span class="t-kw">number</span> {
+    <span class="t-kw">return</span> <span class="t-kw">this</span>.items.length;
+  }
+}</code></pre></figure>
+<p>La versión clásica, que verás en casi todos los ejemplos, hace exactamente lo mismo:</p>
+<figure class="code"><figcaption><span class="file">carrito-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Injectable } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Injectable</span>({ providedIn: <span class="t-str">'root'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> CarritoService {
+  <span class="t-com">// ... mismo contenido</span>
+}</code></pre></figure>
+<div class="table"><table><thead><tr><th></th><th><code>@Service()</code></th><th><code>@Injectable({ providedIn: 'root' })</code></th></tr></thead><tbody>
+<tr><td data-label="">Desde</td><td data-label="@Service()">Angular 22</td><td data-label="@Injectable({ providedIn: 'root' })">Angular 6</td></tr>
+<tr><td data-label="">Una instancia para toda la app</td><td data-label="@Service()">Sí, por defecto</td><td data-label="@Injectable({ providedIn: 'root' })">Sí, por el <code>providedIn: 'root'</code></td></tr>
+<tr><td data-label="">Pedir otros servicios con <code>inject()</code></td><td data-label="@Service()">Sí</td><td data-label="@Injectable({ providedIn: 'root' })">Sí</td></tr>
+<tr><td data-label="">Pedir otros servicios por constructor</td><td data-label="@Service()">No (error NG2028)</td><td data-label="@Injectable({ providedIn: 'root' })">Sí</td></tr>
+<tr><td data-label="">Lo genera <code>ng g s</code></td><td data-label="@Service()">Sí</td><td data-label="@Injectable({ providedIn: 'root' })">Con <code>--injectable</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="b3--usar-servicio">
+<h2><a href="#b3--usar-servicio">Usar un servicio en un componente</a></h2>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { CarritoService } <span class="t-kw">from</span> <span class="t-str">'./carrito-service'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-root'</span>,
+  templateUrl: <span class="t-str">'./app.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> App {
+  carritoService = <span class="t-fn">inject</span>(CarritoService);
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Artículos en el carrito: <span class="t-interp">{{</span> carritoService.total <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;button</span> <span class="t-bind">(click)</span>=<span class="t-str">"carritoService.anadir('Zapatilla')"</span><span class="t-tag">&gt;</span>Añadir zapatilla<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Si lo vas a usar en la plantilla, déjalo público (sin <code>private</code>).</p>
+<p class="ojo"><strong>Ojo</strong>el servicio <strong>no</strong> va en <code>imports</code> del componente. Se pide con <code>inject()</code>.</p>
+<p class="ojo"><strong>Ojo</strong>no hagas <code>new CarritoService()</code>: crearías una copia propia y no compartirías los datos.</p>
+</article>
+<article class="receta" id="b3--constructor">
+<h2><a href="#b3--constructor">Pedirlo por constructor (forma clásica)</a></h2>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> App {
+  <span class="t-fn">constructor</span>(<span class="t-kw">private</span> carritoService: CarritoService) {}
+}
+
+<span class="t-com">// equivale a:</span>
+<span class="t-kw">export</span> <span class="t-kw">class</span> App {
+  <span class="t-kw">private</span> carritoService = <span class="t-fn">inject</span>(CarritoService);
+}</code></pre></figure>
+<p><code>inject()</code> es la forma recomendada. Con <code>@Service()</code> el constructor no vale para pedir dependencias (error NG2028): usa <code>inject()</code>.</p>
+</article>
+<article class="receta" id="b3--servicio-en-servicio">
+<h2><a href="#b3--servicio-en-servicio">Un servicio que usa otro servicio</a></h2>
+<figure class="code"><figcaption><span class="file">pedidos-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Service, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { CarritoService } <span class="t-kw">from</span> <span class="t-str">'./carrito-service'</span>;
+
+<span class="t-deco">@Service</span>()
+<span class="t-kw">export</span> <span class="t-kw">class</span> PedidosService {
+  <span class="t-kw">private</span> carritoService = <span class="t-fn">inject</span>(CarritoService);
+
+  <span class="t-fn">confirmar</span>(): <span class="t-kw">void</span> {
+    console.<span class="t-fn">log</span>(<span class="t-str">'Pedido con'</span>, <span class="t-kw">this</span>.carritoService.total, <span class="t-str">'artículos'</span>);
+  }
+}</code></pre></figure>
+</article>
+<article class="receta" id="b3--compartir">
+<h2><a href="#b3--compartir">Compartir datos entre dos componentes hermanos</a></h2>
+<p>El servicio guarda los datos. Un componente los cambia y el otro los lee. Como hay <strong>una sola instancia</strong>, los dos ven lo mismo.</p>
+<figure class="code"><figcaption><span class="file">tareas-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Service</span>()
+<span class="t-kw">export</span> <span class="t-kw">class</span> TareasService {
+  tareas: <span class="t-kw">string</span>[] = [];
+
+  <span class="t-fn">anadir</span>(tarea: <span class="t-kw">string</span>): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.tareas = [...<span class="t-kw">this</span>.tareas, tarea];
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">nueva-tarea.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> NuevaTarea {
+  <span class="t-kw">private</span> tareasService = <span class="t-fn">inject</span>(TareasService);
+  texto = <span class="t-str">''</span>;
+
+  <span class="t-fn">guardar</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.tareasService.<span class="t-fn">anadir</span>(<span class="t-kw">this</span>.texto);
+    <span class="t-kw">this</span>.texto = <span class="t-str">''</span>;
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">lista-tareas.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">class</span> ListaTareas {
+  tareasService = <span class="t-fn">inject</span>(TareasService);
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">lista-tareas.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@for</span> (t <span class="t-kw">of</span> tareasService.tareas; track $index) {
+  <span class="t-tag">&lt;li</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> t <span class="t-interp">}}</span><span class="t-tag">&lt;/li</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;app-nueva-tarea</span> <span class="t-tag">/&gt;</span>
+<span class="t-tag">&lt;app-lista-tareas</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+</article>
+<article class="receta" id="b3--providers">
+<h2><a href="#b3--providers">Una instancia propia para un componente</a></h2>
+<p>Cuando cada componente necesita <strong>su propia copia</strong> del servicio (por ejemplo, un borrador de un editor):</p>
+<figure class="code"><figcaption><span class="file">borrador-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Injectable } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+
+<span class="t-deco">@Injectable</span>()   <span class="t-com">// sin providedIn: 'root'</span>
+<span class="t-kw">export</span> <span class="t-kw">class</span> BorradorService {
+  <span class="t-kw">private</span> cambios: Record&lt;string, unknown&gt; = {};
+
+  <span class="t-fn">guardarCambio</span>(campo: <span class="t-kw">string</span>, valor: unknown): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.cambios[campo] = valor;
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">editor-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-editor-producto'</span>,
+  providers: [BorradorService],   <span class="t-com">// instancia propia de ESTE componente</span>
+  templateUrl: <span class="t-str">'./editor-producto.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> EditorProducto {
+  <span class="t-kw">private</span> borrador = <span class="t-fn">inject</span>(BorradorService);
+}</code></pre></figure>
+<p>Con la sintaxis nueva: <code>@Service({ autoProvided: false })</code> equivale a <code>@Injectable()</code> sin <code>providedIn</code>.</p>
+<div class="table"><table><thead><tr><th>Dónde se registra</th><th>Cuántas instancias</th></tr></thead><tbody>
+<tr><td data-label="Dónde se registra"><code>@Service()</code> o <code>providedIn: 'root'</code></td><td data-label="Cuántas instancias"><strong>Una</strong> compartida por toda la app</td></tr>
+<tr><td data-label="Dónde se registra"><code>providers: [X]</code> en un <code>@Component</code></td><td data-label="Cuántas instancias">Una <strong>por cada</strong> componente de ese tipo (y la comparten sus hijos)</td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b2">← Plantillas</a><a href="#b4">Rutas →</a></nav>
+</section>
+<section class="tab" id="b4" data-tab="b4" hidden>
+<p class="kicker">Bloque 4</p><h1>Rutas</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b4--rutas">Definir las rutas</a><a href="#b4--outlet">Menú y sitio donde se pintan las pantallas</a><a href="#b4--redirect">Redirigir una ruta</a><a href="#b4--parametro">Ruta con parámetro <code>:id</code></a><a href="#b4--leer-parametro">Leer el parámetro</a><a href="#b4--hijas">Rutas hijas</a><a href="#b4--navigate">Navegar desde código</a><a href="#b4--guard">Proteger una ruta con un guard</a><a href="#b4--lazy">Cargar una pantalla solo cuando se visita (lazy loading)</a></nav>
+<article class="receta" id="b4--rutas">
+<h2><a href="#b4--rutas">Definir las rutas</a></h2>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Routes } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+<span class="t-kw">import</span> { Catalogo } <span class="t-kw">from</span> <span class="t-str">'./catalogo/catalogo'</span>;
+<span class="t-kw">import</span> { Contacto } <span class="t-kw">from</span> <span class="t-str">'./contacto/contacto'</span>;
+<span class="t-kw">import</span> { NoEncontrado } <span class="t-kw">from</span> <span class="t-str">'./no-encontrado/no-encontrado'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">const</span> routes: Routes = [
+  { path: <span class="t-str">''</span>, component: Catalogo },
+  { path: <span class="t-str">'contacto'</span>, component: Contacto },
+  { path: <span class="t-str">'**'</span>, component: NoEncontrado },   <span class="t-com">// 404: SIEMPRE la última</span>
+];</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.config.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { ApplicationConfig } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { provideRouter } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+<span class="t-kw">import</span> { routes } <span class="t-kw">from</span> <span class="t-str">'./app.routes'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">const</span> appConfig: ApplicationConfig = {
+  providers: [<span class="t-fn">provideRouter</span>(routes)],
+};</code></pre></figure>
+<p>El <code>app.config.ts</code> ya viene así al crear el proyecto. Los <code>path</code> van <strong>sin</strong> <code>/</code> delante.</p>
+</article>
+<article class="receta" id="b4--outlet">
+<h2><a href="#b4--outlet">Menú y sitio donde se pintan las pantallas</a></h2>
+<figure class="code"><figcaption><span class="file">app.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { RouterLink, RouterLinkActive, RouterOutlet } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-root'</span>,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  templateUrl: <span class="t-str">'./app.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> App {}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;nav</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;a</span> routerLink=<span class="t-str">"/"</span> routerLinkActive=<span class="t-str">"activo"</span> <span class="t-bind">[routerLinkActiveOptions]</span>=<span class="t-str">"{ exact: true }"</span><span class="t-tag">&gt;</span>Catálogo<span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;a</span> routerLink=<span class="t-str">"/contacto"</span> routerLinkActive=<span class="t-str">"activo"</span><span class="t-tag">&gt;</span>Contacto<span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/nav</span><span class="t-tag">&gt;</span>
+
+<span class="t-tag">&lt;router-outlet</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<p><code>routerLink</code> navega sin recargar la página (no uses <code>href</code>). <code>routerLinkActive</code> pone la clase <code>activo</code> al enlace de la página actual. <code>exact: true</code> evita que <code>/</code> salga activo en todas.</p>
+<p class="ojo"><strong>Ojo</strong>el <code>&lt;nav&gt;</code> va <strong>fuera</strong> del <code>&lt;router-outlet /&gt;</code>.</p>
+</article>
+<article class="receta" id="b4--redirect">
+<h2><a href="#b4--redirect">Redirigir una ruta</a></h2>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">export</span> <span class="t-kw">const</span> routes: Routes = [
+  { path: <span class="t-str">''</span>, redirectTo: <span class="t-str">'catalogo'</span>, pathMatch: <span class="t-str">'full'</span> },
+  { path: <span class="t-str">'catalogo'</span>, component: Catalogo },
+];</code></pre></figure>
+</article>
+<article class="receta" id="b4--parametro">
+<h2><a href="#b4--parametro">Ruta con parámetro <code>:id</code></a></h2>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{ path: <span class="t-str">'producto/:id'</span>, component: DetalleProducto },</code></pre></figure>
+<figure class="code"><figcaption><span class="file">catalogo.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@for</span> (producto <span class="t-kw">of</span> productos; track producto.id) {
+  <span class="t-tag">&lt;a</span> <span class="t-bind">[routerLink]</span>=<span class="t-str">"['/producto', producto.id]"</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> producto.nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+<p><code>['/producto', 3]</code> genera <code>/producto/3</code>. El texto va entre comillas simples y la variable sin comillas.</p>
+</article>
+<article class="receta" id="b4--leer-parametro">
+<h2><a href="#b4--leer-parametro">Leer el parámetro</a></h2>
+<figure class="code"><figcaption><span class="file">detalle-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { ActivatedRoute } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+
+<span class="t-deco">@Component</span>({ selector: <span class="t-str">'app-detalle-producto'</span>, templateUrl: <span class="t-str">'./detalle-producto.html'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> DetalleProducto {
+  <span class="t-kw">private</span> route = <span class="t-fn">inject</span>(ActivatedRoute);
+  <span class="t-kw">private</span> productosService = <span class="t-fn">inject</span>(ProductosService);
+
+  id = <span class="t-fn">Number</span>(<span class="t-kw">this</span>.route.snapshot.paramMap.<span class="t-kw">get</span>(<span class="t-str">'id'</span>));
+  producto = <span class="t-kw">this</span>.productosService.<span class="t-fn">buscarPorId</span>(<span class="t-kw">this</span>.id);
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">detalle-producto.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@if</span> (producto) {
+  <span class="t-tag">&lt;h2</span><span class="t-tag">&gt;</span><span class="t-interp">{{</span> producto.nombre <span class="t-interp">}}</span><span class="t-tag">&lt;/h2</span><span class="t-tag">&gt;</span>
+} <span class="t-deco">@else</span> {
+  <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Producto no encontrado<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+<p><code>get('id')</code> usa el mismo nombre que pusiste tras los <code>:</code> en la ruta. Los parámetros llegan <strong>como texto</strong>: por eso <code>Number()</code>.</p>
+<p>Si se navega de <code>/producto/1</code> a <code>/producto/2</code> sin salir del componente, <code>snapshot</code> no se actualiza. En ese caso:</p>
+<figure class="code"><figcaption><span class="file">detalle-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">this</span>.route.paramMap.<span class="t-fn">subscribe</span>(params =&gt; {
+  <span class="t-kw">this</span>.id = <span class="t-fn">Number</span>(params.<span class="t-kw">get</span>(<span class="t-str">'id'</span>));
+});</code></pre></figure>
+</article>
+<article class="receta" id="b4--hijas">
+<h2><a href="#b4--hijas">Rutas hijas</a></h2>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{
+  path: <span class="t-str">'cuenta'</span>,
+  component: Cuenta,
+  children: [
+    { path: <span class="t-str">'perfil'</span>, component: Perfil },
+    { path: <span class="t-str">'pedidos'</span>, component: Pedidos },
+  ],
+},</code></pre></figure>
+<figure class="code"><figcaption><span class="file">cuenta.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;nav</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;a</span> routerLink=<span class="t-str">"perfil"</span><span class="t-tag">&gt;</span>Perfil<span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;a</span> routerLink=<span class="t-str">"pedidos"</span><span class="t-tag">&gt;</span>Pedidos<span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/nav</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;router-outlet</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<p>El padre (<code>Cuenta</code>) necesita <strong>su propio</strong> <code>&lt;router-outlet /&gt;</code> y <code>RouterOutlet</code> + <code>RouterLink</code> en sus <code>imports</code>. Los enlaces sin <code>/</code> son relativos: <code>perfil</code> lleva a <code>/cuenta/perfil</code>.</p>
+</article>
+<article class="receta" id="b4--navigate">
+<h2><a href="#b4--navigate">Navegar desde código</a></h2>
+<figure class="code"><figcaption><span class="file">formulario-producto.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { Router } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">class</span> FormularioProducto {
+  <span class="t-kw">private</span> router = <span class="t-fn">inject</span>(Router);
+
+  <span class="t-fn">guardar</span>(): <span class="t-kw">void</span> {
+    <span class="t-com">// ... guardar ...</span>
+    <span class="t-kw">this</span>.router.<span class="t-fn">navigate</span>([<span class="t-str">'/catalogo'</span>]);
+    <span class="t-com">// con parámetro: this.router.navigate(['/producto', productoCreado.id]);</span>
+  }
+}</code></pre></figure>
+<div class="table"><table><thead><tr><th></th><th><code>Router</code></th><th><code>ActivatedRoute</code></th></tr></thead><tbody>
+<tr><td data-label="">Para qué</td><td data-label="Router"><strong>Ir</strong> a otra ruta</td><td data-label="ActivatedRoute"><strong>Leer</strong> la ruta actual</td></tr>
+<tr><td data-label="">Ejemplo</td><td data-label="Router"><code>router.navigate(['/x'])</code></td><td data-label="ActivatedRoute"><code>route.snapshot.paramMap.get('id')</code></td></tr>
+</tbody></table></div>
+<p>Ninguno de los dos va en <code>imports</code>: se piden con <code>inject()</code>.</p>
+</article>
+<article class="receta" id="b4--guard">
+<h2><a href="#b4--guard">Proteger una ruta con un guard</a></h2>
+<figure class="code term"><figcaption><span class="file">Terminal</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-cmd">ng generate guard auth</span></code></pre></figure>
+<p>Al preguntar el tipo, elige <strong>CanActivate</strong>.</p>
+<figure class="code"><figcaption><span class="file">auth-guard.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { CanActivateFn, Router } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+<span class="t-kw">import</span> { AuthService } <span class="t-kw">from</span> <span class="t-str">'./auth-service'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">const</span> authGuard: CanActivateFn = () =&gt; {
+  <span class="t-kw">const</span> authService = <span class="t-fn">inject</span>(AuthService);
+  <span class="t-kw">const</span> router = <span class="t-fn">inject</span>(Router);
+
+  <span class="t-kw">if</span> (authService.<span class="t-fn">estaAutenticado</span>()) {
+    <span class="t-kw">return</span> <span class="t-kw">true</span>;
+  }
+  router.<span class="t-fn">navigate</span>([<span class="t-str">'/login'</span>]);
+  <span class="t-kw">return</span> <span class="t-kw">false</span>;
+};</code></pre></figure>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>{ path: <span class="t-str">'cuenta'</span>, component: Cuenta, canActivate: [authGuard] },</code></pre></figure>
+<figure class="code"><figcaption><span class="file">auth-service.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@Injectable</span>({ providedIn: <span class="t-str">'root'</span> })
+<span class="t-kw">export</span> <span class="t-kw">class</span> AuthService {
+  <span class="t-kw">private</span> autenticado = <span class="t-kw">false</span>;
+
+  <span class="t-fn">iniciarSesion</span>(): <span class="t-kw">void</span> { <span class="t-kw">this</span>.autenticado = <span class="t-kw">true</span>; }
+  <span class="t-fn">cerrarSesion</span>(): <span class="t-kw">void</span> { <span class="t-kw">this</span>.autenticado = <span class="t-kw">false</span>; }
+  <span class="t-fn">estaAutenticado</span>(): <span class="t-kw">boolean</span> { <span class="t-kw">return</span> <span class="t-kw">this</span>.autenticado; }
+}</code></pre></figure>
+<p>El guard es una <strong>función</strong>, no una clase. En la ruta va sin paréntesis: <code>authGuard</code>, no <code>authGuard()</code>.</p>
+<p>En vez de <code>navigate</code> + <code>return false</code> puedes escribir <code>return router.createUrlTree(['/login']);</code>.</p>
+<div class="table"><table><thead><tr><th>Guard</th><th>Cuándo se ejecuta</th></tr></thead><tbody>
+<tr><td data-label="Guard"><code>canActivate</code></td><td data-label="Cuándo se ejecuta">Al entrar en la ruta</td></tr>
+<tr><td data-label="Guard"><code>canActivateChild</code></td><td data-label="Cuándo se ejecuta">Al entrar en sus rutas hijas</td></tr>
+<tr><td data-label="Guard"><code>canDeactivate</code></td><td data-label="Cuándo se ejecuta">Al salir (por ejemplo, «¿salir sin guardar?»)</td></tr>
+<tr><td data-label="Guard"><code>canMatch</code></td><td data-label="Cuándo se ejecuta">Decide si la ruta se tiene en cuenta</td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="b4--lazy">
+<h2><a href="#b4--lazy">Cargar una pantalla solo cuando se visita (lazy loading)</a></h2>
+<figure class="code"><figcaption><span class="file">app.routes.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Routes } <span class="t-kw">from</span> <span class="t-str">'@angular/router'</span>;
+<span class="t-kw">import</span> { Catalogo } <span class="t-kw">from</span> <span class="t-str">'./catalogo/catalogo'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">const</span> routes: Routes = [
+  { path: <span class="t-str">''</span>, component: Catalogo },
+  {
+    path: <span class="t-str">'admin'</span>,
+    loadComponent: () =&gt; <span class="t-kw">import</span>(<span class="t-str">'./admin/admin'</span>).<span class="t-fn">then</span>(m =&gt; m.Admin),
+    canActivate: [authGuard],   <span class="t-com">// opcional: se combina con guards</span>
+  },
+];</code></pre></figure>
+<p><code>loadComponent</code> en lugar de <code>component</code>, y recibe una función.</p>
+<p class="ojo"><strong>Ojo</strong>quita el <code>import { Admin } ...</code> de arriba del archivo. Si lo dejas, deja de ser lazy y el build avisa.</p>
+<p>Se comprueba en F12 <span class="arrow">→</span> Red: el archivo <code>chunk-...js</code> de esa pantalla aparece al entrar en ella.</p>
+</article>
+<nav class="pasar"><a href="#b3">← Servicios</a><a href="#b5">Formularios →</a></nav>
+</section>
+<section class="tab" id="b5" data-tab="b5" hidden>
+<p class="kicker">Bloque 5</p><h1>Formularios</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#b5--template">Formulario template-driven</a><a href="#b5--ngmodelgroup">Agrupar campos: <code>ngModelGroup</code></a><a href="#b5--validar-template">Validar un formulario template-driven</a><a href="#b5--errores-template">Mensajes de error por campo (template-driven)</a><a href="#b5--estados">Estados de un campo y estilos automáticos</a><a href="#b5--reactivo">Formulario reactivo con <code>FormGroup</code></a><a href="#b5--formbuilder">Formulario reactivo con <code>FormBuilder</code></a><a href="#b5--validators">Validadores en un formulario reactivo</a><a href="#b5--validador-propio">Validador personalizado</a><a href="#b5--formarray">Lista de campos que crece: <code>FormArray</code></a><a href="#b5--formarray-grupos"><code>FormArray</code> de grupos (varios campos por elemento)</a><a href="#b5--comparar-forms">Template-driven o reactivo</a></nav>
+<article class="receta" id="b5--template">
+<h2><a href="#b5--template">Formulario template-driven</a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { FormsModule } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-alta-cliente'</span>,
+  imports: [FormsModule],
+  templateUrl: <span class="t-str">'./alta-cliente.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> AltaCliente {
+  cliente = { nombre: <span class="t-str">''</span>, email: <span class="t-str">''</span> };
+
+  <span class="t-fn">guardar</span>(valores: <span class="t-kw">any</span>): <span class="t-kw">void</span> {
+    console.<span class="t-fn">log</span>(<span class="t-str">'Formulario enviado:'</span>, valores);
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> #f=<span class="t-str">"ngForm"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar(f.value)"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> name=<span class="t-str">"nombre"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.nombre"</span> placeholder=<span class="t-str">"Nombre"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> name=<span class="t-str">"email"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.email"</span> placeholder=<span class="t-str">"Email"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p><code>#f="ngForm"</code> es una variable que apunta al formulario entero: <code>f.value</code>, <code>f.valid</code>, <code>f.invalid</code>. Se envía con <code>(ngSubmit)</code> en el <code>&lt;form&gt;</code>, no con <code>(click)</code> en el botón.</p>
+<p class="ojo"><strong>Ojo</strong>cada input con <code>ngModel</code> dentro de un <code>&lt;form&gt;</code> <strong>necesita <code>name</code></strong>. Sin él, Angular da error.</p>
+</article>
+<article class="receta" id="b5--ngmodelgroup">
+<h2><a href="#b5--ngmodelgroup">Agrupar campos: <code>ngModelGroup</code></a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> #f=<span class="t-str">"ngForm"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar(f.value)"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> name=<span class="t-str">"nombre"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.nombre"</span><span class="t-tag">&gt;</span>
+
+  <span class="t-tag">&lt;div</span> ngModelGroup=<span class="t-str">"direccion"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;input</span> name=<span class="t-str">"calle"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.direccion.calle"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;input</span> name=<span class="t-str">"ciudad"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.direccion.ciudad"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p><code>f.value</code> queda como <code>{ nombre: '...', direccion: { calle: '...', ciudad: '...' } }</code>.</p>
+</article>
+<article class="receta" id="b5--validar-template">
+<h2><a href="#b5--validar-template">Validar un formulario template-driven</a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> #f=<span class="t-str">"ngForm"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar(f.value)"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> name=<span class="t-str">"nombre"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.nombre"</span> required minlength=<span class="t-str">"3"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> name=<span class="t-str">"email"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.email"</span> required email<span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span> <span class="t-bind">[disabled]</span>=<span class="t-str">"f.invalid"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>Los validadores se ponen como atributos: <code>required</code>, <code>minlength="3"</code>, <code>maxlength="20"</code>, <code>email</code>, <code>pattern="[0-9]+"</code>. Con <code>[disabled]="f.invalid"</code> no se puede enviar si algo falla.</p>
+</article>
+<article class="receta" id="b5--errores-template">
+<h2><a href="#b5--errores-template">Mensajes de error por campo (template-driven)</a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;input</span> name=<span class="t-str">"email"</span> <span class="t-bind">[(ngModel)]</span>=<span class="t-str">"cliente.email"</span> required email #emailCtrl=<span class="t-str">"ngModel"</span><span class="t-tag">&gt;</span>
+
+<span class="t-deco">@if</span> (emailCtrl.invalid &amp;&amp; emailCtrl.touched) {
+  <span class="t-deco">@if</span> (emailCtrl.errors?.[<span class="t-str">'required'</span>]) {
+    <span class="t-tag">&lt;p</span> <span class="t-kw">class</span>=<span class="t-str">"error"</span><span class="t-tag">&gt;</span>El email es obligatorio<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+  }
+  <span class="t-deco">@if</span> (emailCtrl.errors?.[<span class="t-str">'email'</span>]) {
+    <span class="t-tag">&lt;p</span> <span class="t-kw">class</span>=<span class="t-str">"error"</span><span class="t-tag">&gt;</span>El formato del email no es válido<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+  }
+}</code></pre></figure>
+<p><code>#emailCtrl="ngModel"</code> apunta a <strong>ese campo</strong>. <code>errors</code> tiene una clave por cada validador que falla: <code>'required'</code>, <code>'email'</code>, <code>'minlength'</code>…</p>
+<p>Se comprueba <code>touched</code> para no mostrar el error antes de que el usuario haya escrito.</p>
+</article>
+<article class="receta" id="b5--estados">
+<h2><a href="#b5--estados">Estados de un campo y estilos automáticos</a></h2>
+<div class="table"><table><thead><tr><th>Estado</th><th>Significa</th></tr></thead><tbody>
+<tr><td data-label="Estado"><code>valid</code> / <code>invalid</code></td><td data-label="Significa">Cumple o no todos sus validadores</td></tr>
+<tr><td data-label="Estado"><code>touched</code> / <code>untouched</code></td><td data-label="Significa">El usuario ha entrado y salido del campo</td></tr>
+<tr><td data-label="Estado"><code>dirty</code> / <code>pristine</code></td><td data-label="Significa">El valor ha cambiado respecto al inicial</td></tr>
+</tbody></table></div>
+<p>Angular pone solo las clases <code>ng-valid</code>, <code>ng-invalid</code>, <code>ng-touched</code>, <code>ng-dirty</code>… en cada campo:</p>
+<figure class="code"><figcaption><span class="file">alta-cliente.css</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>input.ng-invalid.ng-touched {
+  border-color: red;
+}</code></pre></figure>
+</article>
+<article class="receta" id="b5--reactivo">
+<h2><a href="#b5--reactivo">Formulario reactivo con <code>FormGroup</code></a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { FormControl, FormGroup, ReactiveFormsModule } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-alta-cliente'</span>,
+  imports: [ReactiveFormsModule],
+  templateUrl: <span class="t-str">'./alta-cliente.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> AltaCliente {
+  formulario = <span class="t-kw">new</span> <span class="t-fn">FormGroup</span>({
+    nombre: <span class="t-kw">new</span> <span class="t-fn">FormControl</span>(<span class="t-str">''</span>),
+    email: <span class="t-kw">new</span> <span class="t-fn">FormControl</span>(<span class="t-str">''</span>),
+  });
+
+  <span class="t-fn">guardar</span>(): <span class="t-kw">void</span> {
+    console.<span class="t-fn">log</span>(<span class="t-kw">this</span>.formulario.value);
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> <span class="t-bind">[formGroup]</span>=<span class="t-str">"formulario"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar()"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"nombre"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"email"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p>La estructura del formulario está en la <strong>clase</strong>. En el HTML: <code>[formGroup]</code> en el <code>&lt;form&gt;</code> y <code>formControlName</code> (sin corchetes) en cada campo.</p>
+</article>
+<article class="receta" id="b5--formbuilder">
+<h2><a href="#b5--formbuilder">Formulario reactivo con <code>FormBuilder</code></a></h2>
+<p>Lo mismo, más corto:</p>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { FormBuilder, ReactiveFormsModule } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-alta-cliente'</span>,
+  imports: [ReactiveFormsModule],
+  templateUrl: <span class="t-str">'./alta-cliente.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> AltaCliente {
+  <span class="t-kw">private</span> fb = <span class="t-fn">inject</span>(FormBuilder);
+
+  formulario = <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({
+    nombre: [<span class="t-str">''</span>],
+    email: [<span class="t-str">''</span>],
+  });
+
+  <span class="t-fn">guardar</span>(): <span class="t-kw">void</span> {
+    console.<span class="t-fn">log</span>(<span class="t-kw">this</span>.formulario.value);
+  }
+}</code></pre></figure>
+<p>El HTML es el mismo que con <code>FormGroup</code>. Cada campo es <code>[valorInicial, validadores]</code>.</p>
+</article>
+<article class="receta" id="b5--validators">
+<h2><a href="#b5--validators">Validadores en un formulario reactivo</a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { FormBuilder, ReactiveFormsModule, Validators } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+formulario = <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({
+  nombre: [<span class="t-str">''</span>, [Validators.required, Validators.<span class="t-fn">minLength</span>(<span class="t-num">3</span>)]],
+  email: [<span class="t-str">''</span>, [Validators.required, Validators.email]],
+});</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> <span class="t-bind">[formGroup]</span>=<span class="t-str">"formulario"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar()"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"nombre"</span><span class="t-tag">&gt;</span>
+  <span class="t-deco">@if</span> (formulario.<span class="t-kw">get</span>(<span class="t-str">'nombre'</span>)?.invalid &amp;&amp; formulario.<span class="t-kw">get</span>(<span class="t-str">'nombre'</span>)?.touched) {
+    <span class="t-deco">@if</span> (formulario.<span class="t-kw">get</span>(<span class="t-str">'nombre'</span>)?.errors?.[<span class="t-str">'required'</span>]) {
+      <span class="t-tag">&lt;p</span> <span class="t-kw">class</span>=<span class="t-str">"error"</span><span class="t-tag">&gt;</span>El nombre es obligatorio<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+    }
+    <span class="t-deco">@if</span> (formulario.<span class="t-kw">get</span>(<span class="t-str">'nombre'</span>)?.errors?.[<span class="t-str">'minlength'</span>]) {
+      <span class="t-tag">&lt;p</span> <span class="t-kw">class</span>=<span class="t-str">"error"</span><span class="t-tag">&gt;</span>Mínimo <span class="t-num">3</span> caracteres<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+    }
+  }
+
+  <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"email"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span> <span class="t-bind">[disabled]</span>=<span class="t-str">"formulario.invalid"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre></figure>
+<div class="table"><table><thead><tr><th>Validador</th><th>Clave en <code>errors</code></th></tr></thead><tbody>
+<tr><td data-label="Validador"><code>Validators.required</code></td><td data-label="Clave en errors"><code>'required'</code></td></tr>
+<tr><td data-label="Validador"><code>Validators.minLength(3)</code></td><td data-label="Clave en errors"><code>'minlength'</code> (en minúsculas)</td></tr>
+<tr><td data-label="Validador"><code>Validators.maxLength(20)</code></td><td data-label="Clave en errors"><code>'maxlength'</code></td></tr>
+<tr><td data-label="Validador"><code>Validators.email</code></td><td data-label="Clave en errors"><code>'email'</code></td></tr>
+<tr><td data-label="Validador"><code>Validators.min(0)</code> / <code>Validators.max(100)</code></td><td data-label="Clave en errors"><code>'min'</code> / <code>'max'</code></td></tr>
+<tr><td data-label="Validador"><code>Validators.pattern(/^[0-9]+$/)</code></td><td data-label="Clave en errors"><code>'pattern'</code></td></tr>
+</tbody></table></div>
+<p><code>formulario.get('nombre')</code> saca el campo, con los mismos estados de siempre: <code>invalid</code>, <code>touched</code>, <code>errors</code>.</p>
+</article>
+<article class="receta" id="b5--validador-propio">
+<h2><a href="#b5--validador-propio">Validador personalizado</a></h2>
+<figure class="code"><figcaption><span class="file">solo-letras.validator.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { AbstractControl, ValidationErrors, ValidatorFn } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-kw">export</span> <span class="t-kw">function</span> <span class="t-fn">soloLetrasValidator</span>(): ValidatorFn {
+  <span class="t-kw">return</span> (control: AbstractControl): ValidationErrors | <span class="t-kw">null</span> =&gt; {
+    <span class="t-kw">const</span> valor = control.value <span class="t-kw">as</span> <span class="t-kw">string</span>;
+    <span class="t-kw">if</span> (!valor) <span class="t-kw">return</span> <span class="t-kw">null</span>;   <span class="t-com">// los vacíos los controla required</span>
+    <span class="t-kw">const</span> esValido = /^[a-zA-ZÀ-ÿ\s]+$/.<span class="t-fn">test</span>(valor);
+    <span class="t-kw">return</span> esValido ? <span class="t-kw">null</span> : { soloLetras: <span class="t-kw">true</span> };
+  };
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>formulario = <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({
+  nombre: [<span class="t-str">''</span>, [Validators.required, <span class="t-fn">soloLetrasValidator</span>()]],
+});</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-deco">@if</span> (formulario.<span class="t-kw">get</span>(<span class="t-str">'nombre'</span>)?.errors?.[<span class="t-str">'soloLetras'</span>]) {
+  <span class="t-tag">&lt;p</span> <span class="t-kw">class</span>=<span class="t-str">"error"</span><span class="t-tag">&gt;</span>El nombre solo puede contener letras y espacios<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+}</code></pre></figure>
+<p>Devuelve <code>null</code> si es <strong>válido</strong> y un objeto <code>{ nombreDelError: true }</code> si no. Esa clave es la que lees en <code>errors?.['...']</code>. Al usarlo se llama con paréntesis: <code>soloLetrasValidator()</code>.</p>
+</article>
+<article class="receta" id="b5--formarray">
+<h2><a href="#b5--formarray">Lista de campos que crece: <code>FormArray</code></a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">import</span> { Component, inject } <span class="t-kw">from</span> <span class="t-str">'@angular/core'</span>;
+<span class="t-kw">import</span> { FormArray, FormBuilder, ReactiveFormsModule, Validators } <span class="t-kw">from</span> <span class="t-str">'@angular/forms'</span>;
+
+<span class="t-deco">@Component</span>({
+  selector: <span class="t-str">'app-alta-cliente'</span>,
+  imports: [ReactiveFormsModule],
+  templateUrl: <span class="t-str">'./alta-cliente.html'</span>,
+})
+<span class="t-kw">export</span> <span class="t-kw">class</span> AltaCliente {
+  <span class="t-kw">private</span> fb = <span class="t-fn">inject</span>(FormBuilder);
+
+  formulario = <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({
+    nombre: [<span class="t-str">''</span>, Validators.required],
+    telefonos: <span class="t-kw">this</span>.fb.<span class="t-fn">array</span>([<span class="t-kw">this</span>.fb.<span class="t-fn">control</span>(<span class="t-str">''</span>)]),
+  });
+
+  <span class="t-kw">get</span> <span class="t-fn">telefonos</span>(): FormArray {
+    <span class="t-kw">return</span> <span class="t-kw">this</span>.formulario.<span class="t-kw">get</span>(<span class="t-str">'telefonos'</span>) <span class="t-kw">as</span> FormArray;
+  }
+
+  <span class="t-fn">anadirTelefono</span>(): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.telefonos.<span class="t-fn">push</span>(<span class="t-kw">this</span>.fb.<span class="t-fn">control</span>(<span class="t-str">''</span>));
+  }
+
+  <span class="t-fn">quitarTelefono</span>(indice: <span class="t-kw">number</span>): <span class="t-kw">void</span> {
+    <span class="t-kw">this</span>.telefonos.<span class="t-fn">removeAt</span>(indice);
+  }
+
+  <span class="t-fn">guardar</span>(): <span class="t-kw">void</span> {
+    console.<span class="t-fn">log</span>(<span class="t-kw">this</span>.formulario.value);
+  }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;form</span> <span class="t-bind">[formGroup]</span>=<span class="t-str">"formulario"</span> <span class="t-bind">(ngSubmit)</span>=<span class="t-str">"guardar()"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"nombre"</span> placeholder=<span class="t-str">"Nombre"</span><span class="t-tag">&gt;</span>
+
+  <span class="t-tag">&lt;div</span> formArrayName=<span class="t-str">"telefonos"</span><span class="t-tag">&gt;</span>
+    <span class="t-deco">@for</span> (control <span class="t-kw">of</span> telefonos.controls; track $index; <span class="t-kw">let</span> i = $index) {
+      <span class="t-tag">&lt;input</span> <span class="t-bind">[formControlName]</span>=<span class="t-str">"i"</span> placeholder=<span class="t-str">"Teléfono"</span><span class="t-tag">&gt;</span>
+      <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"button"</span> <span class="t-bind">(click)</span>=<span class="t-str">"quitarTelefono(i)"</span><span class="t-tag">&gt;</span>Quitar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+    }
+  <span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"button"</span> <span class="t-bind">(click)</span>=<span class="t-str">"anadirTelefono()"</span><span class="t-tag">&gt;</span>Añadir teléfono<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+
+  <span class="t-tag">&lt;button</span> <span class="t-kw">type</span>=<span class="t-str">"submit"</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/button</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span>
+
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Teléfonos: <span class="t-interp">{{</span> telefonos.length <span class="t-interp">}}</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p><code>[formControlName]="i"</code> lleva corchetes porque <code>i</code> es una variable. El getter evita repetir <code>as FormArray</code>.</p>
+<p class="ojo"><strong>Ojo</strong>los botones de añadir y quitar llevan <code>type="button"</code>. Si no, envían el formulario.</p>
+</article>
+<article class="receta" id="b5--formarray-grupos">
+<h2><a href="#b5--formarray-grupos"><code>FormArray</code> de grupos (varios campos por elemento)</a></h2>
+<figure class="code"><figcaption><span class="file">alta-cliente.ts</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>formulario = <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({
+  telefonos: <span class="t-kw">this</span>.fb.<span class="t-fn">array</span>([
+    <span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({ tipo: [<span class="t-str">''</span>], numero: [<span class="t-str">''</span>] }),
+  ]),
+});
+
+<span class="t-fn">anadirTelefono</span>(): <span class="t-kw">void</span> {
+  <span class="t-kw">this</span>.telefonos.<span class="t-fn">push</span>(<span class="t-kw">this</span>.fb.<span class="t-fn">group</span>({ tipo: [<span class="t-str">''</span>], numero: [<span class="t-str">''</span>] }));
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">alta-cliente.html</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;div</span> formArrayName=<span class="t-str">"telefonos"</span><span class="t-tag">&gt;</span>
+  <span class="t-deco">@for</span> (grupo <span class="t-kw">of</span> telefonos.controls; track $index; <span class="t-kw">let</span> i = $index) {
+    <span class="t-tag">&lt;div</span> <span class="t-bind">[formGroupName]</span>=<span class="t-str">"i"</span><span class="t-tag">&gt;</span>
+      <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"tipo"</span> placeholder=<span class="t-str">"Tipo"</span><span class="t-tag">&gt;</span>
+      <span class="t-tag">&lt;input</span> formControlName=<span class="t-str">"numero"</span> placeholder=<span class="t-str">"Número"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+  }
+<span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span></code></pre></figure>
+</article>
+<article class="receta" id="b5--comparar-forms">
+<h2><a href="#b5--comparar-forms">Template-driven o reactivo</a></h2>
+<div class="table"><table><thead><tr><th></th><th>Template-driven</th><th>Reactivo</th></tr></thead><tbody>
+<tr><td data-label="">La estructura está en</td><td data-label="Template-driven">La plantilla (<code>ngModel</code>)</td><td data-label="Reactivo">La clase (<code>FormGroup</code>)</td></tr>
+<tr><td data-label="">Módulo en <code>imports</code></td><td data-label="Template-driven"><code>FormsModule</code></td><td data-label="Reactivo"><code>ReactiveFormsModule</code></td></tr>
+<tr><td data-label="">En el <code>&lt;form&gt;</code></td><td data-label="Template-driven"><code>#f="ngForm"</code></td><td data-label="Reactivo"><code>[formGroup]="formulario"</code></td></tr>
+<tr><td data-label="">En cada campo</td><td data-label="Template-driven"><code>name</code> + <code>[(ngModel)]</code></td><td data-label="Reactivo"><code>formControlName</code></td></tr>
+<tr><td data-label="">Validadores</td><td data-label="Template-driven">Atributos: <code>required</code>, <code>email</code></td><td data-label="Reactivo"><code>Validators.required</code>, <code>Validators.email</code></td></tr>
+<tr><td data-label="">Para</td><td data-label="Template-driven">Formularios sencillos</td><td data-label="Reactivo">Formularios complejos (el resto del curso)</td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b4">← Rutas</a><a href="#chuletas">Chuletas →</a></nav>
+</section>
+<section class="tab" id="chuletas" data-tab="chuletas" hidden>
+<h1>Chuletas</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#chuletas--comandos">Comandos</a><a href="#chuletas--imports">Qué va en <code>imports</code> del componente</a><a href="#chuletas--donde">Dónde va cada cosa</a><a href="#chuletas--errores">Errores típicos</a></nav>
+<article class="receta" id="chuletas--comandos">
+<h2><a href="#chuletas--comandos">Comandos</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Comando</th></tr></thead><tbody>
+<tr><td data-label="Quiero">Proyecto nuevo</td><td data-label="Comando"><code>ng new nombre</code></td></tr>
+<tr><td data-label="Quiero">Arrancar en local</td><td data-label="Comando"><code>ng serve</code></td></tr>
+<tr><td data-label="Quiero">Comprobar que compila</td><td data-label="Comando"><code>ng build</code></td></tr>
+<tr><td data-label="Quiero">Componente</td><td data-label="Comando"><code>ng g c nombre</code></td></tr>
+<tr><td data-label="Quiero">Servicio</td><td data-label="Comando"><code>ng g s nombre</code></td></tr>
+<tr><td data-label="Quiero">Pipe</td><td data-label="Comando"><code>ng g p nombre</code></td></tr>
+<tr><td data-label="Quiero">Directiva</td><td data-label="Comando"><code>ng g d nombre</code></td></tr>
+<tr><td data-label="Quiero">Guard</td><td data-label="Comando"><code>ng g g nombre</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="chuletas--imports">
+<h2><a href="#chuletas--imports">Qué va en <code>imports</code> del componente</a></h2>
+<div class="table"><table><thead><tr><th>Si en la plantilla usas</th><th>En <code>imports</code> pones</th><th>Se importa desde</th></tr></thead><tbody>
+<tr><td data-label="Si en la plantilla usas"><code>@if</code>, <code>@for</code>, <code>@switch</code></td><td data-label="En imports pones">nada</td><td data-label="Se importa desde">—</td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>[(ngModel)]</code>, <code>ngForm</code></td><td data-label="En imports pones"><code>FormsModule</code></td><td data-label="Se importa desde"><code>@angular/forms</code></td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>[formGroup]</code>, <code>formControlName</code></td><td data-label="En imports pones"><code>ReactiveFormsModule</code></td><td data-label="Se importa desde"><code>@angular/forms</code></td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>&lt;router-outlet /&gt;</code></td><td data-label="En imports pones"><code>RouterOutlet</code></td><td data-label="Se importa desde"><code>@angular/router</code></td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>routerLink</code></td><td data-label="En imports pones"><code>RouterLink</code></td><td data-label="Se importa desde"><code>@angular/router</code></td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>routerLinkActive</code></td><td data-label="En imports pones"><code>RouterLinkActive</code></td><td data-label="Se importa desde"><code>@angular/router</code></td></tr>
+<tr><td data-label="Si en la plantilla usas"><code>[ngClass]</code> / <code>[ngStyle]</code></td><td data-label="En imports pones"><code>NgClass</code> / <code>NgStyle</code></td><td data-label="Se importa desde"><code>@angular/common</code></td></tr>
+<tr><td data-label="Si en la plantilla usas">Pipes <code>currency</code>, <code>date</code>…</td><td data-label="En imports pones"><code>CurrencyPipe</code>, <code>DatePipe</code>…</td><td data-label="Se importa desde"><code>@angular/common</code></td></tr>
+<tr><td data-label="Si en la plantilla usas">Tu componente, directiva o pipe</td><td data-label="En imports pones">Su clase</td><td data-label="Se importa desde"><code>'./su-archivo'</code></td></tr>
+</tbody></table></div>
+<p>No van en <code>imports</code>, se piden con <code>inject()</code>: tus servicios, <code>Router</code>, <code>ActivatedRoute</code>, <code>FormBuilder</code>.</p>
+</article>
+<article class="receta" id="chuletas--donde">
+<h2><a href="#chuletas--donde">Dónde va cada cosa</a></h2>
+<div class="table"><table><thead><tr><th>Quiero</th><th>Archivo</th></tr></thead><tbody>
+<tr><td data-label="Quiero">Datos y métodos de una pantalla</td><td data-label="Archivo"><code>nombre.ts</code> del componente</td></tr>
+<tr><td data-label="Quiero">Lo que se ve</td><td data-label="Archivo"><code>nombre.html</code> del componente</td></tr>
+<tr><td data-label="Quiero">Rutas, guards en rutas, lazy loading</td><td data-label="Archivo"><code>app.routes.ts</code></td></tr>
+<tr><td data-label="Quiero"><code>provideRouter</code>, configuración global</td><td data-label="Archivo"><code>app.config.ts</code></td></tr>
+<tr><td data-label="Quiero">Menú y <code>&lt;router-outlet /&gt;</code> principal</td><td data-label="Archivo"><code>app.html</code></td></tr>
+<tr><td data-label="Quiero">Datos compartidos entre pantallas</td><td data-label="Archivo">Un servicio <code>nombre-service.ts</code></td></tr>
+<tr><td data-label="Quiero">Un guard</td><td data-label="Archivo"><code>nombre-guard.ts</code></td></tr>
+<tr><td data-label="Quiero">Un validador propio</td><td data-label="Archivo">Un archivo <code>.ts</code> con la función</td></tr>
+</tbody></table></div>
+</article>
+<article class="receta" id="chuletas--errores">
+<h2><a href="#chuletas--errores">Errores típicos</a></h2>
+<div class="table"><table><thead><tr><th>Error</th><th>Causa</th></tr></thead><tbody>
+<tr><td data-label="Error"><code>'app-x' is not a known element</code></td><td data-label="Causa">Falta el componente en <code>imports</code> del padre</td></tr>
+<tr><td data-label="Error"><code>No pipe found with name 'x'</code></td><td data-label="Causa">Falta el pipe en <code>imports</code></td></tr>
+<tr><td data-label="Error"><code>Can't bind to 'ngModel'</code></td><td data-label="Causa">Falta <code>FormsModule</code></td></tr>
+<tr><td data-label="Error"><code>Can't bind to 'formGroup'</code></td><td data-label="Causa">Falta <code>ReactiveFormsModule</code></td></tr>
+<tr><td data-label="Error"><code>Unterminated regular expression</code> en un <code>[routerLink]</code></td><td data-label="Causa">Falta poner el texto entre comillas: <code>['/planeta', id]</code></td></tr>
+<tr><td data-label="Error">Un input con <code>ngModel</code> dentro de <code>&lt;form&gt;</code> da error</td><td data-label="Causa">Le falta <code>name</code></td></tr>
+<tr><td data-label="Error">Un parámetro de ruta no encuentra nada</td><td data-label="Causa">Falta <code>Number()</code>: llega como texto</td></tr>
+<tr><td data-label="Error"><code>will not be lazy loaded because it is also imported statically</code></td><td data-label="Causa">Sobra el <code>import</code> de arriba en <code>app.routes.ts</code></td></tr>
+<tr><td data-label="Error">NG2028 en un <code>@Service()</code></td><td data-label="Causa">Usas el constructor: cambia a <code>inject()</code></td></tr>
+</tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b5">← Formularios</a><a href="#problemas">Problemas →</a></nav>
+</section>
+<section class="tab" id="problemas" data-tab="problemas" hidden>
+<h1>Problemas</h1>
+
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#problemas--como">Cómo usarlo</a><a href="#problemas--p1">Bloque 1</a><a href="#problemas--p2">Bloque 2</a><a href="#problemas--p3">Bloque 3</a><a href="#problemas--p4">Bloque 4</a><a href="#problemas--p5">Bloque 5</a></nav>
+<article class="receta" id="problemas--como">
+<h2><a href="#problemas--como">Cómo usarlo</a></h2>
+<p>Para practicar para el examen escrito. Lee el problema, escríbelo <strong>en papel sin mirar</strong> y luego compara con la receta enlazada. Lo que falles, repítelo otro día.</p>
+</article>
+<article class="receta" id="problemas--p1">
+<h2><a href="#problemas--p1">Bloque 1</a></h2>
+<ul class="items"><li><div>Crea un componente <code>tarjeta-producto</code> y píntalo dos veces dentro de <code>app.html</code>.<span class="ver">Receta: <a href="#b1--usar-componente">Usar un componente dentro de otro</a></span></div></li><li><div>Un componente con <code>nombre</code>, <code>agotado</code> y <code>cantidad</code>: muestra el nombre, deshabilita un botón si está agotado, llama a <code>comprar()</code> al pulsarlo y enlaza un input a <code>cantidad</code> en las dos direcciones.<span class="ver">Receta: <a href="#b1--cuatro-bindings">Las cuatro formas de binding</a></span></div></li><li><div>Sin <code>ngModel</code>: guarda en <code>texto</code> lo que se escribe en un input y muéstralo debajo.<span class="ver">Receta: <a href="#b1--event">Leer lo que escribe el usuario</a></span></div></li><li><div>Un cronómetro que empiece al crearse el componente y se pare al quitarlo.<span class="ver">Receta: <a href="#b1--ondestroy">ngOnDestroy</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p2">
+<h2><a href="#problemas--p2">Bloque 2</a></h2>
+<ul class="items"><li><div>Pinta una lista de tareas con un mensaje si está vacía y numera cada una.<span class="ver">Receta: <a href="#b2--for">@for</a></span></div></li><li><div>Muestra un texto distinto según <code>estado</code> sea <code>'pendiente'</code>, <code>'enviado'</code> u otro.<span class="ver">Receta: <a href="#b2--switch">@switch</a></span></div></li><li><div>Pon la clase <code>agotado</code> si <code>stock === 0</code> y la clase <code>oferta</code> si <code>enOferta</code>.<span class="ver">Receta: <a href="#b2--ngclass">ngClass</a></span></div></li><li><div>Directiva <code>appResaltado</code> que cambie el fondo al pasar el ratón, con el color pasado desde fuera.<span class="ver">Receta: <a href="#b2--directiva">Crear una directiva propia</a></span></div></li><li><div>Muestra un precio en euros y una fecha como <code>21/11/2026</code>.<span class="ver">Receta: <a href="#b2--pipes">Pipes integrados</a></span></div></li><li><div>Pipe <code>truncar</code> que recorte un texto a N caracteres (50 por defecto) y añada <code>...</code>.<span class="ver">Receta: <a href="#b2--pipe-propio">Crear un pipe propio</a></span></div></li><li><div>El padre pasa nombre y precio a una tarjeta; la tarjeta tiene un botón «Añadir» que avisa al padre con el nombre.<span class="ver">Receta: <a href="#b2--input">@Input</a> y <a href="#b2--output">@Output</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p3">
+<h2><a href="#problemas--p3">Bloque 3</a></h2>
+<ul class="items"><li><div>Crea un <code>CarritoService</code> con una lista, un método para añadir y un total. Muestra el total en <code>app.html</code>.<span class="ver">Receta: <a href="#b3--servicio">Crear un servicio</a> y <a href="#b3--usar-servicio">usarlo</a></span></div></li><li><div>Dos componentes hermanos: uno añade tareas y el otro las lista.<span class="ver">Receta: <a href="#b3--compartir">Compartir datos entre hermanos</a></span></div></li><li><div>Explica qué pasa si pones el servicio en <code>providers</code> de cada componente.<span class="ver">Receta: <a href="#b3--providers">Una instancia propia</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p4">
+<h2><a href="#problemas--p4">Bloque 4</a></h2>
+<ul class="items"><li><div>App con Inicio, Catálogo, un menú con el enlace activo resaltado y una página 404.<span class="ver">Receta: <a href="#b4--rutas">Definir las rutas</a> y <a href="#b4--outlet">menú</a></span></div></li><li><div>Lista de productos que enlaza a <code>/producto/:id</code>; el detalle lee el id y busca el producto.<span class="ver">Receta: <a href="#b4--parametro">Ruta con parámetro</a> y <a href="#b4--leer-parametro">leerlo</a></span></div></li><li><div>Dentro de <code>/cuenta</code>, dos pestañas: <code>/cuenta/perfil</code> y <code>/cuenta/pedidos</code>.<span class="ver">Receta: <a href="#b4--hijas">Rutas hijas</a></span></div></li><li><div>Al pulsar «Guardar», vuelve al catálogo desde código.<span class="ver">Receta: <a href="#b4--navigate">Navegar desde código</a></span></div></li><li><div>Solo se entra en <code>/cuenta</code> con sesión iniciada; si no, a <code>/login</code>.<span class="ver">Receta: <a href="#b4--guard">Guard</a></span></div></li><li><div>Haz que <code>/admin</code> se descargue solo al visitarla.<span class="ver">Receta: <a href="#b4--lazy">Lazy loading</a></span></div></li></ul>
+</article>
+<article class="receta" id="problemas--p5">
+<h2><a href="#problemas--p5">Bloque 5</a></h2>
+<ul class="items"><li><div>Formulario de contacto con nombre, email y mensaje (template-driven) que muestre los valores al enviar.<span class="ver">Receta: <a href="#b5--template">Template-driven</a></span></div></li><li><div>Al anterior: nombre obligatorio y mínimo 3, email válido, botón deshabilitado y mensajes del email solo si se ha tocado.<span class="ver">Receta: <a href="#b5--validar-template">Validar</a> y <a href="#b5--errores-template">mensajes</a></span></div></li><li><div>El mismo formulario, reactivo con <code>FormBuilder</code>.<span class="ver">Receta: <a href="#b5--formbuilder">FormBuilder</a></span></div></li><li><div>Validador <code>passwordSeguraValidator()</code>: mínimo 8 caracteres, una mayúscula y un número; error <code>{ passwordInsegura: true }</code>.<span class="ver">Receta: <a href="#b5--validador-propio">Validador personalizado</a></span></div></li><li><div>Perfil con nombre obligatorio y una lista de habilidades: botones para añadir y quitar, y el total fuera del formulario.<span class="ver">Receta: <a href="#b5--formarray">FormArray</a></span></div></li></ul>
+</article>
+<nav class="pasar"><a href="#chuletas">← Chuletas</a></nav>
+</section>
+</main>
+<script>
+// Pestañas: #b2 abre el bloque 2; #b2--pipe-propio abre el bloque 2 y baja a esa receta
+const tabsIds = ["b1","b2","b3","b4","b5","chuletas","problemas"];
+function mostrar(destinoHash) {
+  const hash = destinoHash ?? decodeURIComponent(location.hash.slice(1));
+  let id = hash.split('--')[0];
+  if (!tabsIds.includes(id)) { try { id = localStorage.getItem('recetario-pestana'); } catch (e) {} }
+  if (!tabsIds.includes(id)) id = tabsIds[0];
+  document.querySelectorAll('section.tab').forEach(s => s.hidden = s.id !== id);
+  document.querySelectorAll('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === id));
+  document.querySelector('.tabs a.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  try { localStorage.setItem('recetario-pestana', id); } catch (e) {}
+  const destino = hash.includes('--') && document.getElementById(hash);
+  if (destino) destino.scrollIntoView(); else scrollTo(0, 0);
+}
+addEventListener('hashchange', () => mostrar());
+// Los enlaces internos cambian de pestaña sin depender de la URL (funciona también en visores)
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  e.preventDefault();
+  const h = a.getAttribute('href').slice(1);
+  mostrar(h);
+  try { history.pushState(null, '', '#' + h); } catch (err) {}
+});
+addEventListener('popstate', () => mostrar());
+mostrar();
+
+// Modo claro / oscuro (se recuerda; no depende del sistema)
+const SOL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const LUNA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const btn = document.getElementById('theme');
+function pintarBoton() {
+  const oscuro = document.documentElement.dataset.theme === 'dark';
+  btn.innerHTML = oscuro ? SOL + 'Modo claro' : LUNA + 'Modo oscuro';
+}
+btn.addEventListener('click', () => {
+  const nuevo = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nuevo;
+  try { localStorage.setItem('recetario-tema', nuevo); } catch (e) {}
+  pintarBoton();
+});
+pintarBoton();
+
+// Botón copiar de cada bloque de código
+document.querySelectorAll('figure.code').forEach(f => {
+  const b = f.querySelector('.copy');
+  b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(f.querySelector('pre').innerText); b.textContent = 'Copiado'; }
+    catch (e) { b.textContent = 'No se pudo'; }
+    setTimeout(() => b.textContent = 'Copiar', 1400);
+  });
+});
+</script>
+</body>
+</html>
