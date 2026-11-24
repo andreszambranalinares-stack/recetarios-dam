@@ -16,6 +16,7 @@ $recetarios = [ordered]@{
     'recetario-pmdm.html'  = "$dam\Programacion Multimedia\Recetario\recetario-pmdm.html"
     'recetario-psp.html'   = "$dam\Programacion de Servicios y Procesos\Recetario\recetario-psp.html"
     'recetario-deint.html' = "$dam\Desarrollo de Interfaces\Recetario\recetario-deint.html"
+    'recetario-python.html' = "$dam\Sistemas de Gestion Empresarial\Recetario\recetario-python.html"
 }
 
 $git = 'C:\Program Files\Git\cmd\git.exe'
