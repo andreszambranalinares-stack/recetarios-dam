@@ -34,6 +34,9 @@ a { color: var(--link); text-underline-offset: 2px; }
 .sub { color: var(--soft); font-size: .85rem; }
 #theme { margin-left: auto; display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .85rem;
   color: var(--text); background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+.home { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; color: var(--text); text-decoration: none;
+  background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; white-space: nowrap; }
+.home:hover { background: var(--chip-hover); }
 #theme:hover { background: var(--chip-hover); }
 #theme svg { width: 16px; height: 16px; }
 .tabs { display: flex; gap: .25rem; overflow-x: auto; scrollbar-width: none; }
@@ -104,6 +107,7 @@ ul.items li:first-child { border-top: 0; }
 .pasar a { text-decoration: none; font-weight: 600; }
 
 @media (max-width: 640px) {
+  .home span { display: none; }
   body { font-size: 16px; }
   html { scroll-padding-top: 7rem; }
   .sub { display: none; }
@@ -134,6 +138,7 @@ ul.items li:first-child { border-top: 0; }
 <body>
 <header class="bar">
 <div class="bar-in">
+<a class="home" href="./" aria-label="Volver al menú de recetarios">&larr;<span> Recetarios</span></a>
 <a class="brand" href="#b1">Recetario .NET MAUI</a><span class="sub">DEINT, práctico lun 30/11 · teórico mar 1/12</span>
 <button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
 </div>

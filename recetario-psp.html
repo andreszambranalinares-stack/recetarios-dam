@@ -35,6 +35,9 @@ a { color: var(--link); text-underline-offset: 2px; }
 .sub { color: var(--soft); font-size: .85rem; }
 #theme { margin-left: auto; display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .85rem;
   color: var(--text); background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+.home { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; color: var(--text); text-decoration: none;
+  background: var(--chip); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; white-space: nowrap; }
+.home:hover { background: var(--chip-hover); }
 #theme:hover { background: var(--chip-hover); }
 #theme svg { width: 16px; height: 16px; }
 .tabs { display: flex; gap: .25rem; overflow-x: auto; scrollbar-width: none; }
@@ -109,6 +112,7 @@ ol.pasos li { margin: .25rem 0; }
 .pasar a { text-decoration: none; font-weight: 600; }
 
 @media (max-width: 640px) {
+  .home span { display: none; }
   body { font-size: 16px; }
   html { scroll-padding-top: 7rem; }
   .sub { display: none; }
@@ -138,6 +142,7 @@ ol.pasos li { margin: .25rem 0; }
 <body>
 <header class="bar">
 <div class="bar-in">
+<a class="home" href="./" aria-label="Volver al menú de recetarios">&larr;<span> Recetarios</span></a>
 <a class="brand" href="#b0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5l-8.5-4.8V7.3z"/><path d="M9 15V9l6 6V9"/></svg>Recetario Node</a><span class="sub">PSP · Node.js, Express, Sequelize y Mongoose · sesiones 0.1 a 4.6</span>
 <button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
 </div>
