@@ -142,7 +142,7 @@ ul.items li:first-child { border-top: 0; }
 <a class="brand" href="#b1">Recetario .NET MAUI</a><span class="sub">DEINT, práctico lun 30/11 · teórico mar 1/12</span>
 <button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
 </div>
-<nav class="tabs" aria-label="Bloques"><a href="#b1" data-tab="b1"><b>1</b>Proyecto</a><a href="#b2" data-tab="b2"><b>2</b>Layouts y controles</a><a href="#ev" data-tab="ev">Eventos</a><a href="#b3" data-tab="b3"><b>3</b>Data binding</a><a href="#b4" data-tab="b4"><b>4</b>MVVM y listas</a><a href="#b5" data-tab="b5"><b>5</b>Navegación</a><a href="#b6" data-tab="b6"><b>6</b>Estilos</a><a href="#chuletas" data-tab="chuletas">Chuletas</a><a href="#problemas" data-tab="problemas">Problemas</a></nav>
+<nav class="tabs" aria-label="Bloques"><a href="#b1" data-tab="b1"><b>1</b>Proyecto</a><a href="#b2" data-tab="b2"><b>2</b>Layouts y controles</a><a href="#ev" data-tab="ev">Eventos</a><a href="#b3" data-tab="b3"><b>3</b>Data binding</a><a href="#b4" data-tab="b4"><b>4</b>MVVM y listas</a><a href="#b5" data-tab="b5"><b>5</b>Navegación</a><a href="#b6" data-tab="b6"><b>6</b>Estilos</a><a href="#adopta" data-tab="adopta">Adopta (examen)</a><a href="#chuletas" data-tab="chuletas">Chuletas</a><a href="#problemas" data-tab="problemas">Problemas</a></nav>
 </header>
 <main>
 <section class="tab" id="b1" data-tab="b1" hidden>
@@ -1754,7 +1754,240 @@ Application.Current!.Resources.MergedDictionaries.<span class="t-fn">Add</span>(
 <span class="t-kw">private</span> <span class="t-kw">void</span> <span class="t-fn">AC_Clicked</span>(<span class="t-kw">object</span> sender, EventArgs e) =&gt; lblPantalla.Text = <span class="t-str">"0"</span>;</code></pre></figure>
 <p>Los botones, en un <code>Grid</code> con <a href="#b6--styleclass">clases de estilo</a>; el tema, con <a href="#b6--tema">AppThemeBinding</a> o con <a href="#b6--tema-boton">un botón</a>.</p>
 </article>
-<nav class="pasar"><a href="#b5">← Navegación</a><a href="#chuletas">Chuletas →</a></nav>
+<nav class="pasar"><a href="#b5">← Navegación</a><a href="#adopta">Adopta (examen) →</a></nav>
+</section>
+<section class="tab" id="adopta" data-tab="adopta" hidden>
+<p class="kicker">Ejercicio de clase 25/11 · examen de hace 2 años</p><h1>Adopta una mascota, pieza a pieza</h1>
+<nav class="indice" aria-label="Recetas de este bloque"><a href="#adopta--mapa">Qué pide y en qué orden hacerlo</a><a href="#adopta--model">1. Model con Fody</a><a href="#adopta--viewmodel">2. ViewModel: ObservableCollection y la mascota elegida</a><a href="#adopta--app">3. Arrancar con NavigationPage</a><a href="#adopta--principal-cs">4. Página principal: BindingContext y PushAsync</a><a href="#adopta--collectionview">5. La lista: CollectionView con selección</a><a href="#adopta--detalle-cs">6. Detalle: recibir el ViewModel, volver y DisplayAlertAsync</a><a href="#adopta--detalle-xaml">7. Detalle: bindings con punto</a><a href="#adopta--converter">8. Converter: de texto a bool</a><a href="#adopta--errores">Errores que tuve y su arreglo</a></nav>
+<article class="receta" id="adopta--mapa">
+<h2><a href="#adopta--mapa">Qué pide y en qué orden hacerlo</a></h2>
+<p>App de dos pantallas: una <strong>lista de mascotas</strong> (foto, nombre y raza) y, al tocar una, su <strong>detalle</strong> con los botones «Seguir mirando» (vuelve) y «Adoptar ahora» (aviso y la marca como adoptada). Junta casi todo lo que puede caer en el práctico. Orden recomendado, compilando en cada paso:</p>
+<div class="table"><table><thead><tr><th>Paso</th><th>Archivo</th><th>Qué va</th></tr></thead><tbody><tr><td data-label="Paso">1</td><td data-label="Archivo"><code>Mascota.cs</code></td><td data-label="Qué va">Model con Fody</td></tr><tr><td data-label="Paso">2</td><td data-label="Archivo"><code>MascotaViewModel.cs</code></td><td data-label="Qué va"><code>ObservableCollection</code> + mascota seleccionada</td></tr><tr><td data-label="Paso">3</td><td data-label="Archivo"><code>App.xaml.cs</code></td><td data-label="Qué va"><code>NavigationPage</code> al arrancar</td></tr><tr><td data-label="Paso">4</td><td data-label="Archivo"><code>MascotaViewPrincipal.xaml.cs</code></td><td data-label="Qué va">ViewModel + <code>BindingContext</code> + <code>PushAsync</code></td></tr><tr><td data-label="Paso">5</td><td data-label="Archivo"><code>MascotaViewPrincipal.xaml</code></td><td data-label="Qué va"><code>CollectionView</code> con <code>DataTemplate</code> y selección</td></tr><tr><td data-label="Paso">6</td><td data-label="Archivo"><code>MascotaDetallesView.xaml.cs</code></td><td data-label="Qué va">Recibe el ViewModel, <code>PopAsync</code>, <code>DisplayAlertAsync</code></td></tr><tr><td data-label="Paso">7</td><td data-label="Archivo"><code>MascotaDetallesView.xaml</code></td><td data-label="Qué va">Bindings con punto: <code>MascotaSeleccionada.Nombre</code></td></tr><tr><td data-label="Paso">8</td><td data-label="Archivo"><code>AdopcionABoolConverter.cs</code> + <code>App.xaml</code></td><td data-label="Qué va">Converter de texto a <code>bool</code></td></tr></tbody></table></div>
+<figure class="code"><figcaption><span class="file">Explorador de soluciones</span><button type="button" class="copy">Copiar</button></figcaption><pre><code>AdoptaProyecto/
+├── MVVM/
+│   ├── Model/        Mascota.cs
+│   ├── ViewModel/    MascotaViewModel.cs
+│   ├── View/         MascotaViewPrincipal.xaml(.cs), MascotaDetallesView.xaml(.cs)
+│   └── Converters/   AdopcionABoolConverter.cs
+├── Resources/Images/ perro1.jpg, perro2.jpg, perro4.jpg
+├── App.xaml          (converter registrado)
+└── App.xaml.cs       (NavigationPage)</code></pre></figure>
+</article>
+<article class="receta" id="adopta--model">
+<h2><a href="#adopta--model">1. Model con Fody</a></h2>
+<p>Solo datos. El atributo hace que cada propiedad avise cuando cambia (por eso, al adoptar, la vista se actualiza sola).</p>
+<figure class="code"><figcaption><span class="file">MVVM/Model/Mascota.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">using</span> PropertyChanged;
+
+<span class="t-kw">namespace</span> AdoptaProyecto.MVVM.Model
+{
+<span class="t-deco">    [AddINotifyPropertyChangedInterface]</span>
+    <span class="t-kw">public</span> <span class="t-kw">class</span> Mascota
+    {
+        <span class="t-kw">public</span> <span class="t-kw">string</span> Nombre { <span class="t-kw">get</span>; <span class="t-kw">set</span>; } = <span class="t-str">""</span>;
+        <span class="t-kw">public</span> <span class="t-kw">string</span> Raza { <span class="t-kw">get</span>; <span class="t-kw">set</span>; } = <span class="t-str">""</span>;
+        <span class="t-kw">public</span> <span class="t-kw">string</span> Adopcion { <span class="t-kw">get</span>; <span class="t-kw">set</span>; } = <span class="t-str">""</span>;     <span class="t-com">// "Adoptado" o "Disponible"</span>
+        <span class="t-kw">public</span> <span class="t-kw">string</span> Imagen { <span class="t-kw">get</span>; <span class="t-kw">set</span>; } = <span class="t-str">""</span>;       <span class="t-com">// nombre del archivo en Resources/Images</span>
+    }
+}</code></pre></figure>
+</article>
+<article class="receta" id="adopta--viewmodel">
+<h2><a href="#adopta--viewmodel">2. ViewModel: ObservableCollection y la mascota elegida</a></h2>
+<figure class="code"><figcaption><span class="file">MVVM/ViewModel/MascotaViewModel.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">using</span> AdoptaProyecto.MVVM.Model;
+<span class="t-kw">using</span> PropertyChanged;
+<span class="t-kw">using</span> System.Collections.ObjectModel;
+
+<span class="t-kw">namespace</span> AdoptaProyecto.MVVM.ViewModel
+{
+<span class="t-deco">    [AddINotifyPropertyChangedInterface]</span>
+    <span class="t-kw">public</span> <span class="t-kw">class</span> MascotaViewModel
+    {
+        <span class="t-kw">public</span> ObservableCollection&lt;Mascota&gt; ColeccionMascotas { <span class="t-kw">get</span>; <span class="t-kw">set</span>; }
+        <span class="t-kw">public</span> Mascota? MascotaSeleccionada { <span class="t-kw">get</span>; <span class="t-kw">set</span>; }      <span class="t-com">// empieza en null</span>
+
+        <span class="t-kw">public</span> <span class="t-fn">MascotaViewModel</span>()
+        {
+            ColeccionMascotas = <span class="t-kw">new</span> ObservableCollection&lt;Mascota&gt;
+            {
+                <span class="t-kw">new</span> Mascota { Nombre = <span class="t-str">"Firulais"</span>, Raza = <span class="t-str">"Labrador"</span>, Adopcion = <span class="t-str">"Disponible"</span>, Imagen = <span class="t-str">"perro1.jpg"</span> },
+                <span class="t-kw">new</span> Mascota { Nombre = <span class="t-str">"Pelusa"</span>, Raza = <span class="t-str">"Persa"</span>, Adopcion = <span class="t-str">"Adoptado"</span>, Imagen = <span class="t-str">"perro2.jpg"</span> },
+                <span class="t-kw">new</span> Mascota { Nombre = <span class="t-str">"Max"</span>, Raza = <span class="t-str">"Beagle"</span>, Adopcion = <span class="t-str">"Disponible"</span>, Imagen = <span class="t-str">"perro4.jpg"</span> },
+                <span class="t-kw">new</span> Mascota { Nombre = <span class="t-str">"Luna"</span>, Raza = <span class="t-str">"Siamés"</span>, Adopcion = <span class="t-str">"Adoptado"</span> }
+            };
+        }
+    }
+}</code></pre></figure>
+<ul class="items"><li><div><code>ObservableCollection</code> avisa a la <code>CollectionView</code> cuando <strong>añades o quitas</strong> elementos; con <code>List</code> lo añadido después no aparece.<span class="ver">Receta: <a href="#b4--observable">ObservableCollection</a></span></div></li><li><div>Fody avisa cuando cambia <strong>una propiedad</strong> (<code>Adopcion</code> de una mascota). Son dos avisos distintos.</div></li></ul>
+<p class="ojo"><strong>Ojo</strong>No inicialices <code>MascotaSeleccionada = new Mascota()</code>: al cargar, el binding de <code>SelectedItem</code> se la pasa a la lista, salta <code>SelectionChanged</code> y la app <strong>arranca en el detalle</strong>.</p>
+</article>
+<article class="receta" id="adopta--app">
+<h2><a href="#adopta--app">3. Arrancar con NavigationPage</a></h2>
+<figure class="code"><figcaption><span class="file">App.xaml.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">protected</span> <span class="t-kw">override</span> Window <span class="t-fn">CreateWindow</span>(IActivationState? activationState)
+{
+    <span class="t-kw">return</span> <span class="t-kw">new</span> <span class="t-fn">Window</span>(<span class="t-kw">new</span> <span class="t-fn">NavigationPage</span>(<span class="t-kw">new</span> <span class="t-fn">MascotaViewPrincipal</span>()));
+}</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>La <code>NavigationPage</code> va <strong>solo aquí</strong>. No la metas otra vez en el <code>PushAsync</code> (<code>PushAsync(new NavigationPage(...))</code> está mal).</p>
+</article>
+<article class="receta" id="adopta--principal-cs">
+<h2><a href="#adopta--principal-cs">4. Página principal: BindingContext y PushAsync</a></h2>
+<figure class="code"><figcaption><span class="file">MVVM/View/MascotaViewPrincipal.xaml.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">using</span> AdoptaProyecto.MVVM.ViewModel;
+
+<span class="t-kw">namespace</span> AdoptaProyecto.MVVM.View;
+
+<span class="t-kw">public</span> <span class="t-kw">partial</span> <span class="t-kw">class</span> MascotaViewPrincipal : ContentPage
+{
+    <span class="t-kw">private</span> MascotaViewModel viewModel;              <span class="t-com">// campo: para usarlo en los eventos</span>
+
+    <span class="t-kw">public</span> <span class="t-fn">MascotaViewPrincipal</span>()
+    {
+        <span class="t-fn">InitializeComponent</span>();
+        viewModel = <span class="t-kw">new</span> <span class="t-fn">MascotaViewModel</span>();
+        BindingContext = viewModel;                  <span class="t-com">// sin esto la lista sale vacía</span>
+    }
+
+    <span class="t-kw">private</span> <span class="t-kw">void</span> <span class="t-fn">CollectionView_SelectionChanged</span>(<span class="t-kw">object</span> sender, SelectionChangedEventArgs e)
+    {
+        <span class="t-kw">if</span> (viewModel.MascotaSeleccionada == <span class="t-kw">null</span>) <span class="t-kw">return</span>;
+        Navigation.<span class="t-fn">PushAsync</span>(<span class="t-kw">new</span> <span class="t-fn">MascotaDetallesView</span>(viewModel));   <span class="t-com">// el MISMO ViewModel</span>
+    }
+}</code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>Si el constructor del detalle pide <code>(MascotaViewModel viewModel)</code>, <code>new MascotaDetallesView()</code> sin argumento <strong>no compila</strong> (CS7036).</p>
+</article>
+<article class="receta" id="adopta--collectionview">
+<h2><a href="#adopta--collectionview">5. La lista: CollectionView con selección</a></h2>
+<figure class="code"><figcaption><span class="file">MVVM/View/MascotaViewPrincipal.xaml</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;VerticalStackLayout</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;Label</span> Text=<span class="t-str">"Adopta a tu mascota"</span> HorizontalOptions=<span class="t-str">"Center"</span> <span class="t-tag">/&gt;</span>
+    <span class="t-tag">&lt;CollectionView</span> ItemsSource=<span class="t-bind">"{Binding ColeccionMascotas}"</span>
+                    SelectionMode=<span class="t-str">"Single"</span>
+                    SelectedItem=<span class="t-bind">"{Binding MascotaSeleccionada}"</span>
+                    SelectionChanged=<span class="t-str">"CollectionView_SelectionChanged"</span><span class="t-tag">&gt;</span>
+        <span class="t-tag">&lt;CollectionView.ItemTemplate</span><span class="t-tag">&gt;</span>
+            <span class="t-tag">&lt;DataTemplate</span><span class="t-tag">&gt;</span>
+                <span class="t-tag">&lt;Border</span> StrokeShape=<span class="t-str">"RoundRectangle 10"</span> Stroke=<span class="t-str">"Black"</span> StrokeThickness=<span class="t-str">"2"</span><span class="t-tag">&gt;</span>
+                    <span class="t-tag">&lt;VerticalStackLayout</span><span class="t-tag">&gt;</span>
+                        <span class="t-tag">&lt;Image</span> Source=<span class="t-bind">"{Binding Imagen}"</span> HeightRequest=<span class="t-str">"150"</span> <span class="t-tag">/&gt;</span>
+                        <span class="t-tag">&lt;Label</span> Text=<span class="t-bind">"{Binding Nombre}"</span> FontSize=<span class="t-str">"16"</span> <span class="t-tag">/&gt;</span>
+                        <span class="t-tag">&lt;Label</span> Text=<span class="t-bind">"{Binding Raza}"</span> FontSize=<span class="t-str">"16"</span> <span class="t-tag">/&gt;</span>
+                    <span class="t-tag">&lt;/VerticalStackLayout</span><span class="t-tag">&gt;</span>
+                <span class="t-tag">&lt;/Border</span><span class="t-tag">&gt;</span>
+            <span class="t-tag">&lt;/DataTemplate</span><span class="t-tag">&gt;</span>
+        <span class="t-tag">&lt;/CollectionView.ItemTemplate</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;/CollectionView</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/VerticalStackLayout</span><span class="t-tag">&gt;</span></code></pre></figure>
+<ul class="items"><li><div>Dentro del <code>DataTemplate</code> cada fila <strong>es una mascota</strong>: <code>{Binding Nombre}</code>. Fuera, la página <strong>es el ViewModel</strong>: <code>{Binding ColeccionMascotas}</code>.<span class="ver">Receta: <a href="#b4--binding-punto">Binding dentro de la plantilla</a></span></div></li></ul>
+<div class="table"><table><thead><tr><th>Propiedad</th><th>Qué hace</th></tr></thead><tbody><tr><td data-label="Propiedad"><code>ItemsSource</code></td><td data-label="Qué hace">La colección que se pinta (la del ViewModel)</td></tr><tr><td data-label="Propiedad"><code>ItemTemplate</code> + <code>DataTemplate</code></td><td data-label="Qué hace">El molde de cada fila; se repite por cada mascota</td></tr><tr><td data-label="Propiedad"><code>SelectionMode="Single"</code></td><td data-label="Qué hace">Permite tocar una fila (por defecto <code>None</code>: no se puede)</td></tr><tr><td data-label="Propiedad"><code>SelectedItem="{Binding MascotaSeleccionada}"</code></td><td data-label="Qué hace">Guarda la mascota tocada en el ViewModel (ya es TwoWay)</td></tr><tr><td data-label="Propiedad"><code>SelectionChanged</code></td><td data-label="Qué hace">Evento al cambiar la selección: aquí se navega</td></tr></tbody></table></div>
+<p class="ojo"><strong>Ojo</strong>No cierres con <code>&lt;CollectionView ... /&gt;</code> si dentro va el <code>ItemTemplate</code>: queda fuera y el XAML falla. Y un <code>Border</code>, igual que una <code>ContentPage</code>, admite <strong>un solo hijo</strong>.</p>
+</article>
+<article class="receta" id="adopta--detalle-cs">
+<h2><a href="#adopta--detalle-cs">6. Detalle: recibir el ViewModel, volver y DisplayAlertAsync</a></h2>
+<figure class="code"><figcaption><span class="file">MVVM/View/MascotaDetallesView.xaml.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">using</span> AdoptaProyecto.MVVM.ViewModel;
+
+<span class="t-kw">namespace</span> AdoptaProyecto.MVVM.View;
+
+<span class="t-kw">public</span> <span class="t-kw">partial</span> <span class="t-kw">class</span> MascotaDetallesView : ContentPage
+{
+    <span class="t-kw">private</span> MascotaViewModel viewModel;
+
+    <span class="t-kw">public</span> <span class="t-fn">MascotaDetallesView</span>(MascotaViewModel viewModel)
+    {
+        <span class="t-fn">InitializeComponent</span>();
+        <span class="t-kw">this</span>.viewModel = viewModel;      <span class="t-com">// campo = parámetro</span>
+        BindingContext = viewModel;      <span class="t-com">// usar el que llega, no crear uno nuevo</span>
+    }
+
+    <span class="t-kw">private</span> <span class="t-kw">async</span> <span class="t-kw">void</span> <span class="t-fn">Button_Clicked</span>(<span class="t-kw">object</span> sender, EventArgs e)
+    {
+        <span class="t-kw">await</span> Navigation.<span class="t-fn">PopAsync</span>();     <span class="t-com">// vuelve a la lista</span>
+    }
+
+    <span class="t-kw">private</span> <span class="t-kw">async</span> <span class="t-kw">void</span> <span class="t-fn">Button_Clicked2</span>(<span class="t-kw">object</span> sender, EventArgs e)
+    {
+        <span class="t-kw">if</span> (viewModel.MascotaSeleccionada!.Adopcion == <span class="t-str">"Adoptado"</span>)
+        {
+            <span class="t-kw">await</span> <span class="t-fn">DisplayAlertAsync</span>(<span class="t-str">"Adopción"</span>, <span class="t-str">"Esta mascota ya está adoptada"</span>, <span class="t-str">"Aceptar"</span>);
+            <span class="t-kw">return</span>;
+        }
+        viewModel.MascotaSeleccionada.Adopcion = <span class="t-str">"Adoptado"</span>;   <span class="t-com">// Fody avisa: la vista cambia sola</span>
+        <span class="t-kw">await</span> <span class="t-fn">DisplayAlertAsync</span>(<span class="t-str">"Adopción"</span>, <span class="t-str">"¡Gracias por adoptar a esta mascota!"</span>, <span class="t-str">"Aceptar"</span>);
+    }
+}</code></pre></figure>
+<ul class="items"><li><div><code>await DisplayAlertAsync("Título", "Mensaje", "OK");</code> aviso. <code>bool si = await DisplayAlertAsync("Título", "¿Seguro?", "Sí", "No");</code> pregunta. Siempre con <code>async</code> en el método y <code>await</code> delante.</div></li><li><div>Como las dos páginas comparten el mismo ViewModel, al volver con <code>PopAsync</code> la lista ya tiene la mascota como «Adoptado».<span class="ver">Receta: <a href="#b5--compartir-vm">Compartir el ViewModel</a></span></div></li></ul>
+</article>
+<article class="receta" id="adopta--detalle-xaml">
+<h2><a href="#adopta--detalle-xaml">7. Detalle: bindings con punto</a></h2>
+<figure class="code"><figcaption><span class="file">MVVM/View/MascotaDetallesView.xaml</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;VerticalStackLayout</span> Padding=<span class="t-str">"20"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;Border</span> StrokeShape=<span class="t-str">"RoundRectangle 10"</span> Stroke=<span class="t-str">"Black"</span> StrokeThickness=<span class="t-str">"2"</span> Padding=<span class="t-str">"10"</span><span class="t-tag">&gt;</span>
+        <span class="t-tag">&lt;VerticalStackLayout</span> Spacing=<span class="t-str">"8"</span><span class="t-tag">&gt;</span>
+            <span class="t-tag">&lt;Image</span> Source=<span class="t-bind">"{Binding MascotaSeleccionada.Imagen}"</span> HeightRequest=<span class="t-str">"150"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;Label</span> Text=<span class="t-bind">"{Binding MascotaSeleccionada.Nombre}"</span> FontSize=<span class="t-str">"20"</span> FontAttributes=<span class="t-str">"Bold"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;Label</span> Text=<span class="t-bind">"{Binding MascotaSeleccionada.Raza}"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;Label</span> Text=<span class="t-bind">"{Binding MascotaSeleccionada.Adopcion}"</span> <span class="t-tag">/&gt;</span>
+
+            <span class="t-tag">&lt;HorizontalStackLayout</span> Spacing=<span class="t-str">"5"</span><span class="t-tag">&gt;</span>
+                <span class="t-tag">&lt;CheckBox</span> IsChecked=<span class="t-bind">"{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}"</span> IsEnabled=<span class="t-str">"False"</span> <span class="t-tag">/&gt;</span>
+                <span class="t-tag">&lt;Label</span> Text=<span class="t-str">"Adoptado"</span> VerticalOptions=<span class="t-str">"Center"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;/HorizontalStackLayout</span><span class="t-tag">&gt;</span>
+            <span class="t-tag">&lt;Label</span> Text=<span class="t-str">"Esta mascota ya tiene familia"</span> TextColor=<span class="t-str">"Red"</span>
+                   IsVisible=<span class="t-bind">"{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}"</span> <span class="t-tag">/&gt;</span>
+
+            <span class="t-tag">&lt;HorizontalStackLayout</span> Spacing=<span class="t-str">"10"</span><span class="t-tag">&gt;</span>
+                <span class="t-tag">&lt;Button</span> Text=<span class="t-str">"Seguir mirando"</span> Clicked=<span class="t-str">"Button_Clicked"</span> <span class="t-tag">/&gt;</span>
+                <span class="t-tag">&lt;Button</span> Text=<span class="t-str">"Adoptar ahora"</span> Clicked=<span class="t-str">"Button_Clicked2"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;/HorizontalStackLayout</span><span class="t-tag">&gt;</span>
+        <span class="t-tag">&lt;/VerticalStackLayout</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;/Border</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/VerticalStackLayout</span><span class="t-tag">&gt;</span></code></pre></figure>
+<p class="ojo"><strong>Ojo</strong>Aquí el <code>BindingContext</code> es el <strong>ViewModel</strong>: <code>{Binding Nombre}</code> sale en blanco y <strong>no da error</strong>. Hay que poner <code>MascotaSeleccionada.Nombre</code>, con el nombre de la propiedad letra por letra.</p>
+</article>
+<article class="receta" id="adopta--converter">
+<h2><a href="#adopta--converter">8. Converter: de texto a bool</a></h2>
+<p>Un converter traduce el valor del ViewModel al tipo que pide el control. <code>Adopcion</code> es <code>string</code>, pero <code>IsChecked</code> e <code>IsVisible</code> quieren <code>bool</code>. Tres pasos: <strong>clase</strong>, <strong>recurso</strong>, <strong>uso</strong>.</p>
+<figure class="code"><figcaption><span class="file">MVVM/Converters/AdopcionABoolConverter.cs</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-kw">using</span> System.Globalization;
+
+<span class="t-kw">namespace</span> AdoptaProyecto.MVVM.Converters
+{
+    <span class="t-kw">public</span> <span class="t-kw">class</span> AdopcionABoolConverter : IValueConverter
+    {
+        <span class="t-com">// ViewModel -&gt; vista: string -&gt; bool</span>
+        <span class="t-kw">public</span> <span class="t-kw">object</span>? <span class="t-fn">Convert</span>(<span class="t-kw">object</span>? <span class="t-kw">value</span>, Type targetType, <span class="t-kw">object</span>? parameter, CultureInfo culture)
+        {
+            <span class="t-kw">string</span> texto = (<span class="t-kw">string</span>)<span class="t-kw">value</span>!;
+            <span class="t-kw">return</span> texto == <span class="t-str">"Adoptado"</span>;
+        }
+
+        <span class="t-com">// vista -&gt; ViewModel: bool -&gt; string (solo con binding TwoWay)</span>
+        <span class="t-kw">public</span> <span class="t-kw">object</span>? <span class="t-fn">ConvertBack</span>(<span class="t-kw">object</span>? <span class="t-kw">value</span>, Type targetType, <span class="t-kw">object</span>? parameter, CultureInfo culture)
+        {
+            <span class="t-kw">bool</span> adoptado = (<span class="t-kw">bool</span>)<span class="t-kw">value</span>!;
+            <span class="t-kw">if</span> (adoptado)
+                <span class="t-kw">return</span> <span class="t-str">"Adoptado"</span>;
+            <span class="t-kw">else</span>
+                <span class="t-kw">return</span> <span class="t-str">"Disponible"</span>;
+        }
+    }
+}</code></pre></figure>
+<figure class="code"><figcaption><span class="file">App.xaml</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;Application</span> xmlns=<span class="t-str">"http://schemas.microsoft.com/dotnet/2021/maui"</span>
+             xmlns:x=<span class="t-str">"http://schemas.microsoft.com/winfx/2009/xaml"</span>
+             xmlns:conv=<span class="t-str">"clr-namespace:AdoptaProyecto.MVVM.Converters"</span>
+             x:Class=<span class="t-str">"AdoptaProyecto.App"</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;Application.Resources</span><span class="t-tag">&gt;</span>
+        <span class="t-tag">&lt;ResourceDictionary</span><span class="t-tag">&gt;</span>
+            <span class="t-tag">&lt;ResourceDictionary.MergedDictionaries</span><span class="t-tag">&gt;</span>
+                <span class="t-tag">&lt;ResourceDictionary</span> Source=<span class="t-str">"Resources/Styles/Colors.xaml"</span> <span class="t-tag">/&gt;</span>
+                <span class="t-tag">&lt;ResourceDictionary</span> Source=<span class="t-str">"Resources/Styles/Styles.xaml"</span> <span class="t-tag">/&gt;</span>
+            <span class="t-tag">&lt;/ResourceDictionary.MergedDictionaries</span><span class="t-tag">&gt;</span>
+
+            <span class="t-tag">&lt;conv:AdopcionABoolConverter</span> x:Key=<span class="t-str">"AdopcionABool"</span> <span class="t-tag">/&gt;</span>
+        <span class="t-tag">&lt;/ResourceDictionary</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;/Application.Resources</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/Application</span><span class="t-tag">&gt;</span></code></pre></figure>
+<figure class="code"><figcaption><span class="file">Uso en cualquier página</span><button type="button" class="copy">Copiar</button></figcaption><pre><code><span class="t-tag">&lt;CheckBox</span> IsChecked=<span class="t-bind">"{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}"</span> <span class="t-tag">/&gt;</span></code></pre></figure>
+<ul class="items"><li><div>En el binding va la <strong>clave</strong> del recurso (<code>AdopcionABool</code>), no el nombre de la clase.</div></li><li><div>Si no lo registras: error «StaticResource not found for key». El <code>xmlns:conv</code> apunta al <strong>namespace</strong> de la clase.</div></li><li><div>Solo en una página: ponlo en <code>&lt;ContentPage.Resources&gt;</code> en lugar de en <code>App.xaml</code>.</div></li></ul>
+</article>
+<article class="receta" id="adopta--errores">
+<h2><a href="#adopta--errores">Errores que tuve y su arreglo</a></h2>
+<div class="table"><table><thead><tr><th>Síntoma</th><th>Causa</th><th>Arreglo</th></tr></thead><tbody><tr><td data-label="Síntoma">No compila (CS7036)</td><td data-label="Causa"><code>new MascotaDetallesView()</code> sin el ViewModel</td><td data-label="Arreglo"><code>new MascotaDetallesView(viewModel)</code></td></tr><tr><td data-label="Síntoma">Lista vacía</td><td data-label="Causa">Sin <code>BindingContext</code> en la página principal</td><td data-label="Arreglo"><code>BindingContext = viewModel;</code> tras <code>InitializeComponent()</code></td></tr><tr><td data-label="Síntoma"><code>PushAsync</code> no navega</td><td data-label="Causa">Sin <code>NavigationPage</code> en <code>App.xaml.cs</code></td><td data-label="Arreglo"><code>new Window(new NavigationPage(new MascotaViewPrincipal()))</code></td></tr><tr><td data-label="Síntoma">Error de XAML en la lista</td><td data-label="Causa"><code>&lt;CollectionView ... /&gt;</code> cerrada antes del <code>ItemTemplate</code></td><td data-label="Arreglo">Abrir con <code>&gt;</code> y cerrar con <code>&lt;/CollectionView&gt;</code></td></tr><tr><td data-label="Síntoma">Solo se ve un control</td><td data-label="Causa"><code>Border</code> o <code>ContentPage</code> con varios hijos</td><td data-label="Arreglo">Meterlos en un <code>VerticalStackLayout</code></td></tr><tr><td data-label="Síntoma">Detalle en blanco</td><td data-label="Causa"><code>{Binding Nombre}</code> en vez de <code>{Binding MascotaSeleccionada.Nombre}</code>, o nombre mal escrito</td><td data-label="Arreglo">Ruta con punto y nombre exacto</td></tr><tr><td data-label="Síntoma">Arranca en el detalle</td><td data-label="Causa"><code>MascotaSeleccionada = new Mascota()</code></td><td data-label="Arreglo">Que empiece en <code>null</code> y <code>if (... == null) return;</code></td></tr><tr><td data-label="Síntoma"><code>SelectedItem</code> raro</td><td data-label="Causa"><code>SelectedItem="{Binding ColeccionMascotas}"</code> (la lista entera)</td><td data-label="Arreglo"><code>SelectedItem="{Binding MascotaSeleccionada}"</code></td></tr><tr><td data-label="Síntoma">Imagen en blanco</td><td data-label="Causa"><code>perro3.jpg</code> no existía</td><td data-label="Arreglo">Mismo nombre y extensión que el archivo de <code>Resources/Images</code></td></tr></tbody></table></div>
+</article>
+<nav class="pasar"><a href="#b6">← Estilos</a><a href="#chuletas">Chuletas →</a></nav>
 </section>
 <section class="tab" id="chuletas" data-tab="chuletas" hidden>
 <p class="kicker">Repaso</p><h1>Chuletas y teoría</h1>
@@ -1780,14 +2013,14 @@ Application.Current!.Resources.MergedDictionaries.<span class="t-fn">Add</span>(
 <h2><a href="#chuletas--errores">Errores típicos y su causa</a></h2>
 <div class="table"><table><thead><tr><th>Síntoma</th><th>Causa probable</th></tr></thead><tbody><tr><td data-label="Síntoma">El botón cambia el dato pero la pantalla no</td><td data-label="Causa probable">La clase no avisa: falta <code>[AddINotifyPropertyChangedInterface]</code> o <code>OnPropertyChanged</code></td></tr><tr><td data-label="Síntoma">Añado a la lista y no aparece</td><td data-label="Causa probable">Usas <code>List&lt;T&gt;</code> en vez de <code>ObservableCollection&lt;T&gt;</code></td></tr><tr><td data-label="Síntoma"><code>{Binding}</code> no muestra nada y no da error</td><td data-label="Causa probable">Falta <code>BindingContext = vm;</code>, o el nombre de la propiedad está mal escrito (mira la ventana «Salida» o «Errores de enlace XAML»), o es un campo y no una propiedad <code>{ get; set; }</code></td></tr><tr><td data-label="Síntoma">«StaticResource not found for key»</td><td data-label="Causa probable">El estilo no está en <code>Resources</code> ni en un diccionario de <code>MergedDictionaries</code>, o la clave está mal escrita</td></tr><tr><td data-label="Síntoma">La app se cierra al escribir en un <code>Entry</code></td><td data-label="Causa probable"><code>double.Parse</code> con texto vacío: usa <code>TryParse</code></td></tr><tr><td data-label="Síntoma">«PushAsync is not supported globally»</td><td data-label="Causa probable">La página no está dentro de una <code>NavigationPage</code> (o de un <code>Shell</code>)</td></tr><tr><td data-label="Síntoma">Todos los controles del <code>Grid</code> montados en la esquina</td><td data-label="Causa probable">Faltan <code>Grid.Row</code> y <code>Grid.Column</code></td></tr><tr><td data-label="Síntoma">La <code>CollectionView</code> no hace scroll</td><td data-label="Causa probable">Está dentro de un <code>StackLayout</code> o <code>ScrollView</code>: ponla en una fila <code>*</code> de un <code>Grid</code></td></tr><tr><td data-label="Síntoma">«x:Class … does not match»</td><td data-label="Causa probable">El <code>namespace</code> del <code>.cs</code> y el <code>x:Class</code> del XAML no coinciden</td></tr></tbody></table></div>
 </article>
-<nav class="pasar"><a href="#b6">← Estilos</a><a href="#problemas">Problemas →</a></nav>
+<nav class="pasar"><a href="#adopta">← Adopta (examen)</a><a href="#problemas">Problemas →</a></nav>
 </section>
 <section class="tab" id="problemas" data-tab="problemas" hidden>
 <p class="kicker">Practicar</p><h1>Problemas para practicar sin mirar</h1>
 <nav class="indice" aria-label="Recetas de este bloque"><a href="#problemas--checklist">Lo que tienes que saber hacer antes del lunes 30</a><a href="#problemas--practicas">Prácticas del Moodle</a><a href="#problemas--cortos">Ejercicios cortos (15–20 min cada uno)</a></nav>
 <article class="receta" id="problemas--checklist">
 <h2><a href="#problemas--checklist">Lo que tienes que saber hacer antes del lunes 30</a></h2>
-<ul class="items"><li><div>Crear un proyecto y montar una pantalla con <code>Grid</code> (filas y columnas).<span class="ver">Receta: <a href="#b2--grid">Grid</a></span></div></li><li><div>Manejar un <code>Clicked</code> desde el <code>.xaml.cs</code> y cambiar un <code>Label</code>.<span class="ver">Receta: <a href="#ev--clicked">Eventos Clicked paso a paso</a></span></div></li><li><div>Poner el <code>BindingContext</code> de la página y enlazar un <code>Entry</code> en los dos sentidos.<span class="ver">Receta: <a href="#b3--objeto">Enlazar a un objeto</a></span></div></li><li><div>ViewModel con propiedades que avisan (Fody u <code>OnPropertyChanged</code>) y un botón con <code>Clicked</code> que lo modifica.<span class="ver">Receta: <a href="#b3--fody">Fody</a> y <a href="#b4--clicked-vm">Clicked que llama al ViewModel</a></span></div></li><li><div>Lista con <code>ObservableCollection</code> en <code>CollectionView</code> y en <code>BindableLayout</code>, sabiendo a qué apunta <code>{Binding}</code> dentro del <code>DataTemplate</code>.<span class="ver">Receta: <a href="#b4--collectionview">CollectionView</a>, <a href="#b4--bindable">BindableLayout</a> y <a href="#b4--binding-punto">Binding dentro de la plantilla</a></span></div></li><li><div>Navegar a otra página pasándole un dato.<span class="ver">Receta: <a href="#b5--datos-constructor">Pasar datos por el constructor</a></span></div></li><li><div>Estilo global en <code>App.xaml</code> y una clase de estilo.<span class="ver">Receta: <a href="#b6--global">Estilos globales</a> y <a href="#b6--styleclass">StyleClass</a></span></div></li><li><div>Un <code>Dictionary1.xaml</code> propio con colores y un estilo, importado en <code>App.xaml</code>, y un botón que cambie entre tema claro y oscuro.<span class="ver">Receta: <a href="#b6--importar">Importar diccionarios</a>, <a href="#b6--tema-diccionarios">Dos diccionarios</a></span></div></li></ul>
+<ul class="items"><li><div>Crear un proyecto y montar una pantalla con <code>Grid</code> (filas y columnas).<span class="ver">Receta: <a href="#b2--grid">Grid</a></span></div></li><li><div>Manejar un <code>Clicked</code> desde el <code>.xaml.cs</code> y cambiar un <code>Label</code>.<span class="ver">Receta: <a href="#ev--clicked">Eventos Clicked paso a paso</a></span></div></li><li><div>Poner el <code>BindingContext</code> de la página y enlazar un <code>Entry</code> en los dos sentidos.<span class="ver">Receta: <a href="#b3--objeto">Enlazar a un objeto</a></span></div></li><li><div>ViewModel con propiedades que avisan (Fody u <code>OnPropertyChanged</code>) y un botón con <code>Clicked</code> que lo modifica.<span class="ver">Receta: <a href="#b3--fody">Fody</a> y <a href="#b4--clicked-vm">Clicked que llama al ViewModel</a></span></div></li><li><div>Lista con <code>ObservableCollection</code> en <code>CollectionView</code> y en <code>BindableLayout</code>, sabiendo a qué apunta <code>{Binding}</code> dentro del <code>DataTemplate</code>.<span class="ver">Receta: <a href="#b4--collectionview">CollectionView</a>, <a href="#b4--bindable">BindableLayout</a> y <a href="#b4--binding-punto">Binding dentro de la plantilla</a></span></div></li><li><div>Navegar a otra página pasándole un dato.<span class="ver">Receta: <a href="#b5--datos-constructor">Pasar datos por el constructor</a></span></div></li><li><div>Hacer entero el ejercicio <strong>Adopta una mascota</strong> (lista, detalle, <code>DisplayAlertAsync</code> y converter) sin mirar.<span class="ver">Receta: <a href="#adopta--mapa">Adopta pieza a pieza</a></span></div></li><li><div>Estilo global en <code>App.xaml</code> y una clase de estilo.<span class="ver">Receta: <a href="#b6--global">Estilos globales</a> y <a href="#b6--styleclass">StyleClass</a></span></div></li><li><div>Un <code>Dictionary1.xaml</code> propio con colores y un estilo, importado en <code>App.xaml</code>, y un botón que cambie entre tema claro y oscuro.<span class="ver">Receta: <a href="#b6--importar">Importar diccionarios</a>, <a href="#b6--tema-diccionarios">Dos diccionarios</a></span></div></li></ul>
 </article>
 <article class="receta" id="problemas--practicas">
 <h2><a href="#problemas--practicas">Prácticas del Moodle</a></h2>
@@ -1802,7 +2035,7 @@ Application.Current!.Resources.MergedDictionaries.<span class="t-fn">Add</span>(
 </main>
 <script>
 // Pestañas: #b2 abre el bloque 2; #b2--pipe-propio abre el bloque 2 y baja a esa receta
-const tabsIds = ["b1","b2","ev","b3","b4","b5","b6","chuletas","problemas"];
+const tabsIds = ["b1","b2","ev","b3","b4","b5","b6","adopta","chuletas","problemas"];
 function mostrar(destinoHash) {
   const hash = destinoHash ?? decodeURIComponent(location.hash.slice(1));
   let id = hash.split('--')[0];
