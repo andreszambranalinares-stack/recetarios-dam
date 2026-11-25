@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MVVM de Adopta</title>
+<script>try{var t=localStorage.getItem('recetario-tema');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1f2328; --muted:#5d6670; --line:#d9d4c7;
+  --model:#2f7d5b; --model-bg:#e3f2ea;
+  --vm:#7a4fc0; --vm-bg:#efe7fb;
+  --view:#1d6fb8; --view-bg:#e2eefa;
+  --app:#b0631a; --app-bg:#fbeedd;
+  --conv:#b3264d; --conv-bg:#fbe3ea;
+  --hl:#fff1a8; --code-bg:#1e1f24; --code-ink:#e6e6e6;
+  --add:#1f6f3f; --add-bg:rgba(46,160,67,.22); --del-bg:rgba(248,81,73,.22);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171b; --card:#202228; --ink:#e8e8ea; --muted:#a1a7b0; --line:#34363e;
+    --model:#5fc79a; --model-bg:#1b3229; --vm:#b493f0; --vm-bg:#2b2340;
+    --view:#6cb3f2; --view-bg:#18293b; --app:#f0a560; --app-bg:#3a2a18;
+    --conv:#f07a9b; --conv-bg:#3d1c27; --hl:#4d4310; --code-bg:#0f1013; --code-ink:#e6e6e6;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171b; --card:#202228; --ink:#e8e8ea; --muted:#a1a7b0; --line:#34363e;
+  --model:#5fc79a; --model-bg:#1b3229; --vm:#b493f0; --vm-bg:#2b2340;
+  --view:#6cb3f2; --view-bg:#18293b; --app:#f0a560; --app-bg:#3a2a18;
+  --conv:#f07a9b; --conv-bg:#3d1c27; --hl:#4d4310; --code-bg:#0f1013; --code-ink:#e6e6e6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;max-width:1280px;margin:0 auto;padding:24px 16px 80px}
+@media (max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}}
+aside.toc{position:sticky;top:16px;align-self:start;font-size:14px}
+aside.toc .t{font-weight:700;margin-bottom:6px}
+aside.toc a{display:block;color:var(--muted);text-decoration:none;padding:5px 10px;border-left:3px solid var(--line)}
+aside.toc a:hover{color:var(--ink)}
+aside.toc a.on{color:var(--ink);border-left-color:var(--vm);background:var(--vm-bg);font-weight:600}
+aside.toc .volver{display:block;margin:0 0 14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-weight:600;text-decoration:none}
+aside.toc .volver:hover{border-color:var(--ink)}
+.tema{margin-top:6px}
+section,h2[id]{scroll-margin-top:16px}
+@media (max-width:1000px){
+  .layout{display:block}
+  aside.toc{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;background:var(--bg);margin:-24px -16px 0;padding:10px 16px;border-bottom:1px solid var(--line)}
+  aside.toc::-webkit-scrollbar{display:none}
+  aside.toc .t,aside.toc .noprint{display:none}
+  aside.toc a{flex:none;border:1px solid var(--line);border-radius:99px;padding:4px 11px;background:var(--card);white-space:nowrap}
+  aside.toc .volver{margin:0;font-weight:600}
+  h2[id]{scroll-margin-top:64px}
+}
+h1{font-size:28px;margin:0 0 4px;line-height:1.2}
+h2{font-size:21px;margin:44px 0 8px;padding-top:10px;border-top:1px solid var(--line)}
+h2 .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:14px;margin-right:8px;vertical-align:2px}
+p.sub{color:var(--muted);margin:0 0 16px}
+code{font-family:Consolas,"Cascadia Code",monospace;font-size:.92em;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 4px;border-radius:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit;font-size:14px}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--vm);border-color:var(--vm);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- mapa ---------- */
+.mapa{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.mapa{grid-template-columns:minmax(0,1fr)}}
+.capa{border:2px solid;border-radius:12px;padding:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;background:var(--card);text-align:left;color:var(--ink);font:inherit}
+.capa:hover,.capa.activa{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.capa h3{margin:0 0 2px;font-size:16px}
+.capa .archivo{font-family:Consolas,monospace;font-size:12px;color:var(--muted)}
+.capa ul{margin:8px 0 0;padding-left:18px;font-size:13px}
+.c-model{border-color:var(--model);background:var(--model-bg)} .c-model h3{color:var(--model)}
+.c-vm{border-color:var(--vm);background:var(--vm-bg)} .c-vm h3{color:var(--vm)}
+.c-view{border-color:var(--view);background:var(--view-bg)} .c-view h3{color:var(--view)}
+.c-app{border-color:var(--app);background:var(--app-bg)} .c-app h3{color:var(--app)}
+.c-conv{border-color:var(--conv);background:var(--conv-bg)} .c-conv h3{color:var(--conv)}
+.fila-flechas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:4px 0;font-size:13px;color:var(--muted);text-align:center}
+@media (max-width:820px){.fila-flechas{display:none}}
+#detalleCapa{margin-top:14px}
+#detalleCapa h4{margin:0 0 6px}
+code{overflow-wrap:anywhere}
+@media (max-width:600px){.tabla{display:block;overflow-x:auto}}
+.tabla{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.tabla td,.tabla th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tabla th{color:var(--muted);font-weight:600}
+
+/* ---------- código ---------- */
+pre.code{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:10px 0;overflow-x:auto;font:13px/1.55 Consolas,"Cascadia Code",monospace;margin:8px 0}
+pre.code .l{display:block;padding:0 12px 0 28px;white-space:pre;border-left:3px solid transparent;position:relative}
+pre.code .l.on{background:rgba(245,217,10,.2);border-left-color:#f5d90a}
+pre.code .l.add{background:var(--add-bg);border-left-color:#2ea043}
+pre.code .l.del{background:var(--del-bg);border-left-color:#f85149;text-decoration:line-through;text-decoration-color:rgba(248,81,73,.7)}
+pre.code .l.add::before{content:"+";position:absolute;left:10px;color:#56d364}
+pre.code .l.del::before{content:"−";position:absolute;left:10px;color:#ff7b72}
+pre.code .l.on::before{content:"▶";position:absolute;left:8px;color:#f5d90a;font-size:10px;top:2px}
+pre.code .cm{color:#8fbf7f}
+.ficheros{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.ficheros button{border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;background:var(--bg);color:var(--muted);padding:5px 10px;cursor:pointer;font:12.5px Consolas,monospace}
+.ficheros button.on{background:var(--code-bg);color:#fff;border-color:var(--code-bg)}
+.ficheros + pre.code{margin-top:0;border-top-left-radius:0}
+.leyenda{font-size:12.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin:4px 0}
+.leyenda span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.leyenda .la::before{background:#2ea043}.leyenda .ld::before{background:#f85149}.leyenda .lo::before{background:#f5d90a}
+
+/* ---------- etiquetas y cajas ---------- */
+.etq{display:inline-block;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;margin-right:6px;color:#fff;vertical-align:middle}
+.e-model{background:var(--model)}.e-vm{background:var(--vm)}.e-view{background:var(--view)}.e-conv{background:var(--conv)}.e-app{background:var(--app)}
+.caja{border-left:4px solid;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:14px}
+.caja.ok{border-color:var(--model);background:var(--model-bg)}
+.caja.mal{border-color:var(--conv);background:var(--conv-bg)}
+.caja.info{border-color:var(--view);background:var(--view-bg)}
+.caja.ojo{border-color:var(--app);background:var(--app-bg)}
+.paso{font-size:14px;background:var(--hl);border-radius:8px;padding:8px 10px;margin:6px 0 10px}
+
+/* ---------- película ---------- */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.chip{border:2px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px;color:var(--muted);transition:all .25s}
+.chip.on{color:#fff;transform:scale(1.06)}
+.chip.on[data-c="app"]{background:var(--app);border-color:var(--app)}
+.chip.on[data-c="vm"]{background:var(--vm);border-color:var(--vm)}
+.chip.on[data-c="model"]{background:var(--model);border-color:var(--model)}
+.chip.on[data-c="principal"],.chip.on[data-c="detalle"]{background:var(--view);border-color:var(--view)}
+.chip.on[data-c="conv"]{background:var(--conv);border-color:var(--conv)}
+.barraPasos{display:flex;gap:4px;margin:8px 0}
+.barraPasos i{flex:1;height:6px;border-radius:3px;background:var(--line);cursor:pointer}
+.barraPasos i.hecho{background:var(--vm)}
+.peli{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px}
+@media (max-width:820px){.peli{grid-template-columns:minmax(0,1fr)}}
+.mini{border:6px solid #2a2b30;border-radius:22px;background:#fff;color:#1f2328;height:300px;overflow:hidden;font-size:12px;position:relative}
+.mini .mb{background:#512bd4;color:#fff;padding:6px 8px;font-weight:600;font-size:11px}
+.mini .mc{padding:6px}
+.mini .mt{border:1.5px solid #000;border-radius:6px;padding:4px 6px;margin:4px 0;display:flex;gap:6px;align-items:center}
+.mini .mt.sel{background:#e9e3ff}
+.mini .vacio{color:#999;text-align:center;padding:40px 6px}
+.mini .ok{color:#c62828;font-weight:600}
+.peli h3{margin:0 0 4px;font-size:17px}
+
+/* ---------- simulador ---------- */
+.sim{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px}
+@media (max-width:820px){.sim{grid-template-columns:minmax(0,1fr)}}
+.movil{width:300px;max-width:100%;margin:0 auto;border:10px solid #2a2b30;border-radius:34px;background:#fff;color:#1f2328;height:560px;overflow:hidden;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.movil::before{content:"";position:absolute;top:6px;left:50%;width:70px;height:6px;margin-left:-35px;border-radius:3px;background:#2a2b30;z-index:3}
+.barra{background:#512bd4;color:#fff;padding:18px 14px 10px;font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center}
+.barra button{background:none;border:0;color:#fff;font-size:18px;cursor:pointer;padding:0 4px}
+.pantalla{position:absolute;inset:52px 0 0 0;overflow-y:auto;transition:transform .35s ease}
+#pDetalle{transform:translateX(100%)}
+.movil.det #pLista{transform:translateX(-100%)} .movil.det #pDetalle{transform:translateX(0)}
+.bind{outline:2px dashed transparent;outline-offset:2px;border-radius:6px;cursor:help;transition:outline-color .15s}
+.bind:hover{outline-color:#f59e0b}
+.tarjeta{margin:10px;border:2px solid #000;border-radius:10px;padding:8px;display:flex;gap:10px;align-items:center;cursor:pointer;background:#fff}
+.tarjeta.sel{background:#e9e3ff}
+.foto{width:64px;height:64px;border-radius:8px;display:grid;place-items:center;font-size:34px;background:#f1efe9;flex:none}
+.foto.grande{width:120px;height:120px;font-size:70px;margin:0 auto}
+.tarjeta .n{font-weight:700}
+.tarjeta .st{font-size:11px;font-weight:700;color:#c62828}
+.det-body{padding:16px}
+.det-caja{border:2px solid #000;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.det-caja .nom{font-size:20px;font-weight:700}
+.chk{display:flex;align-items:center;gap:6px}
+.chk input{width:18px;height:18px}
+.rojo{color:#c62828;font-weight:600}
+.botones{display:flex;gap:8px;flex-wrap:wrap}
+.botones button{background:#512bd4;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit;font-size:14px}
+.alerta{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:5}
+.alerta.on{display:grid}
+.alerta .ventana{background:#fff;border-radius:10px;padding:16px;width:80%;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.alerta .ventana h5{margin:0 0 6px;font-size:16px}
+.alerta .ventana button{float:right;margin-top:10px;background:#512bd4;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer}
+.panel h4{margin:0 0 4px}
+pre.json{background:var(--model-bg);border:1px solid var(--model);color:var(--ink);border-radius:10px;padding:10px 12px;font:12.5px/1.5 Consolas,monospace;overflow-x:auto;margin:6px 0}
+pre.json .camb{background:var(--hl);border-radius:3px}
+.variantes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:10px 0}
+@media (max-width:820px){.variantes{grid-template-columns:minmax(0,1fr)}}
+.variante{border:2px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;background:var(--card)}
+.variante.on{border-color:var(--vm);background:var(--vm-bg)}
+.variante input{margin-top:4px;width:18px;height:18px}
+.variante b{display:block}
+.variante small{color:var(--muted)}
+
+/* ---------- laboratorio ---------- */
+.modos{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;width:max-content;max-width:100%;flex-wrap:wrap}
+.modos button{border:0;background:var(--card);color:var(--ink);padding:8px 14px;cursor:pointer;font:inherit;font-size:14px;border-right:1px solid var(--line)}
+.modos button:last-child{border-right:0}
+.modos button.on{background:var(--vm);color:#fff;font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);gap:10px;align-items:stretch;margin:14px 0}
+@media (max-width:820px){.lab{grid-template-columns:minmax(0,1fr)}}
+.lado{border:2px solid;border-radius:12px;padding:12px;background:var(--card)}
+.lado.vm{border-color:var(--vm)} .lado.vi{border-color:var(--view)}
+.lado h4{margin:0 0 8px;font-size:15px}
+.prop{display:flex;justify-content:space-between;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 0;font-family:Consolas,monospace;font-size:13px;flex-wrap:wrap}
+.prop .v{background:var(--vm-bg);border-radius:6px;padding:2px 8px;font-weight:700;transition:background .3s}
+.prop .v.brilla,.ctrlv.brilla{background:var(--hl)!important}
+.tubos{display:flex;flex-direction:column;justify-content:space-around;gap:10px}
+.tubo{position:relative;height:46px;border-radius:23px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;color:var(--muted);text-align:center;padding:0 10px;overflow:hidden}
+.tubo.cerrado{opacity:.45;background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 6px,var(--line) 6px,var(--line) 8px)}
+.tubo .bola{position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;opacity:0}
+.tubo .bola.d{background:var(--vm);animation:ader .8s ease forwards}
+.tubo .bola.i{background:var(--view);animation:aizq .8s ease forwards}
+.tubo .bola.x{background:#f85149;animation:choca .8s ease forwards}
+@keyframes ader{0%{left:4px;opacity:1}100%{left:calc(100% - 18px);opacity:1}}
+@keyframes aizq{0%{left:calc(100% - 18px);opacity:1}100%{left:4px;opacity:1}}
+@keyframes choca{0%{left:calc(100% - 18px);opacity:1}60%{left:45%;opacity:1}100%{left:45%;opacity:0;transform:scale(2)}}
+.ctrl{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.ctrl label{display:flex;gap:6px;align-items:center;font-size:14px}
+.ctrl input[type=text]{font:inherit;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.ctrl input[type=checkbox]{width:18px;height:18px}
+.ctrlv{font-family:Consolas,monospace;font-size:12px;color:var(--muted);border-radius:4px;padding:0 4px}
+.desync{color:var(--conv);font-weight:700;font-size:12.5px;display:none}
+.desync.on{display:block}
+.registro{font:12.5px/1.6 Consolas,monospace;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:8px 12px;max-height:170px;overflow-y:auto}
+.registro div{border-bottom:1px solid #2c2d33;padding:2px 0}
+.registro .a{color:#c9a8ff}.registro .b{color:#8cc8ff}.registro .r{color:#ff9ab6}
+
+/* ---------- rompe ---------- */
+.rompe{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px}
+@media (max-width:820px){.rompe{grid-template-columns:minmax(0,1fr)}}
+.fallos button{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;margin:0 0 6px;cursor:pointer;font:inherit;font-size:13.5px}
+.fallos button.on{border-color:var(--conv);background:var(--conv-bg);font-weight:600}
+.sintoma{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:600px){.sintoma{grid-template-columns:minmax(0,1fr)}}
+.consola{background:#2b0f14;color:#ffb3c1;border-radius:8px;padding:8px 10px;font:12.5px/1.5 Consolas,monospace;white-space:pre-wrap;margin:8px 0}
+.consola.ok{background:#0f2b1b;color:#a6f0c6}
+.tipo{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px}
+.tipo.comp{background:#f85149;color:#fff}.tipo.ejec{background:#d29922;color:#000}.tipo.silen{background:#8b949e;color:#000}
+
+/* ---------- test ---------- */
+.preg{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0;background:var(--card)}
+.preg .q{font-weight:600;margin-bottom:8px}
+.preg button{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 10px;margin:5px 0;cursor:pointer;font:inherit;font-size:14px}
+.preg button.bien{border-color:var(--model);background:var(--model-bg);font-weight:600}
+.preg button.malr{border-color:var(--conv);background:var(--conv-bg)}
+.preg .fb{font-size:13.5px;margin-top:6px;display:none}
+.preg .fb.on{display:block}
+#nota{font-weight:700;font-size:18px}
+
+ol.pasos li{margin:6px 0}
+.anim{animation:pulso .5s}
+@keyframes pulso{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+@media print{
+  body{background:#fff;color:#000;font-size:12px}
+  aside.toc,.noprint,.movil,.mini,.fallos,.modos,.variantes,#tgThis,#tgConv,.barraPasos{display:none!important}
+  .layout{display:block;padding:0}
+  .sim,.peli,.rompe,.grid2,.lab{display:block}
+  pre.code{background:#f4f4f4;color:#000;white-space:pre-wrap}
+  h2{break-before:auto;page-break-after:avoid}
+  .card,.preg{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="toc" id="toc">
+  <a class="volver" href="recetario-deint.html#adopta">← Recetario MAUI</a>
+  <div class="t">Índice</div>
+  <a href="#mapa">1 · Mapa de capas</a>
+  <a href="#peli">2 · Película paso a paso</a>
+  <a href="#sim">3 · Simulador + variantes</a>
+  <a href="#lab">4 · Laboratorio TwoWay</a>
+  <a href="#this">5 · ¿Por qué this?</a>
+  <a href="#conv">6 · El converter</a>
+  <a href="#rompe">7 · Rompe el código</a>
+  <a href="#orden">8 · Orden para el examen</a>
+  <a href="#test">9 · Autotest</a>
+  <div class="noprint" style="margin-top:12px"><button class="btn" onclick="window.print()">🖨 Imprimir</button><br><button class="btn tema" id="tema">◐ Modo claro/oscuro</button></div>
+</aside>
+<main>
+<h1>MVVM de «Adopta una mascota», en un vistazo</h1>
+<p class="sub">Todo sale de tu <code>AdoptaProyecto</code> (clase 25/11). Toca, pulsa y rompe: cada cosa te enseña la línea de código que la provoca. Colores: <span class="etq e-model">Model</span><span class="etq e-vm">ViewModel</span><span class="etq e-view">View</span><span class="etq e-conv">Converter</span><span class="etq e-app">App</span></p>
+
+<!-- =============== 1. MAPA =============== -->
+<h2 id="mapa"><span class="num">1</span>Mapa de capas: quién es quién</h2>
+<p>El <b>Model</b> es el molde de un dato, el <b>ViewModel</b> guarda la lista y la mascota elegida, y las <b>Views</b> enseñan lo que tiene el ViewModel. Toca una caja.</p>
+<div class="mapa">
+  <button class="capa c-model" data-capa="model"><h3>Model</h3><div class="archivo">MVVM/Model/Mascota.cs · Clase</div>
+    <ul><li>Molde de UNA mascota</li><li>4 propiedades string</li><li>Fody avisa de los cambios</li></ul></button>
+  <button class="capa c-vm" data-capa="vm"><h3>ViewModel</h3><div class="archivo">MVVM/ViewModel/MascotaViewModel.cs · Clase</div>
+    <ul><li><code>ColeccionMascotas</code> (la lista)</li><li><code>MascotaSeleccionada</code> (la elegida)</li><li>Rellena la lista en su constructor</li></ul></button>
+  <button class="capa c-view" data-capa="principal"><h3>View principal</h3><div class="archivo">MVVM/View/MascotaViewPrincipal · ContentPage</div>
+    <ul><li><b>Crea</b> el ViewModel (<code>new</code>)</li><li>CollectionView con DataTemplate</li><li>SelectionChanged → PushAsync</li></ul></button>
+</div>
+<div class="fila-flechas">
+  <div>↑ el ViewModel <b>contiene</b> Mascotas</div>
+  <div>↑ <code>BindingContext = viewModel</code> en las dos Views</div>
+  <div>↓ <code>new MascotaDetallesView(viewModel)</code> le <b>pasa el mismo</b></div>
+</div>
+<div class="mapa">
+  <button class="capa c-app" data-capa="app"><h3>App</h3><div class="archivo">App.xaml.cs · App.xaml</div>
+    <ul><li>NavigationPage (para poder navegar)</li><li>Registra el converter con <code>x:Key</code></li></ul></button>
+  <button class="capa c-conv" data-capa="conv"><h3>Converter</h3><div class="archivo">MVVM/Converters/AdopcionABoolConverter.cs · Clase</div>
+    <ul><li>"Adoptado" → true</li><li>"Disponible" → false</li></ul></button>
+  <button class="capa c-view" data-capa="detalle"><h3>View detalle</h3><div class="archivo">MVVM/View/MascotaDetallesView · ContentPage</div>
+    <ul><li><b>Recibe</b> el ViewModel (no hace <code>new</code>)</li><li>Enseña <code>MascotaSeleccionada.X</code></li><li>Adoptar / volver</li></ul></button>
+</div>
+<div id="detalleCapa" class="card"></div>
+
+<!-- =============== 2. PELÍCULA =============== -->
+<h2 id="peli"><span class="num">2</span>Película: qué pasa por dentro, paso a paso</h2>
+<p>Desde que arranca la app hasta que vuelves a la lista con Max adoptado. Usa <b>Siguiente</b> (o las flechas ← → del teclado).</p>
+<div class="card">
+  <div class="chips" id="peliChips">
+    <span class="chip" data-c="app">App</span><span class="chip" data-c="principal">View principal</span><span class="chip" data-c="vm">ViewModel</span><span class="chip" data-c="model">Model</span><span class="chip" data-c="detalle">View detalle</span><span class="chip" data-c="conv">Converter</span>
+  </div>
+  <div class="barraPasos" id="peliBarra"></div>
+  <div class="peli">
+    <div>
+      <h3 id="peliTit"></h3>
+      <div id="peliTxt" style="font-size:14.5px"></div>
+      <pre class="code" id="peliCod"></pre>
+    </div>
+    <div><div class="mini" id="peliMovil"></div></div>
+  </div>
+  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <button class="btn" id="peliAnt">← Anterior</button>
+    <button class="btn pri" id="peliSig">Siguiente →</button>
+    <button class="btn" id="peliAuto">▶ Reproducir solo</button>
+    <span id="peliCont" style="align-self:center;color:var(--muted);font-size:13px"></span>
+  </div>
+</div>
+
+<!-- =============== 3. SIMULADOR =============== -->
+<h2 id="sim"><span class="num">3</span>Simulador con el código, y sus variantes</h2>
+<p>Toca una mascota y luego «Adoptar ahora». Pasa el ratón por cualquier cosa del móvil para ver su <code>{Binding}</code>. Activa una variante y abajo tienes <b>el código completo que cambia</b>.</p>
+<div class="variantes noprint">
+  <label class="variante" id="vA"><input type="checkbox" id="optBloquear"><span><b>A · No dejar abrir una mascota adoptada</b><small>Se comprueba en <code>SelectionChanged</code>, antes de navegar. Prueba con Pelusa o Luna.</small></span></label>
+  <label class="variante" id="vB"><input type="checkbox" id="optCheck"><span><b>B · El CheckBox adopta (TwoWay)</b><small>Fuera <code>IsEnabled="False"</code>: pulsar el CheckBox escribe en el ViewModel vía <code>ConvertBack</code>.</small></span></label>
+</div>
+<div class="sim">
+  <div>
+    <div class="movil" id="movil">
+      <div class="barra"><button id="btnAtras" title="Atrás" style="visibility:hidden">←</button><span id="titulo">MascotaViewPrincipal</span></div>
+      <div class="pantalla" id="pLista">
+        <div class="bind" data-b="titulo" style="text-align:center;padding:8px;font-weight:600">Adopa a tu mascota</div>
+        <div id="lista" class="bind" data-b="itemsSource" style="outline-offset:-2px"></div>
+      </div>
+      <div class="pantalla" id="pDetalle">
+        <div class="det-body"><div class="det-caja">
+          <div class="foto grande bind" data-b="dImagen" id="dImagen"></div>
+          <div class="nom bind" data-b="dNombre" id="dNombre"></div>
+          <div class="bind" data-b="dRaza" id="dRaza"></div>
+          <div class="bind" data-b="dAdopcion" id="dAdopcion"></div>
+          <label class="chk bind" data-b="dCheck"><input type="checkbox" id="dCheck" disabled> Adoptado</label>
+          <div class="rojo bind" data-b="dRojo" id="dRojo">Esta mascota ya tiene familia</div>
+          <div class="botones">
+            <button id="bSeguir" class="bind" data-b="bSeguir">Seguir mirando</button>
+            <button id="bAdoptar" class="bind" data-b="bAdoptar">Adoptar ahora</button>
+          </div>
+        </div></div>
+      </div>
+      <div class="alerta" id="alerta"><div class="ventana"><h5 id="aTit"></h5><div id="aMsg"></div><button id="aOk">Aceptar</button></div></div>
+    </div>
+    <div style="text-align:center;margin-top:8px" class="noprint"><button class="btn" id="simReset">↺ Reiniciar datos</button></div>
+  </div>
+  <div class="panel card">
+    <h4>Qué está pasando</h4>
+    <div class="paso" id="paso"></div>
+    <div id="codigoSim"></div>
+    <h4 style="margin-top:12px">ViewModel ahora mismo <span style="font-weight:400;color:var(--muted);font-size:13px">(el objeto que comparten las dos páginas)</span></h4>
+    <pre class="json" id="json"></pre>
+  </div>
+</div>
+<div class="card" style="margin-top:16px">
+  <h4 style="margin:0">Código de las variantes activas</h4>
+  <div class="leyenda"><span class="la">línea nueva</span><span class="ld">línea que quitas</span><span class="lo">no cambia, pero ahora se usa</span></div>
+  <div id="varInfo"></div>
+  <div class="ficheros" id="varFicheros"></div>
+  <pre class="code" id="varCodigo"></pre>
+  <div id="varNota"></div>
+</div>
+
+<!-- =============== 4. LAB =============== -->
+<h2 id="lab"><span class="num">4</span>Laboratorio: OneWay, TwoWay y OneTime</h2>
+<p>Un <code>{Binding}</code> es un <b>tubo</b> entre una propiedad del ViewModel y una propiedad de un control. El <b>modo</b> dice en qué dirección puede viajar el dato. Cambia el valor desde la izquierda (código C#) o desde la derecha (el usuario) y mira por dónde pasa la bola.</p>
+<div class="card">
+  <div class="modos noprint" id="modos">
+    <button data-m="OneWay">OneWay</button>
+    <button data-m="TwoWay" class="on">TwoWay</button>
+    <button data-m="OneTime">OneTime</button>
+  </div>
+  <div id="modoExpl" class="caja info" style="margin-top:10px"></div>
+  <div class="lab">
+    <div class="lado vm">
+      <h4 style="color:var(--vm)">ViewModel (MascotaSeleccionada)</h4>
+      <div class="prop"><span>Adopcion</span><span class="v" id="lvAdop"></span></div>
+      <div class="prop"><span>Nombre</span><span class="v" id="lvNom"></span></div>
+      <p style="font-size:12.5px;color:var(--muted);margin:8px 0 4px">Cambiar desde C# (p. ej. un botón):</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" id="lvBtnAdop">Adopcion = <span id="lvBtnAdopTxt"></span></button>
+        <button class="btn" id="lvBtnNom">Nombre = "Max el Grande"</button>
+      </div>
+    </div>
+    <div class="tubos">
+      <div class="tubo" id="tubo1"><span id="tubo1t"></span></div>
+      <div class="tubo" id="tubo2"><span id="tubo2t"></span></div>
+    </div>
+    <div class="lado vi">
+      <h4 style="color:var(--view)">View (lo que toca el usuario)</h4>
+      <div class="ctrl">
+        <label><input type="checkbox" id="lcCheck"> CheckBox «Adoptado»</label>
+        <span class="ctrlv" id="lcCheckV"></span>
+        <span class="desync" id="lcCheckD">⚠ Desincronizado: el control dice una cosa y el ViewModel otra</span>
+      </div>
+      <div class="ctrl">
+        <label for="lcEntry">Entry para el nombre</label>
+        <input type="text" id="lcEntry">
+        <span class="ctrlv" id="lcEntryV"></span>
+        <span class="desync" id="lcEntryD">⚠ Desincronizado: lo escrito NO ha llegado al ViewModel</span>
+      </div>
+      <div class="ctrl" style="border:0">
+        <span style="font-size:13px">Label (siempre OneWay): <b id="lcLabel"></b></span>
+        <span class="ctrlv">Text="{Binding MascotaSeleccionada.Nombre}"</span>
+      </div>
+    </div>
+  </div>
+  <pre class="code" id="labCod"></pre>
+  <h4 style="margin:10px 0 4px">Registro</h4>
+  <div class="registro" id="labLog"></div>
+</div>
+<div class="caja ok"><b>La idea clave del TwoWay:</b> lo que el usuario cambia en el control <b>llega al ViewModel</b>. Y como el ViewModel es el mismo para todos, cualquier otro control enlazado a esa propiedad (el Label de abajo, la lista de la otra página) se entera solo. Con OneWay, el control cambia en pantalla pero el ViewModel ni se entera.</div>
+<table class="tabla">
+  <tr><th>Control.propiedad</th><th>Modo por defecto</th><th>¿Por qué?</th></tr>
+  <tr><td><code>Label.Text</code></td><td>OneWay</td><td>El usuario no puede cambiar un Label</td></tr>
+  <tr><td><code>Image.Source</code></td><td>OneWay</td><td>Solo se enseña</td></tr>
+  <tr><td><code>Entry.Text</code></td><td><b>TwoWay</b></td><td>El usuario escribe</td></tr>
+  <tr><td><code>CheckBox.IsChecked</code></td><td><b>TwoWay</b></td><td>El usuario marca</td></tr>
+  <tr><td><code>CollectionView.SelectedItem</code></td><td><b>TwoWay</b></td><td>Por eso tocar a Max rellena <code>MascotaSeleccionada</code></td></tr>
+</table>
+<p style="font-size:14px">Por eso en el examen casi nunca hace falta escribir <code>Mode=TwoWay</code>: estos controles ya lo son. Ponerlo no hace daño y deja claro lo que quieres.</p>
+
+<!-- =============== 5. THIS =============== -->
+<h2 id="this"><span class="num">5</span>¿Por qué <code>this.viewModel = viewModel;</code>?</h2>
+<p>En la página principal <b>no</b> lo usas. Está solo en la página de <b>detalle</b>, también en tu proyecto Adopta (<code>MascotaDetallesView.xaml.cs</code>). Es C# básico: sirve cuando un parámetro se llama igual que un campo.</p>
+<div class="grid2">
+  <div class="card">
+    <h4 style="margin:0">Página principal: <b>CREA</b> el ViewModel</h4>
+    <p style="margin:4px 0;font-size:14px;color:var(--muted)">Igual que AguaView (PracticaMaui). No hay parámetro, así que <code>viewModel</code> solo puede ser el campo.</p>
+    <pre class="code" id="codePrincipal"></pre>
+  </div>
+  <div class="card">
+    <h4 style="margin:0">Página detalle: <b>RECIBE</b> el ViewModel</h4>
+    <p style="margin:4px 0;font-size:14px;color:var(--muted)">Dentro del constructor, <code>viewModel</code> a secas es el <b>parámetro</b>; <code>this.viewModel</code> es el <b>campo</b>.</p>
+    <div class="modos noprint" id="tgThis" style="margin:6px 0">
+      <button data-v="this" class="on">Con this</button>
+      <button data-v="sin">Sin esa línea</button>
+      <button data-v="otro">Otro nombre</button>
+    </div>
+    <pre class="code" id="codeDetalle"></pre>
+    <div id="thisExplica"></div>
+  </div>
+</div>
+<div class="caja info"><b>Para la libreta:</b> la página que <b>abre la app</b> hace <code>viewModel = new MascotaViewModel();</code>. La página a la que <b>navegas</b> lo recibe por el constructor y lo guarda (<code>this.viewModel = viewModel;</code>). Las dos hacen <code>BindingContext = viewModel;</code>. Hay <b>un solo</b> ViewModel.</div>
+
+<!-- =============== 6. CONVERTER =============== -->
+<h2 id="conv"><span class="num">6</span>El converter: el traductor del tubo</h2>
+<p><code>Adopcion</code> es un <code>string</code>, pero <code>IsChecked</code> e <code>IsVisible</code> piden un <code>bool</code>. El converter se pone en medio del tubo del binding: <b>Convert</b> traduce a la ida (ViewModel → control) y <b>ConvertBack</b> a la vuelta (control → ViewModel, solo si el modo es TwoWay).</p>
+<div class="card">
+  <div class="modos noprint" id="tgConv">
+    <button data-v="Disponible" class="on">Adopcion = "Disponible"</button>
+    <button data-v="Adoptado">Adopcion = "Adoptado"</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;font-family:Consolas,monospace;font-size:14px">
+    <span class="lado vm" style="padding:6px 10px" id="tIda1"></span><span>→</span>
+    <span class="lado" style="padding:6px 10px;border-color:var(--conv)">Convert()</span><span>→</span>
+    <span class="lado vi" style="padding:6px 10px" id="tIda2"></span><span>→</span>
+    <span class="lado vi" style="padding:6px 10px" id="tIda3"></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;font-family:Consolas,monospace;font-size:14px">
+    <span class="lado vi" style="padding:6px 10px">pulsas el CheckBox → true</span><span>→</span>
+    <span class="lado" style="padding:6px 10px;border-color:var(--conv)">ConvertBack()</span><span>→</span>
+    <span class="lado vm" style="padding:6px 10px">Adopcion = "Adoptado"</span>
+  </div>
+</div>
+<table class="tabla">
+  <tr><th>Paso</th><th>Dónde</th><th>Qué escribes</th></tr>
+  <tr><td><span class="etq e-conv">1</span>Clase</td><td><code>MVVM/Converters/AdopcionABoolConverter.cs</code></td><td>Clase con <code>IValueConverter</code>: <code>Convert</code> y <code>ConvertBack</code></td></tr>
+  <tr><td><span class="etq e-app">2</span>Recurso</td><td><code>App.xaml</code></td><td><code>xmlns:conv="clr-namespace:AdoptaProyecto.MVVM.Converters"</code> y <code>&lt;conv:AdopcionABoolConverter x:Key="AdopcionABool" /&gt;</code></td></tr>
+  <tr><td><span class="etq e-view">3</span>Uso</td><td><code>MascotaDetallesView.xaml</code></td><td><code>Converter={StaticResource AdopcionABool}</code> — la <b>clave</b>, no el nombre de la clase</td></tr>
+</table>
+<pre class="code" id="codeConv"></pre>
+
+<!-- =============== 7. ROMPE =============== -->
+<h2 id="rompe"><span class="num">7</span>Rompe el código: reconoce el fallo por el síntoma</h2>
+<p>Elige un error típico. Verás qué línea cambia, qué pasa en la pantalla y cómo se arregla. Hay tres tipos: <span class="tipo comp">No compila</span> <span class="tipo ejec">Peta al ejecutar</span> <span class="tipo silen">Falla en silencio</span> (los peores: no hay error, solo sale vacío).</p>
+<div class="rompe">
+  <div class="fallos" id="fallos"></div>
+  <div class="card" id="fallo"></div>
+</div>
+
+<!-- =============== 8. ORDEN =============== -->
+<h2 id="orden"><span class="num">8</span>Orden para montarlo en el examen</h2>
+<div class="card">
+<ol class="pasos">
+  <li><span class="etq e-app">0</span>NuGet <code>PropertyChanged.Fody</code> y carpetas <code>MVVM/Model</code>, <code>MVVM/ViewModel</code>, <code>MVVM/View</code> (y <code>Converters</code> si hace falta).</li>
+  <li><span class="etq e-model">Model</span><b>Clase</b> <code>Mascota</code> con <code>[AddINotifyPropertyChangedInterface]</code> y sus propiedades.</li>
+  <li><span class="etq e-vm">ViewModel</span><b>Clase</b> con <code>ObservableCollection&lt;Mascota&gt; ColeccionMascotas</code>, <code>Mascota? MascotaSeleccionada</code> y el constructor que rellena la lista.</li>
+  <li><span class="etq e-view">View 1</span>ContentPage principal: en el <code>.xaml.cs</code>, campo + <code>new</code> + <code>BindingContext</code>. En el <code>.xaml</code>, <code>CollectionView</code> con <code>ItemsSource</code>, <code>SelectedItem</code>, <code>SelectionChanged</code> y un <code>DataTemplate</code> con <b>un solo hijo</b>.</li>
+  <li><span class="etq e-app">App</span><code>new Window(new NavigationPage(new MascotaViewPrincipal()))</code>. <b>Ejecuta</b>: si sale la lista, sigue.</li>
+  <li><span class="etq e-view">View 2</span>ContentPage detalle: constructor con parámetro, <code>this.viewModel = viewModel;</code>, <code>BindingContext = viewModel;</code>. Bindings con <code>MascotaSeleccionada.X</code>. Botones con <code>PopAsync</code> y <code>DisplayAlertAsync</code>. <b>Ejecuta.</b></li>
+  <li><span class="etq e-conv">Converter</span>Al final: clase → <code>App.xaml</code> → <code>StaticResource</code>. <b>Ejecuta.</b></li>
+</ol>
+<div class="caja ojo"><b>Truco:</b> ejecuta después de cada capa. Si lo montas todo y luego no sale nada, no sabrás cuál de los fallos de la sección 7 es.</div>
+</div>
+
+<!-- =============== 9. TEST =============== -->
+<h2 id="test"><span class="num">9</span>Autotest (opcional)</h2>
+<p>Ocho preguntas. Al pulsar una respuesta te dice si está bien y por qué.</p>
+<div id="preguntas"></div>
+<p>Aciertos: <span id="nota">0 / 8</span> <button class="btn noprint" id="testReset" style="margin-left:8px">↺ Repetir</button></p>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function colorea(t){let h=esc(t);return h.replace(/(\/\/.*)$/,'<span class="cm">$1</span>').replace(/(&lt;!--.*--&gt;)/,'<span class="cm">$1</span>');}
+function pintaCodigo(el,lineas,marcadas){
+  el.innerHTML=lineas.map(([k,t])=>`<span class="l${marcadas&&marcadas.includes(k)?' on':''}">${colorea(t)||' '}</span>`).join('');
+  const on=el.querySelector('.l.on'); if(on&&el.scrollHeight>el.clientHeight) el.scrollTop=on.offsetTop-30;
+}
+/* diff: cada línea empieza por '+', '-', '*' (no cambia pero importa) o ' ' */
+function pintaDiff(el,lineas){
+  el.innerHTML=lineas.map(t=>{const m=t[0],x=t.slice(1);const c=m==='+'?' add':m==='-'?' del':m==='*'?' on':'';return `<span class="l${c}">${colorea(x)||' '}</span>`;}).join('');
+}
+
+/* ================= CÓDIGO REAL ================= */
+const COD={
+model:[['a','[AddINotifyPropertyChangedInterface]   // Fody: avisa a la vista si cambia algo'],['b','public class Mascota'],['c','{'],['n','    public string Nombre { get; set; }'],['r','    public string Raza { get; set; }'],['ad','    public string Adopcion { get; set; }   // "Adoptado" o "Disponible"'],['i','    public string Imagen { get; set; }'],['z','}']],
+vm:[['a','[AddINotifyPropertyChangedInterface]'],['b','public class MascotaViewModel'],['c','{'],['col','    public ObservableCollection<Mascota> ColeccionMascotas { get; set; }'],['sel','    public Mascota? MascotaSeleccionada { get; set; }'],['e',''],['ctor','    public MascotaViewModel()'],['f','    {'],['new','        ColeccionMascotas = new ObservableCollection<Mascota>'],['g','        {'],['m1','            new Mascota { Nombre = "Firulais", Raza = "Labrador", Adopcion = "Disponible", Imagen = "perro1.jpg" },'],['m2','            new Mascota { Nombre = "Pelusa", Raza = "Persa", Adopcion = "Adoptado", Imagen = "perro2.jpg" },'],['m3','            new Mascota { Nombre = "Max", Raza = "Beagle", Adopcion = "Disponible", Imagen = "perro4.jpg" },'],['m4','            new Mascota { Nombre = "Luna", Raza = "Siamés", Adopcion = "Adoptado" }'],['h','        };'],['i','    }'],['z','}']],
+principalCs:[['a','public partial class MascotaViewPrincipal : ContentPage'],['b','{'],['campo','    private MascotaViewModel viewModel;          // campo: lo usan los eventos'],['ctor','    public MascotaViewPrincipal()'],['c','    {'],['init','        InitializeComponent();'],['new','        viewModel = new MascotaViewModel();        // CREA el único ViewModel'],['bc','        BindingContext = viewModel;                // los {Binding} miran aquí'],['d','    }'],['e',''],['ev','    private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)'],['f','    {'],['nul','        if (viewModel.MascotaSeleccionada == null) return;'],['push','        Navigation.PushAsync(new MascotaDetallesView(viewModel));   // le pasa EL MISMO'],['g','    }'],['z','}']],
+principalXaml:[['lbl','<Label Text="Adopa a tu mascota" HorizontalOptions="Center"></Label>'],['cv','<CollectionView ItemsSource="{Binding ColeccionMascotas}"       <!-- la lista del ViewModel -->'],['cv2','                SelectionMode="Single"'],['cv3','                SelectedItem="{Binding MascotaSeleccionada}"   <!-- TwoWay: la elegida va al ViewModel -->'],['cv4','                SelectionChanged="CollectionView_SelectionChanged">'],['it','    <CollectionView.ItemTemplate>'],['dt','        <DataTemplate>        <!-- molde de UNA tarjeta: aquí dentro el contexto es cada Mascota -->'],['bo','            <Border StrokeShape="RoundRectangle" Stroke="Black" StrokeThickness="2">   <!-- un solo hijo -->'],['vs','                <VerticalStackLayout>'],['im','                    <Image Source="{Binding Imagen}" HeightRequest="150" WidthRequest="100"/>'],['no','                    <Label Text="{Binding Nombre}" FontSize="16"/>'],['ra','                    <Label Text="{Binding Raza}" FontSize="16"/>'],['vs2','                </VerticalStackLayout>'],['bo2','            </Border>'],['dt2','        </DataTemplate>'],['it2','    </CollectionView.ItemTemplate>'],['cvz','</CollectionView>']],
+detalleCs:[['a','public partial class MascotaDetallesView : ContentPage'],['b','{'],['campo','    private MascotaViewModel viewModel;'],['ctor','    public MascotaDetallesView(MascotaViewModel viewModel)   // RECIBE el ViewModel'],['c','    {'],['init','        InitializeComponent();'],['this','        this.viewModel = viewModel;     // campo = parámetro'],['bc','        BindingContext = viewModel;     // usa el que llega; NO hace new'],['d','    }'],['e',''],['ev1','    private async void Button_Clicked(object sender, EventArgs e)'],['pop','    {   await Navigation.PopAsync();   }                 // Seguir mirando'],['e2',''],['ev2','    private async void Button_Clicked2(object sender, EventArgs e)'],['f','    {'],['if','        if (viewModel.MascotaSeleccionada!.Adopcion == "Adoptado")'],['g','        {'],['al1','            await DisplayAlertAsync("Adopción", "Esta mascota ya está adoptada", "Aceptar");'],['ret','            return;'],['h','        }'],['set','        viewModel.MascotaSeleccionada.Adopcion = "Adoptado";   // Fody avisa → CheckBox y Label rojo cambian solos'],['al2','        await DisplayAlertAsync("Adopción", "¡Gracias por adoptar a esta mascota!", "Aceptar");'],['i','    }'],['z','}']],
+detalleXaml:[['im','<Image Source="{Binding MascotaSeleccionada.Imagen}" HeightRequest="150" />'],['no','<Label Text="{Binding MascotaSeleccionada.Nombre}" FontSize="20" FontAttributes="Bold" />'],['ra','<Label Text="{Binding MascotaSeleccionada.Raza}" FontSize="16" />'],['ad','<Label Text="{Binding MascotaSeleccionada.Adopcion}" FontSize="16" />'],['ck','<CheckBox IsChecked="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}" IsEnabled="False" />'],['rj','<Label Text="Esta mascota ya tiene familia" TextColor="Red"'],['rj2','       IsVisible="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}" />'],['b1','<Button Text="Seguir mirando" Clicked="Button_Clicked" />'],['b2','<Button Text="Adoptar ahora" Clicked="Button_Clicked2" />']],
+app:[['a','// App.xaml.cs'],['win','return new Window(new NavigationPage(new MascotaViewPrincipal()));   // sin NavigationPage no hay PushAsync'],['e',''],['b','<!-- App.xaml -->'],['ns','<Application ... xmlns:conv="clr-namespace:AdoptaProyecto.MVVM.Converters">'],['c','    <Application.Resources><ResourceDictionary>'],['d','        ... lo que ya había ...'],['key','        <conv:AdopcionABoolConverter x:Key="AdopcionABool" />'],['f','    </ResourceDictionary></Application.Resources>']],
+conv:[['a','public class AdopcionABoolConverter : IValueConverter'],['b','{'],['c1','    // Ida: del ViewModel a la vista (string -> bool)'],['cv','    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)'],['d','    {'],['cv1','        string texto = (string)value!;'],['cv2','        return texto == "Adoptado";'],['e','    }'],['c2','    // Vuelta: de la vista al ViewModel (bool -> string). Solo si el binding es TwoWay'],['cb','    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)'],['f','    {'],['cb1','        bool adoptado = (bool)value!;'],['cb2','        if (adoptado) return "Adoptado";'],['cb3','        else return "Disponible";'],['g','    }'],['z','}']]
+};
+
+/* ================= 1. MAPA ================= */
+const CAPAS={
+ model:{t:'Model · Mascota.cs',txt:'Solo datos. No sabe que existe una pantalla. Así se ve UNA mascota escrita como JSON:',json:true,cod:'model',si:'Propiedades del dato y el atributo de Fody.',no:'Listas, lógica de botones, controles.'},
+ vm:{t:'ViewModel · MascotaViewModel.cs',txt:'Clase normal (no ContentPage). Guarda la lista que pinta el CollectionView y la mascota que tocas. Las dos páginas usan este MISMO objeto.',cod:'vm',si:'ObservableCollection, la seleccionada, métodos de lógica (Agregar, Calcular…).',no:'Label, Entry, DisplayAlertAsync, Navigation.'},
+ principal:{t:'View principal · MascotaViewPrincipal',txt:'La abre la app, por eso hace new del ViewModel. En el XAML, fuera del DataTemplate los Binding miran al ViewModel; dentro, a cada Mascota.',cod:'principalCs',cod2:'principalXaml',si:'BindingContext, SelectionChanged, PushAsync.',no:'Crear las mascotas (eso va en el ViewModel).'},
+ detalle:{t:'View detalle · MascotaDetallesView',txt:'No crea ViewModel: lo recibe por el constructor. Su BindingContext es el ViewModel (no una Mascota), así que los Binding llevan delante MascotaSeleccionada.',cod:'detalleCs',cod2:'detalleXaml',si:'Constructor con parámetro, botones, DisplayAlertAsync, PopAsync.',no:'new MascotaViewModel() (sería otro ViewModel sin selección).'},
+ app:{t:'App · App.xaml.cs y App.xaml',txt:'Mete la primera página en una NavigationPage (si no, PushAsync no funciona) y registra el converter para todas las páginas.',cod:'app',si:'NavigationPage y recursos globales.',no:'Lógica del ejercicio.'},
+ conv:{t:'Converter · AdopcionABoolConverter.cs',txt:'Traduce el string Adopcion al bool que piden IsChecked e IsVisible. Mira las secciones 4 y 6.',cod:'conv',si:'Convert y ConvertBack.',no:'Cambiar datos del ViewModel por su cuenta.'}
+};
+function abreCapa(k){
+  document.querySelectorAll('.capa').forEach(b=>b.classList.toggle('activa',b.dataset.capa===k));
+  const c=CAPAS[k];
+  $('detalleCapa').innerHTML=`<h4>${c.t}</h4><p style="margin:0 0 6px">${c.txt}</p>
+   ${c.json?'<pre class="json">{\n  "Nombre": "Max",\n  "Raza": "Beagle",\n  "Adopcion": "Disponible",\n  "Imagen": "perro4.jpg"\n}</pre>':''}
+   <table class="tabla"><tr><th>Sí va aquí</th><th>No va aquí</th></tr><tr><td>${esc(c.si)}</td><td>${esc(c.no)}</td></tr></table>
+   <pre class="code" id="cc1"></pre>${c.cod2?'<pre class="code" id="cc2"></pre>':''}`;
+  pintaCodigo($('cc1'),COD[c.cod]); if(c.cod2) pintaCodigo($('cc2'),COD[c.cod2]);
+}
+document.querySelectorAll('.capa').forEach(b=>b.onclick=()=>abreCapa(b.dataset.capa));
+abreCapa('vm');
+
+/* ================= 2. PELÍCULA ================= */
+const EMOJI={'perro1.jpg':'🐕','perro2.jpg':'🐈','perro4.jpg':'🐶','':'❔'};
+const BASE=[['Firulais','perro1.jpg',0],['Pelusa','perro2.jpg',1],['Max','perro4.jpg',0],['Luna','',1]];
+function miniLista(selIdx,maxAdop,vacia){
+  if(vacia) return `<div class="mb">MascotaViewPrincipal</div><div class="vacio">(pantalla en blanco: aún no hay datos)</div>`;
+  return `<div class="mb">MascotaViewPrincipal</div><div class="mc"><div style="text-align:center;font-weight:600">Adopa a tu mascota</div>${BASE.map(([n,img,a],i)=>`<div class="mt${i===selIdx?' sel':''}"><span style="font-size:20px">${EMOJI[img]}</span><b>${n}</b>${(a||(i===2&&maxAdop))?'<span class="ok" style="font-size:10px">adoptado</span>':''}</div>`).join('')}</div>`;
+}
+function miniDetalle(adop,vacia){
+  if(vacia) return `<div class="mb">← MascotaDetallesView</div><div class="vacio">(se está construyendo…)</div>`;
+  return `<div class="mb">← MascotaDetallesView</div><div class="mc" style="text-align:center"><div style="font-size:50px">🐶</div><b style="font-size:15px">Max</b><div>Beagle</div><div>${adop?'Adoptado':'Disponible'}</div><div>${adop?'☑':'☐'} Adoptado</div>${adop?'<div class="ok">Esta mascota ya tiene familia</div>':''}</div>`;
+}
+const PELI=[
+ {c:['app'],t:'La app arranca',x:'MAUI ejecuta <code>CreateWindow</code> en <code>App.xaml.cs</code>. Mete la página principal dentro de una <b>NavigationPage</b>: es la «pila» de páginas que luego permite <code>PushAsync</code> y <code>PopAsync</code>.',cod:'app',m:['win'],mv:()=>miniLista(-1,0,true)},
+ {c:['principal'],t:'Constructor de la página principal',x:'<code>new MascotaViewPrincipal()</code> ejecuta su constructor. <code>InitializeComponent()</code> crea los controles del <code>.xaml</code>, pero todavía no tienen datos.',cod:'principalCs',m:['ctor','init'],mv:()=>miniLista(-1,0,true)},
+ {c:['vm','model'],t:'Se crea el ViewModel (el único)',x:'<code>new MascotaViewModel()</code> ejecuta el constructor del ViewModel, que crea la <code>ObservableCollection</code> con 4 objetos <code>Mascota</code> (Model). <code>MascotaSeleccionada</code> empieza en <code>null</code>.',cod:'vm',m:['ctor','new','m1','m2','m3','m4'],mv:()=>miniLista(-1,0,true)},
+ {c:['principal','vm'],t:'BindingContext: se conectan',x:'<code>BindingContext = viewModel;</code> le dice a la página: «tus <code>{Binding}</code> buscan las propiedades en este objeto». Desde aquí la pantalla ya puede leer el ViewModel.',cod:'principalCs',m:['new','bc'],mv:()=>miniLista(-1,0,true)},
+ {c:['principal'],t:'El CollectionView pinta la lista',x:'<code>ItemsSource="{Binding ColeccionMascotas}"</code> recorre la lista y usa el <code>DataTemplate</code> como molde, <b>una tarjeta por mascota</b>. Dentro del molde, <code>{Binding Nombre}</code> es el nombre de <b>esa</b> mascota.',cod:'principalXaml',m:['cv','dt','im','no','ra'],mv:()=>miniLista(-1,0)},
+ {c:['principal','vm'],t:'Tocas a Max → SelectedItem (TwoWay)',x:'<code>SelectedItem</code> es TwoWay: el control <b>escribe</b> en el ViewModel. Ahora <code>MascotaSeleccionada</code> apunta al objeto Max de la lista (el mismo, no una copia).',cod:'principalXaml',m:['cv3'],mv:()=>miniLista(2,0)},
+ {c:['principal'],t:'Salta SelectionChanged → PushAsync',x:'Como cambió la selección, se ejecuta el evento. Comprueba que no sea <code>null</code> y navega creando la página de detalle <b>pasándole el mismo viewModel</b>.',cod:'principalCs',m:['ev','nul','push'],mv:()=>miniLista(2,0)},
+ {c:['detalle','vm'],t:'Constructor del detalle: recibe y guarda',x:'El parámetro <code>viewModel</code> trae el ViewModel de la principal. <code>this.viewModel = viewModel;</code> lo guarda en el campo (para los botones) y <code>BindingContext = viewModel;</code> lo conecta a la pantalla.',cod:'detalleCs',m:['ctor','this','bc'],mv:()=>miniDetalle(0,true)},
+ {c:['detalle','conv'],t:'Los Binding leen MascotaSeleccionada',x:'<code>{Binding MascotaSeleccionada.Nombre}</code> → «Max». Para el CheckBox y el Label rojo, el converter traduce <code>"Disponible"</code> → <code>false</code>: casilla vacía y Label oculto.',cod:'detalleXaml',m:['no','ra','ad','ck','rj2'],mv:()=>miniDetalle(0)},
+ {c:['detalle','model'],t:'Pulsas «Adoptar ahora»',x:'<code>Button_Clicked2</code> comprueba que no esté ya adoptada y cambia la propiedad del Model: <code>MascotaSeleccionada.Adopcion = "Adoptado"</code>.',cod:'detalleCs',m:['ev2','if','set'],mv:()=>miniDetalle(0)},
+ {c:['model','conv','detalle'],t:'Fody avisa y la pantalla se actualiza sola',x:'Gracias a <code>[AddINotifyPropertyChangedInterface]</code> en <code>Mascota</code>, el cambio lanza <code>PropertyChanged</code>. Los Binding vuelven a leer: el converter ahora devuelve <code>true</code>, la casilla se marca y aparece el Label rojo. <b>Ninguna línea de C# toca el CheckBox.</b>',cod:'conv',m:['cv','cv1','cv2'],mv:()=>miniDetalle(1)},
+ {c:['detalle','principal'],t:'Seguir mirando → PopAsync',x:'<code>PopAsync</code> quita el detalle de la pila y se ve otra vez la principal. Como el ViewModel es el mismo, Max ya sale adoptado en la lista.',cod:'detalleCs',m:['ev1','pop'],mv:()=>miniLista(2,1)}
+];
+let pi=0,peliTimer=null;
+$('peliBarra').innerHTML=PELI.map((_,i)=>`<i data-i="${i}" title="Paso ${i+1}"></i>`).join('');
+$('peliBarra').querySelectorAll('i').forEach(e=>e.onclick=()=>{paraAuto();pintaPeli(+e.dataset.i);});
+function pintaPeli(i){
+  pi=Math.max(0,Math.min(PELI.length-1,i)); const p=PELI[pi];
+  document.querySelectorAll('#peliChips .chip').forEach(ch=>ch.classList.toggle('on',p.c.includes(ch.dataset.c)));
+  $('peliBarra').querySelectorAll('i').forEach((e,k)=>e.classList.toggle('hecho',k<=pi));
+  $('peliTit').textContent=(pi+1)+'. '+p.t; $('peliTxt').innerHTML=p.x;
+  pintaCodigo($('peliCod'),COD[p.cod],p.m); $('peliMovil').innerHTML=p.mv();
+  $('peliAnt').disabled=pi===0; $('peliSig').disabled=pi===PELI.length-1;
+  $('peliCont').textContent=`Paso ${pi+1} de ${PELI.length}`;
+}
+function paraAuto(){clearInterval(peliTimer);peliTimer=null;$('peliAuto').textContent='▶ Reproducir solo';}
+$('peliAnt').onclick=()=>{paraAuto();pintaPeli(pi-1);};
+$('peliSig').onclick=()=>{paraAuto();pintaPeli(pi+1);};
+$('peliAuto').onclick=()=>{
+  if(peliTimer){paraAuto();return;}
+  if(pi===PELI.length-1) pintaPeli(0);
+  $('peliAuto').textContent='⏸ Pausa';
+  peliTimer=setInterval(()=>{if(pi>=PELI.length-1){paraAuto();return;}pintaPeli(pi+1);},4500);
+};
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  const r=$('peli').getBoundingClientRect(); if(r.top>window.innerHeight||r.top<-900) return;
+  if(e.key==='ArrowRight'){paraAuto();pintaPeli(pi+1);} if(e.key==='ArrowLeft'){paraAuto();pintaPeli(pi-1);}
+});
+pintaPeli(0);
+
+/* ================= 3. SIMULADOR ================= */
+let mascotas,sel,cambiado;
+function reinicia(){
+  mascotas=[{Nombre:'Firulais',Raza:'Labrador',Adopcion:'Disponible',Imagen:'perro1.jpg'},{Nombre:'Pelusa',Raza:'Persa',Adopcion:'Adoptado',Imagen:'perro2.jpg'},{Nombre:'Max',Raza:'Beagle',Adopcion:'Disponible',Imagen:'perro4.jpg'},{Nombre:'Luna',Raza:'Siamés',Adopcion:'Adoptado',Imagen:''}];
+  sel=null;cambiado=null;
+}
+reinicia();
+function pintaJson(){
+  const m=o=>`{ "Nombre": "${o.Nombre}", "Raza": "${o.Raza}", "Adopcion": ${cambiado===o?'<span class="camb">"'+o.Adopcion+'"</span>':'"'+o.Adopcion+'"'}, "Imagen": "${o.Imagen}" }`;
+  $('json').innerHTML=`{\n  "ColeccionMascotas": [\n${mascotas.map(o=>'    '+m(o)).join(',\n')}\n  ],\n  "MascotaSeleccionada": ${sel?'<span class="camb">→ '+sel.Nombre+'</span>  (la misma de la lista, no una copia)':'null'}\n}`;
+}
+function pintaLista(){
+  $('lista').innerHTML=mascotas.map((o,i)=>`<div class="tarjeta${sel===o?' sel':''}" data-i="${i}"><div class="foto bind" data-b="tImagen">${EMOJI[o.Imagen]}</div><div><div class="n bind" data-b="tNombre">${o.Nombre}</div><div class="bind" data-b="tRaza">${o.Raza}</div></div></div>`).join('');
+  $('lista').querySelectorAll('.tarjeta').forEach(t=>t.onclick=()=>tocaMascota(+t.dataset.i));
+  enganchaBinds($('lista'));
+}
+function pintaDetalle(){
+  if(!sel) return; const ad=sel.Adopcion==='Adoptado';
+  $('dImagen').textContent=EMOJI[sel.Imagen]; $('dNombre').textContent=sel.Nombre; $('dRaza').textContent=sel.Raza; $('dAdopcion').textContent=sel.Adopcion;
+  $('dCheck').checked=ad; $('dCheck').disabled=!$('optCheck').checked; $('dRojo').style.display=ad?'':'none';
+}
+function paso(html,k1,m1,k2,m2){
+  $('paso').innerHTML=html;
+  $('codigoSim').innerHTML='<pre class="code" id="s1"></pre>'+(k2?'<pre class="code" id="s2"></pre>':'');
+  pintaCodigo($('s1'),COD[k1],m1); if(k2) pintaCodigo($('s2'),COD[k2],m2);
+}
+function pasoDiff(html,lineas){$('paso').innerHTML=html;$('codigoSim').innerHTML='<pre class="code" id="s1"></pre>';pintaDiff($('s1'),lineas);}
+function tocaMascota(i){
+  const o=mascotas[i];
+  if($('optBloquear').checked&&o.Adopcion==='Adoptado'){
+    sel=o; pintaLista(); pintaJson();
+    pasoDiff(`<span class="etq e-view">Variante A</span>Tocas a <b>${o.Nombre}</b>. <code>SelectedItem</code> la guarda en el ViewModel y salta <code>SelectionChanged</code>. El <b>nuevo if</b> ve que ya es "Adoptado": aviso y <code>return</code>, sin <code>PushAsync</code>.`,VARS.A.files[0].diff);
+    alerta('Adopción',o.Nombre+' ya está adoptada',()=>{sel=null;pintaLista();pintaJson();
+      $('paso').innerHTML+=' <br>Después, <code>MascotaSeleccionada = null;</code> deja la lista sin selección (mira el JSON), para poder volver a tocarla.';});
+    return;
+  }
+  sel=o;cambiado=null;pintaLista();pintaJson();pintaDetalle();
+  paso(`<span class="etq e-view">View</span>Tocas <b>${o.Nombre}</b>. <code>SelectedItem</code> (TwoWay) lo escribe en <code>MascotaSeleccionada</code>. Salta <code>SelectionChanged</code> y navega pasando <b>el mismo</b> <code>viewModel</code>.`,'principalCs',['ev','nul','push'],'principalXaml',['cv3','cv4']);
+  setTimeout(()=>{
+    $('movil').classList.add('det');$('titulo').textContent='MascotaDetallesView';$('btnAtras').style.visibility='visible';
+    paso(`<span class="etq e-view">View detalle</span>Su constructor guarda el ViewModel recibido y lo pone de <code>BindingContext</code>. Por eso <code>{Binding MascotaSeleccionada.Nombre}</code> muestra «${o.Nombre}».`,'detalleCs',['ctor','this','bc'],'detalleXaml',['im','no','ra','ad']);
+  },700);
+}
+function volver(){
+  $('movil').classList.remove('det');$('titulo').textContent='MascotaViewPrincipal';$('btnAtras').style.visibility='hidden';
+  paso(`<span class="etq e-view">View detalle</span><code>await Navigation.PopAsync();</code> quita la página de encima. La lista usa el mismo ViewModel: si has adoptado, el cambio sigue ahí (mira el JSON).`,'detalleCs',['ev1','pop']);
+}
+function adoptar(){
+  if(sel.Adopcion==='Adoptado'){
+    alerta('Adopción','Esta mascota ya está adoptada');
+    paso(`<span class="etq e-view">View detalle</span>El <code>if</code> ve que ya es "Adoptado": sale el aviso y el <code>return</code> corta el método.`,'detalleCs',['ev2','if','al1','ret']);return;
+  }
+  sel.Adopcion='Adoptado';cambiado=sel;pintaDetalle();pintaJson();pintaLista();
+  alerta('Adopción','¡Gracias por adoptar a esta mascota!');
+  paso(`<span class="etq e-vm">ViewModel</span>Se cambia <code>Adopcion</code> a "Adoptado". Fody avisa, el converter devuelve <code>true</code>: el CheckBox se marca y el Label rojo aparece <b>sin tocar ningún control desde C#</b>.`,'detalleCs',['ev2','set','al2'],'detalleXaml',['ad','ck','rj2']);
+}
+function checkPulsado(){
+  const v=$('dCheck').checked; sel.Adopcion=v?'Adoptado':'Disponible';cambiado=sel;pintaDetalle();pintaJson();pintaLista();
+  paso(`<span class="etq e-conv">Variante B</span>Has pulsado el CheckBox: <code>IsChecked = ${v}</code>. Como el binding es TwoWay, MAUI llama a <b>ConvertBack(${v})</b>, que devuelve <code>"${sel.Adopcion}"</code>, y lo escribe en <code>MascotaSeleccionada.Adopcion</code>. Fody avisa y el Label de texto y el rojo cambian. <b>Cero líneas en el .xaml.cs.</b>${v?'':' Ojo: al desmarcar, la mascota vuelve a estar Disponible.'}`,'conv',v?['cb','cb1','cb2']:['cb','cb1','cb3'],'detalleXaml',['ad','rj2']);
+}
+let alertaCb=null;
+function alerta(t,m,cb){$('aTit').textContent=t;$('aMsg').textContent=m;$('alerta').classList.add('on');alertaCb=cb||null;}
+$('aOk').onclick=()=>{$('alerta').classList.remove('on');if(alertaCb){const f=alertaCb;alertaCb=null;f();}};
+$('bSeguir').onclick=volver;$('btnAtras').onclick=volver;$('bAdoptar').onclick=adoptar;$('dCheck').onchange=checkPulsado;
+$('simReset').onclick=()=>{reinicia();$('movil').classList.remove('det');$('titulo').textContent='MascotaViewPrincipal';$('btnAtras').style.visibility='hidden';pintaLista();pintaJson();paso('Datos reiniciados: el ViewModel vuelve a como lo crea su constructor.','vm',['ctor','new']);};
+
+const BINDS={
+ titulo:['Texto fijo, sin binding.','principalXaml',['lbl']],
+ itemsSource:['<code>ItemsSource="{Binding ColeccionMascotas}"</code>: una tarjeta por cada Mascota de la lista del ViewModel.','principalXaml',['cv']],
+ tImagen:['Dentro del <code>DataTemplate</code> el contexto es <b>cada Mascota</b>: basta <code>{Binding Imagen}</code>.','principalXaml',['dt','im']],
+ tNombre:['Dentro del <code>DataTemplate</code>: <code>{Binding Nombre}</code> de esa Mascota.','principalXaml',['dt','no']],
+ tRaza:['Dentro del <code>DataTemplate</code>: <code>{Binding Raza}</code> de esa Mascota.','principalXaml',['dt','ra']],
+ dImagen:['El contexto de esta página es el ViewModel: hay que bajar a la elegida, <code>MascotaSeleccionada.Imagen</code>.','detalleXaml',['im']],
+ dNombre:['<code>{Binding MascotaSeleccionada.Nombre}</code>','detalleXaml',['no']],
+ dRaza:['<code>{Binding MascotaSeleccionada.Raza}</code>','detalleXaml',['ra']],
+ dAdopcion:['El string tal cual, sin converter: un Label acepta texto.','detalleXaml',['ad']],
+ dCheck:['<code>IsChecked</code> pide bool → hace falta el converter. Es TwoWay de serie: con la variante B, pulsarlo escribe en el ViewModel.','detalleXaml',['ck']],
+ dRojo:['<code>IsVisible</code> pide bool → mismo converter. Si es false, no se ve.','detalleXaml',['rj','rj2']],
+ bSeguir:['<code>Clicked="Button_Clicked"</code> → <code>PopAsync()</code>.','detalleXaml',['b1']],
+ bAdoptar:['<code>Clicked="Button_Clicked2"</code> → comprueba y cambia <code>Adopcion</code>.','detalleXaml',['b2']]
+};
+function enganchaBinds(raiz){
+  raiz.querySelectorAll('.bind').forEach(el=>{if(el.dataset.ok)return;el.dataset.ok=1;
+    el.addEventListener('mouseenter',()=>{const b=BINDS[el.dataset.b];if(b)paso('<span class="etq e-view">Binding</span>'+b[0],b[1],b[2]);});});
+}
+enganchaBinds(document);pintaLista();pintaJson();
+paso('La app arranca: <code>App</code> abre <code>new NavigationPage(new MascotaViewPrincipal())</code>. El constructor de la página crea el ViewModel y lo pone como <code>BindingContext</code>.','principalCs',['ctor','new','bc']);
+
+/* ---- variantes: código completo con diff ---- */
+const VARS={
+ A:{info:'<span class="etq e-view">Variante A</span>Solo cambia <b>un archivo</b>: el <code>.xaml.cs</code> de la página principal. El XAML se queda igual.',
+  files:[{n:'MascotaViewPrincipal.xaml.cs',diff:[
+   ' public partial class MascotaViewPrincipal : ContentPage',' {','     private MascotaViewModel viewModel;','',
+   '     public MascotaViewPrincipal()','     {','         InitializeComponent();','         viewModel = new MascotaViewModel();','         BindingContext = viewModel;','     }','',
+   '-    private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)',
+   '+    private async void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)   // async: dentro hay await',
+   '     {','         if (viewModel.MascotaSeleccionada == null) return;',
+   '+','+        if (viewModel.MascotaSeleccionada.Adopcion == "Adoptado")       // ¿ya tiene familia?','+        {',
+   '+            await DisplayAlertAsync("Adopción", viewModel.MascotaSeleccionada.Nombre + " ya está adoptada", "Aceptar");',
+   '+            viewModel.MascotaSeleccionada = null;   // quita la selección para poder tocarla otra vez',
+   '+            return;                                  // corta: NO navega','+        }','+',
+   '-        Navigation.PushAsync(new MascotaDetallesView(viewModel));',
+   '+        await Navigation.PushAsync(new MascotaDetallesView(viewModel));',
+   '     }',' }']}],
+  nota:'<div class="caja info"><b>Cómo leerlo:</b> el <code>if</code> nuevo va <b>entre</b> la comprobación de null y el <code>PushAsync</code>. Si entra, el <code>return</code> hace que el <code>PushAsync</code> no llegue a ejecutarse. Al poner <code>MascotaSeleccionada = null</code>, <code>SelectionChanged</code> vuelve a saltar, pero el primer <code>if (… == null) return;</code> lo corta: por eso esa línea es importante.</div>'},
+ B:{info:'<span class="etq e-conv">Variante B</span>Lo obligatorio es <b>una línea del XAML</b>. El converter ya tenía <code>ConvertBack</code>: ahora por fin se usa. El evento del <code>.xaml.cs</code> es opcional.',
+  files:[
+   {n:'MascotaDetallesView.xaml',diff:[
+    ' <Label Text="{Binding MascotaSeleccionada.Adopcion}" FontSize="16" />','',' <HorizontalStackLayout Spacing="5">',
+    '-    <CheckBox IsChecked="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}" IsEnabled="False" />',
+    '+    <CheckBox IsChecked="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}, Mode=TwoWay}" />',
+    '     <Label Text="Adoptado" VerticalOptions="Center" />',' </HorizontalStackLayout>',
+    ' <Label Text="Esta mascota ya tiene familia" TextColor="Red"','        IsVisible="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}}" />']},
+   {n:'AdopcionABoolConverter.cs',diff:[
+    ' public class AdopcionABoolConverter : IValueConverter',' {',
+    '     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)','     {','         string texto = (string)value!;','         return texto == "Adoptado";','     }','',
+    '*    // ESTE es el que ahora trabaja: se llama cada vez que pulsas el CheckBox',
+    '*    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)','*    {',
+    '*        bool adoptado = (bool)value!;          // lo que dice el CheckBox','*        if (adoptado) return "Adoptado";      // esto se escribe en MascotaSeleccionada.Adopcion',
+    '*        else return "Disponible";','*    }',' }']},
+   {n:'MascotaDetallesView.xaml.cs (opcional)',diff:[
+    ' // En el XAML, si quieres un aviso al marcar:',
+    '+// <CheckBox ... CheckedChanged="CheckBox_CheckedChanged" />','',
+    '+private async void CheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)','+{',
+    '+    if (e.Value)   // true = se acaba de marcar','+        await DisplayAlertAsync("Adopción", "¡Gracias por adoptar!", "Aceptar");','+}']},
+   {n:'App.xaml',diff:[' <!-- Sin cambios: el converter ya estaba registrado -->',' <conv:AdopcionABoolConverter x:Key="AdopcionABool" />']}
+  ],
+  nota:'<div class="caja ok"><b>Qué hace cada cosa:</b> quitar <code>IsEnabled="False"</code> deja pulsar el CheckBox. <code>Mode=TwoWay</code> abre el tubo de vuelta (en <code>IsChecked</code> ya venía abierto, ponerlo es para que se vea). Al pulsar, MAUI llama a <code>ConvertBack</code> y escribe su resultado en el ViewModel.</div><div class="caja ojo"><b>Ojo con el evento opcional:</b> <code>CheckedChanged</code> salta también cuando es el <b>binding</b> quien marca la casilla, por ejemplo al abrir a Pelusa, que ya está adoptada. Te saldría «¡Gracias por adoptar!» sin haber tocado nada. Si no lo pide el enunciado, no lo pongas: el TwoWay ya hace el trabajo.</div>'}
+};
+let varFich=0;
+function pintaVariantes(){
+  const act=[];if($('optBloquear').checked)act.push('A');if($('optCheck').checked)act.push('B');
+  $('vA').classList.toggle('on',act.includes('A'));$('vB').classList.toggle('on',act.includes('B'));
+  if(!act.length){$('varInfo').innerHTML='<p style="color:var(--muted);font-size:14px">Activa la variante A o la B (arriba del móvil) y aquí verás el código completo de cada archivo que cambia.</p>';$('varFicheros').innerHTML='';$('varCodigo').style.display='none';$('varNota').innerHTML='';return;}
+  const files=[];act.forEach(v=>VARS[v].files.forEach(f=>files.push({...f,v})));
+  if(varFich>=files.length)varFich=0;
+  $('varInfo').innerHTML=act.map(v=>`<p style="margin:6px 0;font-size:14px">${VARS[v].info}</p>`).join('');
+  $('varFicheros').innerHTML=files.map((f,i)=>`<button class="${i===varFich?'on':''}" data-i="${i}">${f.v} · ${f.n}</button>`).join('');
+  $('varFicheros').querySelectorAll('button').forEach(b=>b.onclick=()=>{varFich=+b.dataset.i;pintaVariantes();});
+  $('varCodigo').style.display='';pintaDiff($('varCodigo'),files[varFich].diff);
+  $('varNota').innerHTML=VARS[files[varFich].v].nota;
+}
+$('optCheck').onchange=()=>{pintaDetalle();varFich=0;pintaVariantes();if($('optCheck').checked)paso('<span class="etq e-conv">Variante B</span>Activada. Abre a Max o a Firulais y <b>pulsa el CheckBox</b> (ya no está desactivado). Abajo tienes el código completo.','detalleXaml',['ck']);};
+$('optBloquear').onchange=()=>{varFich=0;pintaVariantes();if($('optBloquear').checked)pasoDiff('<span class="etq e-view">Variante A</span>Activada. Toca a <b>Pelusa</b> o a <b>Luna</b> (ya adoptadas) y mira cómo no se abre el detalle.',VARS.A.files[0].diff);};
+pintaVariantes();
+
+/* ================= 4. LABORATORIO ================= */
+const lab={modo:'TwoWay',adop:'Disponible',nom:'Max',vCheck:false,vText:'Max'};
+const MODOS={
+ OneWay:'<b>OneWay</b> (→): solo del ViewModel al control. Si cambias el ViewModel desde C#, el control se entera. Si el usuario cambia el control, <b>el ViewModel no se entera</b>. Es el modo de <code>Label.Text</code>.',
+ TwoWay:'<b>TwoWay</b> (⇄): en los dos sentidos. Lo que cambia el usuario <b>se escribe en el ViewModel</b>, y lo que cambia el ViewModel llega al control. Es el modo por defecto de <code>Entry.Text</code>, <code>CheckBox.IsChecked</code> y <code>SelectedItem</code>.',
+ OneTime:'<b>OneTime</b> (→ una vez): copia el valor <b>solo al cargar la página</b>. Después, ni el ViewModel llega al control ni al revés. Sirve para datos que no cambian.'
+};
+function brilla(id){const e=$(id);e.classList.remove('brilla');void e.offsetWidth;e.classList.add('brilla');setTimeout(()=>e.classList.remove('brilla'),900);}
+function bola(tubo,dir){const t=$(tubo);const b=document.createElement('span');b.className='bola '+dir;t.appendChild(b);setTimeout(()=>b.remove(),900);}
+function log(cls,txt){const d=document.createElement('div');d.className=cls;d.innerHTML=txt;$('labLog').prepend(d);}
+function pintaLab(){
+  $('modos').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===lab.modo));
+  $('modoExpl').innerHTML=MODOS[lab.modo];
+  $('lvAdop').textContent='"'+lab.adop+'"';$('lvNom').textContent='"'+lab.nom+'"';
+  $('lvBtnAdopTxt').textContent=lab.adop==='Adoptado'?'"Disponible"':'"Adoptado"';
+  $('lcCheck').checked=lab.vCheck;$('lcCheckV').textContent='IsChecked = '+lab.vCheck;
+  if(document.activeElement!==$('lcEntry'))$('lcEntry').value=lab.vText;
+  $('lcEntryV').textContent='Text = "'+lab.vText+'"';
+  $('lcLabel').textContent=lab.nom;
+  $('lcCheckD').classList.toggle('on',lab.vCheck!==(lab.adop==='Adoptado'));
+  $('lcEntryD').classList.toggle('on',lab.vText!==lab.nom);
+  const flecha={OneWay:'→ solo ida',TwoWay:'⇄ ida y vuelta',OneTime:'→ solo al cargar'}[lab.modo];
+  $('tubo1t').innerHTML='Adopcion ⟷ IsChecked<br>'+flecha+' · con converter';
+  $('tubo2t').innerHTML='Nombre ⟷ Text<br>'+flecha;
+  ['tubo1','tubo2'].forEach(t=>$(t).classList.toggle('cerrado',lab.modo==='OneTime'));
+  const m=lab.modo==='TwoWay'?', Mode=TwoWay':lab.modo==='OneWay'?', Mode=OneWay':', Mode=OneTime';
+  pintaCodigo($('labCod'),[
+   ['a','<CheckBox IsChecked="{Binding MascotaSeleccionada.Adopcion, Converter={StaticResource AdopcionABool}'+m+'}" />'],
+   ['b','<Entry Text="{Binding MascotaSeleccionada.Nombre'+m+'}" />'],
+   ['c','<Label Text="{Binding MascotaSeleccionada.Nombre}" />   <!-- otro control enlazado a lo mismo -->']],['a','b']);
+}
+$('modos').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  lab.modo=b.dataset.m;
+  // al cambiar de modo, la página "se recarga": todos los modos copian el valor al cargar
+  lab.vCheck=lab.adop==='Adoptado';lab.vText=lab.nom;
+  log('a','— Modo '+lab.modo+': se carga la página y el control copia el valor del ViewModel —');pintaLab();
+});
+$('lvBtnAdop').onclick=()=>{
+  lab.adop=lab.adop==='Adoptado'?'Disponible':'Adoptado';brilla('lvAdop');
+  if(lab.modo==='OneTime'){bola('tubo1','x');log('r','C#: Adopcion = "'+lab.adop+'" → OneTime: el tubo ya está cerrado, el CheckBox NO cambia');}
+  else{bola('tubo1','d');const b=lab.adop==='Adoptado';lab.vCheck=b;setTimeout(()=>brilla('lcCheckV'),700);log('a','C#: Adopcion = "'+lab.adop+'" → Fody avisa → Convert("'+lab.adop+'") = '+b+' → IsChecked = '+b);}
+  pintaLab();
+};
+$('lvBtnNom').onclick=()=>{
+  lab.nom=lab.nom==='Max el Grande'?'Max':'Max el Grande';brilla('lvNom');
+  $('lvBtnNom').textContent='Nombre = "'+(lab.nom==='Max'?'Max el Grande':'Max')+'"';
+  if(lab.modo==='OneTime'){bola('tubo2','x');log('r','C#: Nombre = "'+lab.nom+'" → OneTime: el Entry NO cambia (el Label sí, es otro binding OneWay)');}
+  else{bola('tubo2','d');lab.vText=lab.nom;setTimeout(()=>brilla('lcEntryV'),700);log('a','C#: Nombre = "'+lab.nom+'" → el Entry y el Label se actualizan');}
+  pintaLab();
+};
+$('lcCheck').onchange=()=>{
+  lab.vCheck=$('lcCheck').checked;
+  if(lab.modo==='TwoWay'){bola('tubo1','i');const s=lab.vCheck?'Adoptado':'Disponible';lab.adop=s;setTimeout(()=>brilla('lvAdop'),700);log('b','Usuario: IsChecked = '+lab.vCheck+' → ConvertBack('+lab.vCheck+') = "'+s+'" → ViewModel.Adopcion = "'+s+'"');}
+  else{bola('tubo1','x');log('r','Usuario: IsChecked = '+lab.vCheck+' → '+lab.modo+': no hay vuelta, ConvertBack NO se llama. El ViewModel sigue en "'+lab.adop+'"');}
+  pintaLab();
+};
+let tEntry=null;
+$('lcEntry').oninput=()=>{
+  lab.vText=$('lcEntry').value;
+  if(lab.modo==='TwoWay'){lab.nom=lab.vText;clearTimeout(tEntry);tEntry=setTimeout(()=>{bola('tubo2','i');brilla('lvNom');log('b','Usuario escribe "'+lab.vText+'" → ViewModel.Nombre = "'+lab.vText+'" → el Label también cambia');},250);}
+  else{clearTimeout(tEntry);tEntry=setTimeout(()=>{bola('tubo2','x');log('r','Usuario escribe "'+lab.vText+'" → '+lab.modo+': NO llega al ViewModel. El Label sigue diciendo "'+lab.nom+'"');},250);}
+  pintaLab();
+};
+log('a','Página cargada: IsChecked = false (Convert("Disponible")), Text = "Max"');
+pintaLab();
+
+/* ================= 5. THIS ================= */
+pintaCodigo($('codePrincipal'),COD.principalCs.slice(0,9),['campo','new','bc']);
+const VTHIS={
+ this:{lin:[['a','private MascotaViewModel viewModel;          // CAMPO (de la clase)'],['b','public MascotaDetallesView(MascotaViewModel viewModel)  // PARÁMETRO'],['c','{'],['d','    InitializeComponent();'],['t','    this.viewModel = viewModel;   // campo ← parámetro'],['e','    BindingContext = viewModel;'],['f','}']],m:['t'],
+   txt:'<div class="caja ok"><b>Funciona.</b> El campo guarda el ViewModel, así que <code>Button_Clicked2</code> puede usar <code>viewModel.MascotaSeleccionada</code>.</div>'},
+ sin:{lin:[['a','private MascotaViewModel viewModel;'],['b','public MascotaDetallesView(MascotaViewModel viewModel)'],['c','{'],['d','    InitializeComponent();'],['t','    // (falta this.viewModel = viewModel;)'],['e','    BindingContext = viewModel;   // usa el parámetro: los Binding SÍ funcionan'],['f','}']],m:['t','e'],
+   txt:'<div class="caja mal"><b>Engaña:</b> compila y la pantalla se ve bien (el BindingContext usa el parámetro), pero el campo se queda en <code>null</code>. Al pulsar «Adoptar ahora» → <b>NullReferenceException</b>. Si escribes <code>viewModel = viewModel;</code> sin this, te asignas el parámetro a sí mismo: mismo fallo.</div>'},
+ otro:{lin:[['a','private MascotaViewModel viewModel;'],['b','public MascotaDetallesView(MascotaViewModel viewModelRecibido)'],['c','{'],['d','    InitializeComponent();'],['t','    viewModel = viewModelRecibido;   // sin confusión: no hace falta this'],['e','    BindingContext = viewModel;'],['f','}']],m:['b','t'],
+   txt:'<div class="caja ok"><b>Equivalente.</b> Con otro nombre de parámetro no necesitas <code>this</code>. Usa la versión que te salga sin pensar.</div>'}
+};
+function pintaThis(v){$('tgThis').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));pintaCodigo($('codeDetalle'),VTHIS[v].lin,VTHIS[v].m);$('thisExplica').innerHTML=VTHIS[v].txt;}
+$('tgThis').querySelectorAll('button').forEach(b=>b.onclick=()=>pintaThis(b.dataset.v));pintaThis('this');
+
+/* ================= 6. CONVERTER ================= */
+pintaCodigo($('codeConv'),COD.conv,['cv2','cb2','cb3']);
+function pintaConv(v){
+  $('tgConv').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  const r=v==='Adoptado';$('tIda1').textContent=`Adopcion = "${v}"`;$('tIda2').textContent=`devuelve ${r}`;
+  $('tIda3').textContent=r?'☑ marcado · Label rojo visible':'☐ vacío · Label rojo oculto';
+  ['tIda2','tIda3'].forEach(id=>{const e=$(id);e.classList.remove('anim');void e.offsetWidth;e.classList.add('anim');});
+}
+$('tgConv').querySelectorAll('button').forEach(b=>b.onclick=()=>pintaConv(b.dataset.v));pintaConv('Disponible');
+
+/* ================= 7. ROMPE ================= */
+const FALLOS=[
+ {t:'Sin BindingContext en la principal',tipo:'silen',f:'MascotaViewPrincipal.xaml.cs',
+  diff:['     InitializeComponent();','     viewModel = new MascotaViewModel();','-    BindingContext = viewModel;'],
+  pant:()=>`<div class="mb">MascotaViewPrincipal</div><div class="mc"><div style="text-align:center;font-weight:600">Adopa a tu mascota</div><div class="vacio">(lista vacía)</div></div>`,
+  err:'Sin error. Solo, en la ventana Salida de VS:\nBinding: \'ColeccionMascotas\' property not found…',ok:'BindingContext = viewModel;   // justo después del new',
+  exp:'Sale el título (es texto fijo) pero ninguna tarjeta. Los <code>{Binding}</code> no saben dónde buscar <code>ColeccionMascotas</code>.'},
+ {t:'Sin NavigationPage en App',tipo:'ejec',f:'App.xaml.cs',
+  diff:['-    return new Window(new NavigationPage(new MascotaViewPrincipal()));','+    return new Window(new MascotaViewPrincipal());'],
+  pant:()=>miniLista(2,0),
+  err:'Al tocar una mascota no navega.\nEn Windows: PlatformNotSupportedException:\nPushAsync is not supported globally on Windows, please use a NavigationPage.',ok:'new Window(new NavigationPage(new MascotaViewPrincipal()))',
+  exp:'La lista sale bien, pero <code>PushAsync</code> necesita la pila de páginas de una <code>NavigationPage</code>.'},
+ {t:'Sin this.viewModel en el detalle',tipo:'ejec',f:'MascotaDetallesView.xaml.cs',
+  diff:['     InitializeComponent();','-    this.viewModel = viewModel;','     BindingContext = viewModel;'],
+  pant:()=>miniDetalle(0),
+  err:'El detalle se ve perfecto. Al pulsar «Adoptar ahora»:\nSystem.NullReferenceException:\nObject reference not set to an instance of an object.',ok:'this.viewModel = viewModel;',
+  exp:'El <code>BindingContext</code> usa el parámetro (por eso se ve), pero el campo <code>viewModel</code> sigue en <code>null</code> y el botón lo usa.'},
+ {t:'new MascotaViewModel() en el detalle',tipo:'silen',f:'MascotaDetallesView.xaml.cs',
+  diff:['     InitializeComponent();','-    this.viewModel = viewModel;','-    BindingContext = viewModel;','+    this.viewModel = new MascotaViewModel();   // crea OTRO, sin selección','+    BindingContext = this.viewModel;'],
+  pant:()=>`<div class="mb">← MascotaDetallesView</div><div class="mc"><div class="vacio">(detalle vacío: sin nombre, sin raza)</div></div>`,
+  err:'Sin error al abrir. Detalle vacío.\nAl pulsar «Adoptar ahora» → NullReferenceException\n(MascotaSeleccionada es null en el ViewModel nuevo).',ok:'BindingContext = viewModel;   // el que llega, sin new',
+  exp:'Ese ViewModel nuevo tiene su propia lista y <code>MascotaSeleccionada = null</code>. La mascota que tocaste está en el <b>otro</b>.'},
+ {t:'Llamar al detalle sin pasarle el ViewModel',tipo:'comp',f:'MascotaViewPrincipal.xaml.cs',
+  diff:['-    Navigation.PushAsync(new MascotaDetallesView(viewModel));','+    Navigation.PushAsync(new MascotaDetallesView());'],
+  pant:()=>`<div class="mb">Visual Studio</div><div class="vacio">❌ No compila</div>`,
+  err:'CS7036: No se ha dado ningún argumento que corresponda al parámetro requerido \'viewModel\' de \'MascotaDetallesView.MascotaDetallesView(MascotaViewModel)\'',ok:'new MascotaDetallesView(viewModel)',
+  exp:'Regla: <b>lo que pide el constructor, se pasa</b>. El constructor del detalle pide un <code>MascotaViewModel</code>.'},
+ {t:'Converter sin registrar en App.xaml',tipo:'ejec',f:'App.xaml',
+  diff:['     <ResourceDictionary.MergedDictionaries> ... </ResourceDictionary.MergedDictionaries>','-    <conv:AdopcionABoolConverter x:Key="AdopcionABool" />'],
+  pant:()=>miniLista(2,0),
+  err:'Al abrir el detalle:\nMicrosoft.Maui.Controls.Xaml.XamlParseException:\nStaticResource not found for key AdopcionABool',ok:'<conv:AdopcionABoolConverter x:Key="AdopcionABool" />   (y el xmlns:conv arriba)',
+  exp:'La lista funciona; peta al cargar el XAML del detalle porque busca una clave que no existe. Lo mismo si escribes mal la clave o pones el nombre de la clase.'},
+ {t:'En el detalle, {Binding Nombre} a secas',tipo:'silen',f:'MascotaDetallesView.xaml',
+  diff:['-<Label Text="{Binding MascotaSeleccionada.Nombre}" FontSize="20" FontAttributes="Bold" />','+<Label Text="{Binding Nombre}" FontSize="20" FontAttributes="Bold" />'],
+  pant:()=>`<div class="mb">← MascotaDetallesView</div><div class="mc" style="text-align:center"><div style="font-size:50px">🐶</div><b style="color:#bbb">(sin nombre)</b><div>Beagle</div><div>Disponible</div></div>`,
+  err:'Sin error. El nombre sale vacío.\nSalida: Binding: \'Nombre\' property not found on \'MascotaViewModel\'',ok:'{Binding MascotaSeleccionada.Nombre}',
+  exp:'Aquí el contexto es el <b>ViewModel</b>, que no tiene <code>Nombre</code>. Solo dentro de un <code>DataTemplate</code> el contexto es cada Mascota.'},
+ {t:'Mascota sin el atributo de Fody',tipo:'silen',f:'Mascota.cs',
+  diff:['-[AddINotifyPropertyChangedInterface]',' public class Mascota',' {','     public string Adopcion { get; set; }'],
+  pant:()=>miniDetalle(0),
+  err:'Sin error. Pulsas «Adoptar ahora», sale el «¡Gracias!»…\npero el CheckBox y el Label rojo NO cambian.\n(El dato sí cambió: si vuelves y entras otra vez, sale adoptado.)',ok:'[AddINotifyPropertyChangedInterface]   // encima de public class Mascota',
+  exp:'El dato cambia, pero nadie avisa a la pantalla. El atributo tiene que estar en la clase <b>cuya propiedad cambia</b>: aquí <code>Adopcion</code> es de <code>Mascota</code>, no del ViewModel.'}
+];
+const TIPOS={comp:'No compila',ejec:'Peta al ejecutar',silen:'Falla en silencio'};
+$('fallos').innerHTML=FALLOS.map((f,i)=>`<button data-i="${i}"><span class="tipo ${f.tipo}" style="margin:0 6px 0 0">${f.tipo==='comp'?'✗':f.tipo==='ejec'?'!':'…'}</span>${f.t}</button>`).join('');
+function pintaFallo(i){
+  $('fallos').querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  const f=FALLOS[i];
+  $('fallo').innerHTML=`<span class="tipo ${f.tipo}">${TIPOS[f.tipo]}</span><h4 style="margin:0 0 6px">${f.t}</h4>
+   <div style="font-size:13px;color:var(--muted)">${f.f}</div><pre class="code" id="falloCod"></pre>
+   <div class="sintoma"><div class="mini" style="height:230px">${f.pant()}</div>
+   <div><b>Síntoma</b><div class="consola">${esc(f.err)}</div><p style="font-size:14px;margin:6px 0">${f.exp}</p><b>Arreglo</b><div class="consola ok">${esc(f.ok)}</div></div></div>`;
+  pintaDiff($('falloCod'),f.diff);
+}
+$('fallos').querySelectorAll('button').forEach(b=>b.onclick=()=>pintaFallo(+b.dataset.i));pintaFallo(0);
+
+/* ================= 9. TEST ================= */
+const TEST=[
+ {q:'¿Qué tipo de archivo es MascotaViewModel?',o:['ContentPage (.xaml + .xaml.cs)','Clase (.cs)','ResourceDictionary'],c:1,e:'Solo las Views son ContentPage. Model, ViewModel y Converter son clases normales.'},
+ {q:'Dentro del DataTemplate de la lista, {Binding Nombre} busca Nombre en…',o:['El ViewModel','Cada Mascota de la lista','MascotaSeleccionada'],c:1,e:'El DataTemplate es el molde de una tarjeta: su contexto es la Mascota que está pintando.'},
+ {q:'¿Qué página hace new MascotaViewModel()?',o:['Las dos','Solo la de detalle','Solo la principal'],c:2,e:'La principal lo crea; el detalle lo recibe. Si el detalle hiciera new, tendría otro ViewModel sin selección.'},
+ {q:'En el detalle quitas this.viewModel = viewModel; ¿qué pasa?',o:['No compila','La pantalla se ve bien, pero el botón Adoptar lanza NullReferenceException','La pantalla sale vacía'],c:1,e:'BindingContext usa el parámetro (se ve bien); el campo queda en null y el botón lo usa.'},
+ {q:'El usuario marca un CheckBox con binding OneWay. ¿Qué pasa en el ViewModel?',o:['Nada: el dato no vuelve','Se llama a ConvertBack','Se llama a Convert'],c:0,e:'OneWay solo va del ViewModel al control. La vuelta (y ConvertBack) solo existe con TwoWay.'},
+ {q:'¿Cuándo se ejecuta ConvertBack?',o:['Cada vez que se carga la página','Cuando el control cambia el valor y el binding es TwoWay','Cuando cambia el ViewModel'],c:1,e:'Convert = ida (ViewModel → control). ConvertBack = vuelta (control → ViewModel), solo en TwoWay.'},
+ {q:'¿Qué escribes en el binding para usar el converter?',o:['Converter={StaticResource AdopcionABool}','Converter=AdopcionABoolConverter','Converter={Binding AdopcionABool}'],c:0,e:'Se usa la x:Key registrada en App.xaml, con StaticResource.'},
+ {q:'Al tocar a Max, ¿qué hace que MascotaSeleccionada valga Max?',o:['El evento SelectionChanged','SelectedItem="{Binding MascotaSeleccionada}", que es TwoWay','ItemsSource'],c:1,e:'SelectedItem es TwoWay: el CollectionView escribe la elegida en el ViewModel. El evento solo navega.'}
+];
+let respondidas={};
+function pintaTest(){
+  $('preguntas').innerHTML=TEST.map((t,i)=>`<div class="preg" data-i="${i}"><div class="q">${i+1}. ${esc(t.q)}</div>${t.o.map((o,j)=>`<button data-j="${j}">${esc(o)}</button>`).join('')}<div class="fb"></div></div>`).join('');
+  $('preguntas').querySelectorAll('.preg').forEach(p=>{const i=+p.dataset.i;
+    p.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      if(i in respondidas)return; const j=+b.dataset.j,t=TEST[i];respondidas[i]=j===t.c;
+      p.querySelectorAll('button')[t.c].classList.add('bien');if(j!==t.c)b.classList.add('malr');
+      const fb=p.querySelector('.fb');fb.innerHTML=(j===t.c?'✅ ':'❌ ')+esc(t.e);fb.classList.add('on');
+      $('nota').textContent=Object.values(respondidas).filter(Boolean).length+' / '+TEST.length;
+    });});
+  $('nota').textContent='0 / '+TEST.length;
+}
+$('testReset').onclick=()=>{respondidas={};pintaTest();};pintaTest();
+
+/* ================= índice: salto por JS (funciona también en visores) + sección activa ================= */
+const enlaces=[...document.querySelectorAll('#toc a[href^="#"]')];
+const titulos=[...document.querySelectorAll('h2[id]')];
+enlaces.forEach(a=>a.addEventListener('click',e=>{
+  e.preventDefault();const d=document.getElementById(a.getAttribute('href').slice(1));if(!d)return;
+  scrollTo({top:d.getBoundingClientRect().top+scrollY-(innerWidth<=1000?60:12),behavior:'instant'});
+  marcaToc();
+  try{history.replaceState(null,'',a.getAttribute('href'));}catch(err){}
+}));
+let pend=false;
+function marcaToc(){
+  pend=false;let act=titulos[0];
+  for(const h of titulos){if(h.getBoundingClientRect().top<=140)act=h;else break;}
+  if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)act=titulos[titulos.length-1];
+  enlaces.forEach(a=>{const on=a.getAttribute('href')==='#'+act.id;a.classList.toggle('on',on);
+    if(on&&innerWidth<=1000){const t=$('toc');t.scrollLeft=a.offsetLeft-t.clientWidth/2+a.offsetWidth/2;}});
+}
+addEventListener('scroll',()=>{if(!pend){pend=true;requestAnimationFrame(marcaToc);}},{passive:true});
+marcaToc();
+if(location.hash){const d=document.getElementById(location.hash.slice(1));if(d)setTimeout(()=>d.scrollIntoView(),50);}
+/* modo claro/oscuro compartido con los recetarios */
+$('tema').onclick=()=>{
+  const osc=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  const nuevo=osc?'light':'dark';document.documentElement.dataset.theme=nuevo;try{localStorage.setItem('recetario-tema',nuevo);}catch(e){}
+};
+</script>
+</body>
+</html>

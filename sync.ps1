@@ -17,6 +17,7 @@ $recetarios = [ordered]@{
     'recetario-psp.html'   = "$dam\Programacion de Servicios y Procesos\Recetario\recetario-psp.html"
     'recetario-deint.html' = "$dam\Desarrollo de Interfaces\Recetario\recetario-deint.html"
     'recetario-python.html' = "$dam\Sistemas de Gestion Empresarial\Recetario\recetario-python.html"
+    'esquema-mvvm-adopta.html' = "$dam\Desarrollo de Interfaces\Recetario\esquema-mvvm-adopta.html"
 }
 
 $git = 'C:\Program Files\Git\cmd\git.exe'
@@ -24,6 +25,13 @@ if (-not (Test-Path $git)) { $git = 'git' }
 
 try {
     if (-not (Test-Path $dam)) { Write-Log 'Google Drive (G:) no disponible; no hago nada.'; exit 0 }
+
+    # Trae primero lo que se haya subido desde otro equipo, para que el push no choque
+    Set-Location $repo
+    $ErrorActionPreference = 'Continue'
+    & $git pull -q --rebase --autostash 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Log 'Pull fallido (¿sin red o conflicto?); sigo con la copia local.' }
+    $ErrorActionPreference = 'Stop'
 
     $cambiados = @()
     foreach ($destino in $recetarios.Keys) {

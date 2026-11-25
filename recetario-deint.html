@@ -134,16 +134,105 @@ ul.items li:first-child { border-top: 0; }
   .receta { break-inside: avoid; }
 }
 </style>
+<style>
+/* ===== índice lateral, buscador y extras (añadido 25/11) ===== */
+:root { --barh: 4rem; }
+.menu-btn { display: none; align-items: center; gap: .35rem; font: inherit; font-size: .85rem; color: var(--text); background: var(--chip);
+  border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+.menu-btn:hover { background: var(--chip-hover); }
+.progreso { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: var(--accent); transition: width .1s linear; }
+.side { background: var(--bar); padding: .9rem .7rem 2.5rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.side-top { position: sticky; top: -.9rem; background: var(--bar); padding: .9rem 0 .6rem; margin-top: -.9rem; z-index: 2; display: flex; align-items: center; }
+#buscar { width: 100%; font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--rule);
+  border-radius: 10px; padding: .5rem 2rem .5rem .75rem; }
+#buscar:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.side-top kbd { position: absolute; right: .55rem; font: .72rem ui-monospace, Consolas, monospace; color: var(--soft);
+  border: 1px solid var(--rule); border-radius: 5px; padding: 0 .35rem; }
+.grupo { margin: 0 0 .1rem; }
+.gcab { display: flex; align-items: center; gap: .6rem; padding: .45rem .55rem; border-radius: 9px; color: var(--text);
+  text-decoration: none; font-size: .93rem; font-weight: 600; }
+.gcab:hover { background: var(--chip); }
+.gcab b { flex: none; display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+  background: var(--chip); color: var(--soft); font-size: .75rem; border: 1px solid var(--rule); }
+.gcab em { margin-left: auto; font-style: normal; font-size: .72rem; color: var(--soft); background: var(--chip); border-radius: 99px; padding: 0 .45rem; }
+.grupo.on > .gcab { background: var(--chip); }
+.grupo.on > .gcab b { background: var(--accent); border-color: var(--accent); color: #fff; }
+.grupo ul { list-style: none; margin: .1rem 0 .6rem 1.25rem; padding: 0 0 0 .55rem; border-left: 2px solid var(--rule); display: none; }
+.grupo.on ul { display: block; }
+.grupo ul a { display: block; padding: .3rem .55rem; margin-left: -.67rem; border-left: 2px solid transparent; font-size: .85rem; line-height: 1.35;
+  color: var(--soft); text-decoration: none; border-radius: 0 6px 6px 0; }
+.grupo ul a:hover { color: var(--text); background: var(--chip); }
+.grupo ul a.on { color: var(--accent); font-weight: 650; border-left-color: var(--accent); background: var(--chip); }
+.grupo ul a code { font-size: .8em; padding: 0 .25em; }
+.side-esquema { display: flex; gap: .6rem; align-items: center; margin: 1rem 0 0; padding: .7rem .75rem; border-radius: 10px;
+  border: 1.5px dashed var(--accent); color: var(--text); text-decoration: none; font-size: .9rem; font-weight: 650; }
+.side-esquema b { color: var(--accent); }
+.side-esquema small { display: block; font-weight: 400; color: var(--soft); font-size: .76rem; }
+.side-esquema:hover { background: var(--chip); }
+.resultados a { display: block; padding: .5rem .6rem; border-radius: 8px; color: var(--text); text-decoration: none; font-size: .88rem; line-height: 1.35; }
+.resultados a:hover, .resultados a.sel { background: var(--chip); }
+.resultados small { display: block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); }
+.resultados .frag { display: block; color: var(--soft); font-size: .78rem; margin-top: .15rem; }
+.resultados mark { background: var(--inline-bg); color: var(--inline-text); border-radius: 3px; padding: 0 .1em; }
+.resultados .nada, .resultados .cab { color: var(--soft); font-size: .82rem; padding: .3rem .6rem; margin: .4rem 0 0; }
+.banner-esquema { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; align-items: center; margin: 0 0 1.4rem;
+  padding: 1rem 1.2rem; border-radius: 12px; text-decoration: none; color: var(--text);
+  background: linear-gradient(135deg, var(--card), var(--chip)); border: 1.5px solid var(--accent); }
+.banner-esquema b { color: var(--accent); font-size: 1.02rem; }
+.banner-esquema span { grid-column: 1; font-size: .9rem; color: var(--soft); }
+.banner-esquema i { grid-row: 1 / 3; grid-column: 2; font-style: normal; font-weight: 700; color: #fff; background: var(--accent);
+  border-radius: 999px; padding: .4rem .9rem; white-space: nowrap; }
+.banner-esquema:hover i { filter: brightness(1.1); }
+.receta { scroll-margin-top: calc(var(--barh) + 1rem); }
+.receta.destello { animation: destello 1.2s ease; }
+@keyframes destello { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.arriba { position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 15; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+  border: 1px solid var(--rule); background: var(--card); color: var(--text); font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.arriba.on { opacity: 1; pointer-events: auto; }
+.velo { display: none; }
+
+@media (min-width: 1000px) {
+  html { scroll-padding-top: 4.5rem; }
+  .tabs { display: none; }
+  .bar-in { max-width: none; padding-left: 1.25rem; padding-right: 1.25rem; }
+  .shell { display: grid; grid-template-columns: 19rem minmax(0, 1fr); }
+  .side { position: sticky; top: var(--barh); height: calc(100vh - var(--barh)); border-right: 1px solid var(--rule); }
+  .shell main { width: 100%; }
+  .tab > .indice { display: none; }
+}
+@media (max-width: 999px) {
+  .menu-btn { display: inline-flex; }
+  .side { position: fixed; top: 0; left: 0; bottom: 0; width: min(86vw, 21rem); z-index: 40; transform: translateX(-102%);
+    transition: transform .25s ease; box-shadow: 6px 0 24px rgba(0,0,0,.25); }
+  body.side-open .side { transform: none; }
+  body.side-open .velo { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.45); }
+  body.side-open { overflow: hidden; }
+  .side-top kbd { display: none; }
+}
+@media (max-width: 640px) { .menu-btn span { display: none; } .banner-esquema { grid-template-columns: 1fr; } .banner-esquema i { grid-row: auto; grid-column: 1; justify-self: start; margin-top: .4rem; } }
+@media print { .side, .velo, .arriba, .menu-btn, .progreso, .banner-esquema { display: none !important; } .shell { display: block; } }
+@media (prefers-reduced-motion: reduce) { .side, .receta.destello { transition: none; animation: none; } }
+</style>
 </head>
 <body>
 <header class="bar">
 <div class="bar-in">
 <a class="home" href="./" aria-label="Volver al menú de recetarios">&larr;<span> Recetarios</span></a>
+<button type="button" class="menu-btn" id="menu" aria-label="Abrir el índice">☰<span> Índice</span></button>
 <a class="brand" href="#b1">Recetario .NET MAUI</a><span class="sub">DEINT, práctico lun 30/11 · teórico mar 1/12</span>
 <button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
 </div>
 <nav class="tabs" aria-label="Bloques"><a href="#b1" data-tab="b1"><b>1</b>Proyecto</a><a href="#b2" data-tab="b2"><b>2</b>Layouts y controles</a><a href="#ev" data-tab="ev">Eventos</a><a href="#b3" data-tab="b3"><b>3</b>Data binding</a><a href="#b4" data-tab="b4"><b>4</b>MVVM y listas</a><a href="#b5" data-tab="b5"><b>5</b>Navegación</a><a href="#b6" data-tab="b6"><b>6</b>Estilos</a><a href="#adopta" data-tab="adopta">Adopta (examen)</a><a href="#chuletas" data-tab="chuletas">Chuletas</a><a href="#problemas" data-tab="problemas">Problemas</a></nav>
 </header>
+<div class="shell">
+<aside class="side" id="side" aria-label="Índice del recetario">
+<div class="side-top"><input type="search" id="buscar" placeholder="Buscar en el recetario…" autocomplete="off" aria-label="Buscar en el recetario"><kbd>/</kbd></div>
+<div id="resultados" class="resultados" hidden></div>
+<nav class="grupos" aria-label="Bloques y recetas"><div class="grupo" data-tab="b1"><a class="gcab" href="#b1"><b>1</b><span>Proyecto</span><em>9</em></a><ul><li><a href="#b1--crear">Crear el proyecto y una página nueva</a></li><li><a href="#b1--archivos">Qué hace cada archivo</a></li><li><a href="#b1--arranque">Qué página sale al arrancar</a></li><li><a href="#b1--anatomia">Anatomía de una página: <code>.xaml</code> + <code>.xaml.cs</code></a></li><li><a href="#b1--sintaxis">Formas de dar valor a una propiedad en XAML</a></li><li><a href="#b1--xaml-teoria">XAML: ventajas y limitaciones (teórico)</a></li><li><a href="#b1--paginas">Tipos de página</a></li><li><a href="#b1--tabbed">TabbedPage</a></li><li><a href="#b1--flyout">FlyoutPage (menú lateral)</a></li></ul></div><div class="grupo" data-tab="b2"><a class="gcab" href="#b2"><b>2</b><span>Layouts y controles</span><em>11</em></a><ul><li><a href="#b2--stack">Apilar: VerticalStackLayout, HorizontalStackLayout y StackLayout</a></li><li><a href="#b2--grid">Grid: filas y columnas</a></li><li><a href="#b2--flex">FlexLayout: que los botones bajen de línea (Wrap)</a></li><li><a href="#b2--absolute">AbsoluteLayout (posiciones exactas)</a></li><li><a href="#b2--contenedores">ScrollView, Border, Frame y BoxView</a></li><li><a href="#b2--entry">Escribir texto: Entry y Editor</a></li><li><a href="#b2--valores">Elegir valores: Slider, Stepper, Switch, CheckBox, fecha y hora</a></li><li><a href="#b2--radio">RadioButton, ImageButton y SearchBar</a></li><li><a href="#b2--imagen">Mostrar una imagen</a></li><li><a href="#b2--picker">Picker, ActivityIndicator y ProgressBar</a></li><li><a href="#b2--tabla">Vistas de MAUI de un vistazo</a></li></ul></div><div class="grupo" data-tab="ev"><a class="gcab" href="#ev"><b>⚡</b><span>Eventos</span><em>5</em></a><ul><li><a href="#ev--clicked">Eventos Clicked paso a paso</a></li><li><a href="#ev--clicked-cosas">Lo que se suele hacer dentro de un Clicked</a></li><li><a href="#ev--clicked-codigo">Conectar el evento desde C# en vez de en el XAML</a></li><li><a href="#ev--clicked-errores">Errores típicos con eventos</a></li><li><a href="#ev--sender">Un solo manejador para varios botones (<code>sender</code>)</a></li></ul></div><div class="grupo" data-tab="b3"><a class="gcab" href="#b3"><b>3</b><span>Data binding</span><em>10</em></a><ul><li><a href="#b3--que-es">Qué es y quién es destino u origen</a></li><li><a href="#b3--vista-vista">Enlazar una vista con otra (Slider → Label)</a></li><li><a href="#b3--codigo">El mismo binding desde C# (<code>SetBinding</code>)</a></li><li><a href="#b3--herencia">El BindingContext se hereda hacia abajo</a></li><li><a href="#b3--modos">Modos de enlace</a></li><li><a href="#b3--stringformat">Dar formato al texto enlazado (<code>StringFormat</code>)</a></li><li><a href="#b3--objeto">Enlazar a un objeto C# (BindingContext = objeto)</a></li><li><a href="#b3--fody">Avisar de los cambios con Fody (lo de clase)</a></li><li><a href="#b3--inotify">Avisar de los cambios a mano (INotifyPropertyChanged)</a></li><li><a href="#b3--static">Origen estático: <code>x:Static</code></a></li></ul></div><div class="grupo" data-tab="b4"><a class="gcab" href="#b4"><b>4</b><span>MVVM y listas</span><em>10</em></a><ul><li><a href="#b4--que-es">MVVM en una frase (y para el teórico)</a></li><li><a href="#b4--viewmodel">ViewModel + vista (como en clase)</a></li><li><a href="#b4--clicked-vm">Clicked con ViewModel: qué va en cada archivo</a></li><li><a href="#b4--ejemplo-pago">Ejemplo completo: Pago perfecto con MVVM (P1)</a></li><li><a href="#b4--ejemplo-imc">Lógica del IMC (P3)</a></li><li><a href="#b4--observable">Colección que avisa: <code>ObservableCollection&lt;T&gt;</code></a></li><li><a href="#b4--collectionview">Mostrar una lista: CollectionView + DataTemplate</a></li><li><a href="#b4--binding-punto">A qué apunta <code>{Binding}</code> dentro de un DataTemplate</a></li><li><a href="#b4--bindable">BindableLayout: repetir controles sin escribirlos (letras del ahorcado)</a></li><li><a href="#b4--gauges">Gauges de Syncfusion (P3 IMC)</a></li></ul></div><div class="grupo" data-tab="b5"><a class="gcab" href="#b5"><b>5</b><span>Navegación</span><em>8</em></a><ul><li><a href="#b5--navigationpage">Preparar la app para navegar</a></li><li><a href="#b5--push-pop">Ir a otra página y volver</a></li><li><a href="#b5--datos-constructor">Pasar datos a la otra página por el constructor</a></li><li><a href="#b5--datos-bindingcontext">Pasar datos poniendo el BindingContext al navegar</a></li><li><a href="#b5--compartir-vm">Compartir el ViewModel entre páginas (añadir y que se vea en la lista)</a></li><li><a href="#b5--modal">Navegación modal (pantalla que hay que cerrar)</a></li><li><a href="#b5--pila">Manipular la pila (login que no se puede volver)</a></li><li><a href="#b5--barra">Personalizar la barra de navegación</a></li></ul></div><div class="grupo" data-tab="b6"><a class="gcab" href="#b6"><b>6</b><span>Estilos</span><em>13</em></a><ul><li><a href="#b6--explicito">Estilo explícito (con <code>x:Key</code>)</a></li><li><a href="#b6--implicito">Estilo implícito (sin <code>x:Key</code>: para todos los de ese tipo)</a></li><li><a href="#b6--diccionario">Diccionario de recursos (<code>ResourceDictionary</code>): qué es y qué guarda</a></li><li><a href="#b6--global">Estilos para toda la app: App.xaml</a></li><li><a href="#b6--importar">Importar diccionarios (<code>MergedDictionaries</code>)</a></li><li><a href="#b6--basedon">Herencia de estilos (<code>BasedOn</code>)</a></li><li><a href="#b6--dinamico">Cambiar estilos en ejecución (<code>DynamicResource</code>)</a></li><li><a href="#b6--styleclass">Clases de estilo (<code>Class</code> + <code>StyleClass</code>): varios estilos a la vez</a></li><li><a href="#b6--prioridad">Quién gana si se pisan</a></li><li><a href="#b6--tema">Modo claro y oscuro con <code>AppThemeBinding</code> (sigue al sistema)</a></li><li><a href="#b6--tema-boton">Botón para cambiar de tema (<code>UserAppTheme</code>)</a></li><li><a href="#b6--tema-diccionarios">Modo claro y oscuro con dos diccionarios (cambiando el diccionario)</a></li><li><a href="#b6--p5">P5 Calculadora: operaciones con <code>Dangl.Calculator</code></a></li></ul></div><div class="grupo" data-tab="adopta"><a class="gcab" href="#adopta"><b>★</b><span>Adopta (examen)</span><em>10</em></a><ul><li><a href="#adopta--mapa">Qué pide y en qué orden hacerlo</a></li><li><a href="#adopta--model">1. Model con Fody</a></li><li><a href="#adopta--viewmodel">2. ViewModel: ObservableCollection y la mascota elegida</a></li><li><a href="#adopta--app">3. Arrancar con NavigationPage</a></li><li><a href="#adopta--principal-cs">4. Página principal: BindingContext y PushAsync</a></li><li><a href="#adopta--collectionview">5. La lista: CollectionView con selección</a></li><li><a href="#adopta--detalle-cs">6. Detalle: recibir el ViewModel, volver y DisplayAlertAsync</a></li><li><a href="#adopta--detalle-xaml">7. Detalle: bindings con punto</a></li><li><a href="#adopta--converter">8. Converter: de texto a bool</a></li><li><a href="#adopta--errores">Errores que tuve y su arreglo</a></li></ul></div><div class="grupo" data-tab="chuletas"><a class="gcab" href="#chuletas"><b>C</b><span>Chuletas</span><em>5</em></a><ul><li><a href="#chuletas--extensiones">Extensiones de marcado</a></li><li><a href="#chuletas--eventos">Eventos y sus argumentos</a></li><li><a href="#chuletas--navegacion">Navegación en una tabla</a></li><li><a href="#chuletas--teoria">Teoría para el examen teórico</a></li><li><a href="#chuletas--errores">Errores típicos y su causa</a></li></ul></div><div class="grupo" data-tab="problemas"><a class="gcab" href="#problemas"><b>P</b><span>Problemas</span><em>3</em></a><ul><li><a href="#problemas--checklist">Lo que tienes que saber hacer antes del lunes 30</a></li><li><a href="#problemas--practicas">Prácticas del Moodle</a></li><li><a href="#problemas--cortos">Ejercicios cortos (15–20 min cada uno)</a></li></ul></div></nav>
+<a class="side-esquema" href="esquema-mvvm-adopta.html"><b>◆</b><span>Esquema interactivo MVVM<small>película, simulador, TwoWay, errores</small></span></a>
+</aside>
+<div class="velo" id="velo"></div>
 <main>
 <section class="tab" id="b1" data-tab="b1" hidden>
 <p class="kicker">Bloque 1</p><h1>Proyecto, XAML y tipos de página</h1>
@@ -631,6 +720,7 @@ ul.items li:first-child { border-top: 0; }
 </section>
 <section class="tab" id="b3" data-tab="b3" hidden>
 <p class="kicker">Bloque 3</p><h1>Data binding (enlace de datos)</h1>
+<a class="banner-esquema" href="esquema-mvvm-adopta.html"><b>◆ Esquema interactivo MVVM</b><span>El ejercicio Adopta visto por dentro: película paso a paso, simulador con el código, laboratorio OneWay/TwoWay, «rompe el código» y autotest.</span><i>Abrir →</i></a>
 <nav class="indice" aria-label="Recetas de este bloque"><a href="#b3--que-es">Qué es y quién es destino u origen</a><a href="#b3--vista-vista">Enlazar una vista con otra (Slider → Label)</a><a href="#b3--codigo">El mismo binding desde C# (<code>SetBinding</code>)</a><a href="#b3--herencia">El BindingContext se hereda hacia abajo</a><a href="#b3--modos">Modos de enlace</a><a href="#b3--stringformat">Dar formato al texto enlazado (<code>StringFormat</code>)</a><a href="#b3--objeto">Enlazar a un objeto C# (BindingContext = objeto)</a><a href="#b3--fody">Avisar de los cambios con Fody (lo de clase)</a><a href="#b3--inotify">Avisar de los cambios a mano (INotifyPropertyChanged)</a><a href="#b3--static">Origen estático: <code>x:Static</code></a></nav>
 <article class="receta" id="b3--que-es">
 <h2><a href="#b3--que-es">Qué es y quién es destino u origen</a></h2>
@@ -1758,6 +1848,7 @@ Application.Current!.Resources.MergedDictionaries.<span class="t-fn">Add</span>(
 </section>
 <section class="tab" id="adopta" data-tab="adopta" hidden>
 <p class="kicker">Ejercicio de clase 25/11 · examen de hace 2 años</p><h1>Adopta una mascota, pieza a pieza</h1>
+<a class="banner-esquema" href="esquema-mvvm-adopta.html"><b>◆ Esquema interactivo MVVM</b><span>El ejercicio Adopta visto por dentro: película paso a paso, simulador con el código, laboratorio OneWay/TwoWay, «rompe el código» y autotest.</span><i>Abrir →</i></a>
 <nav class="indice" aria-label="Recetas de este bloque"><a href="#adopta--mapa">Qué pide y en qué orden hacerlo</a><a href="#adopta--model">1. Model con Fody</a><a href="#adopta--viewmodel">2. ViewModel: ObservableCollection y la mascota elegida</a><a href="#adopta--app">3. Arrancar con NavigationPage</a><a href="#adopta--principal-cs">4. Página principal: BindingContext y PushAsync</a><a href="#adopta--collectionview">5. La lista: CollectionView con selección</a><a href="#adopta--detalle-cs">6. Detalle: recibir el ViewModel, volver y DisplayAlertAsync</a><a href="#adopta--detalle-xaml">7. Detalle: bindings con punto</a><a href="#adopta--converter">8. Converter: de texto a bool</a><a href="#adopta--errores">Errores que tuve y su arreglo</a></nav>
 <article class="receta" id="adopta--mapa">
 <h2><a href="#adopta--mapa">Qué pide y en qué orden hacerlo</a></h2>
@@ -2033,6 +2124,7 @@ Application.Current!.Resources.MergedDictionaries.<span class="t-fn">Add</span>(
 <nav class="pasar"><a href="#chuletas">← Chuletas</a><span></span></nav>
 </section>
 </main>
+</div>
 <script>
 // Pestañas: #b2 abre el bloque 2; #b2--pipe-propio abre el bloque 2 y baja a esa receta
 const tabsIds = ["b1","b2","ev","b3","b4","b5","b6","adopta","chuletas","problemas"];
@@ -2086,6 +2178,115 @@ document.querySelectorAll('figure.code').forEach(f => {
     setTimeout(() => b.textContent = 'Copiar', 1400);
   });
 });
+</script>
+<script>
+// ===== índice lateral, buscador, progreso (añadido 25/11) =====
+(() => {
+  const raiz = document.documentElement, bar = document.querySelector('.bar'), side = document.getElementById('side');
+  const ponAltura = () => raiz.style.setProperty('--barh', bar.offsetHeight + 'px');
+  ponAltura(); addEventListener('resize', ponAltura);
+  const grupos = [...side.querySelectorAll('.grupo')];
+  let enlaces = [], articulos = [];
+
+  // Bloque activo: se entera cuando el script de pestañas cambia el atributo hidden
+  function activo() {
+    const sec = document.querySelector('section.tab:not([hidden])');
+    if (!sec) return;
+    grupos.forEach(g => g.classList.toggle('on', g.dataset.tab === sec.id));
+    const g = side.querySelector('.grupo.on');
+    enlaces = g ? [...g.querySelectorAll('ul a')] : [];
+    articulos = [...sec.querySelectorAll('article.receta')];
+    espia();
+  }
+  new MutationObserver(activo).observe(document.querySelector('main'), { attributes: true, subtree: true, attributeFilter: ['hidden'] });
+
+  // Receta actual + barra de progreso
+  const prog = document.createElement('div'); prog.className = 'progreso'; bar.appendChild(prog);
+  const arriba = document.createElement('button'); arriba.className = 'arriba'; arriba.type = 'button';
+  arriba.setAttribute('aria-label', 'Volver arriba'); arriba.textContent = '↑'; document.body.appendChild(arriba);
+  arriba.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+  let actual = null, pendiente = false;
+  function espia() {
+    pendiente = false;
+    const tope = bar.offsetHeight + 90;
+    let cual = articulos[0];
+    for (const a of articulos) { if (a.getBoundingClientRect().top <= tope) cual = a; else break; }
+    const id = cual && cual.id;
+    if (id !== actual) {
+      actual = id;
+      enlaces.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+      const on = side.querySelector('.grupo.on ul a.on');
+      if (on) {
+        const r = on.getBoundingClientRect(), s = side.getBoundingClientRect();
+        if (r.top < s.top + 70 || r.bottom > s.bottom - 20) side.scrollTop += r.top - s.top - s.height / 3;
+      }
+    }
+    const max = document.documentElement.scrollHeight - innerHeight;
+    prog.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+    arriba.classList.toggle('on', scrollY > 900);
+  }
+  addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(espia); } }, { passive: true });
+
+  // Cajón en móvil
+  const btnMenu = document.getElementById('menu');
+  const cerrar = () => document.body.classList.remove('side-open');
+  btnMenu.onclick = () => { document.body.classList.add('side-open'); const on = side.querySelector('.grupo.on'); if (on) side.scrollTop = on.offsetTop - 80; };
+  document.getElementById('velo').onclick = cerrar;
+  side.addEventListener('click', e => {
+    const a = e.target.closest('a'); if (!a) return;
+    cerrar();
+    const h = a.getAttribute('href');
+    if (h && h.includes('--')) setTimeout(() => { const d = document.getElementById(h.slice(1)); if (d) { d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello'); } }, 60);
+  });
+
+  // Buscador: títulos primero, luego dentro del texto de cada receta
+  const q = document.getElementById('buscar'), res = document.getElementById('resultados'), nav = side.querySelector('.grupos');
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const indice = [...document.querySelectorAll('article.receta')].map(a => {
+    const t = a.querySelector('h2').textContent, txt = a.innerText.replace(/\s+/g, ' ');
+    const bloque = side.querySelector('.grupo[data-tab="' + a.closest('section').id + '"] .gcab span').textContent;
+    return { id: a.id, t, nt: norm(t), txt, ntxt: norm(txt), bloque };
+  });
+  function marca(texto, v) {
+    const n = norm(texto), i = n.indexOf(v);
+    return i < 0 ? esc(texto) : esc(texto.slice(0, i)) + '<mark>' + esc(texto.slice(i, i + v.length)) + '</mark>' + esc(texto.slice(i + v.length));
+  }
+  function buscar() {
+    const v = norm(q.value.trim());
+    if (!v) { res.hidden = true; nav.hidden = false; return; }
+    const tit = indice.filter(x => x.nt.includes(v));
+    const cuerpo = indice.filter(x => !x.nt.includes(v) && x.ntxt.includes(v)).slice(0, 25);
+    let h = tit.map(x => `<a href="#${x.id}"><small>${esc(x.bloque)}</small>${marca(x.t, v)}</a>`).join('');
+    if (cuerpo.length) {
+      h += `<p class="cab">Aparece dentro de:</p>` + cuerpo.map(x => {
+        const i = x.ntxt.indexOf(v), ini = Math.max(0, i - 35);
+        const frag = (ini ? '…' : '') + x.txt.slice(ini, i + v.length + 45) + '…';
+        return `<a href="#${x.id}"><small>${esc(x.bloque)}</small>${esc(x.t)}<span class="frag">${marca(frag, v)}</span></a>`;
+      }).join('');
+    }
+    res.innerHTML = h || `<p class="nada">Nada con «${esc(q.value.trim())}»</p>`;
+    res.hidden = false; nav.hidden = true;
+    res.querySelector('a')?.classList.add('sel');
+  }
+  q.addEventListener('input', buscar);
+  q.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const a = res.querySelector('a.sel') || res.querySelector('a'); if (a) a.click(); }
+    if (e.key === 'Escape') { q.value = ''; buscar(); q.blur(); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); const l = [...res.querySelectorAll('a')], i = l.findIndex(a => a.classList.contains('sel'));
+      const j = Math.max(0, Math.min(l.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
+      l.forEach((a, k) => a.classList.toggle('sel', k === j)); l[j]?.scrollIntoView({ block: 'nearest' });
+    }
+  });
+  addEventListener('keydown', e => {
+    if (e.key === '/' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+      e.preventDefault(); if (innerWidth < 1000) btnMenu.click(); q.focus();
+    }
+    if (e.key === 'Escape') cerrar();
+  });
+  activo();
+})();
 </script>
 </body>
 </html>
