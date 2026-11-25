@@ -138,6 +138,132 @@ ol.pasos li { margin: .25rem 0; }
   .receta { break-inside: avoid; }
 }
 </style>
+<!-- indice-lateral:css -->
+<style>
+/* ===== índice lateral (recetarios-comun/indice_lateral.py) ===== */
+:root { --barh: 4rem; --sidew: 19.5rem; }
+.menu-btn { display: none; align-items: center; gap: .35rem; font: inherit; font-size: .85rem; color: var(--text); background: var(--chip);
+  border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; white-space: nowrap; }
+.menu-btn:hover { background: var(--chip-hover); }
+.progreso { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: var(--accent); transition: width .1s linear; pointer-events: none; }
+.side { background: var(--bar); padding: 0 .7rem 2.5rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.side-top { position: sticky; top: 0; z-index: 2; background: var(--bar); padding: .85rem 0 .5rem; border-bottom: 1px solid var(--rule); margin-bottom: .5rem; }
+.side-fila { display: flex; gap: .4rem; align-items: center; }
+.buscar-caja { position: relative; flex: 1; display: flex; align-items: center; }
+#buscar { width: 100%; font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--rule);
+  border-radius: 10px; padding: .5rem 2.2rem .5rem .75rem; -webkit-appearance: none; appearance: none; }
+#buscar::-webkit-search-cancel-button { display: none; }
+#buscar:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.buscar-caja kbd { position: absolute; right: .55rem; font: .72rem ui-monospace, Consolas, monospace; color: var(--soft);
+  border: 1px solid var(--rule); border-radius: 5px; padding: 0 .35rem; pointer-events: none; }
+.limpiar { position: absolute; right: .35rem; width: 1.6rem; height: 1.6rem; border: 0; border-radius: 50%; background: var(--chip);
+  color: var(--text); font-size: 1.05rem; line-height: 1; cursor: pointer; }
+.limpiar:hover { background: var(--chip-hover); }
+.icono { flex: none; width: 2.2rem; height: 2.2rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--card);
+  color: var(--text); font-size: 1rem; cursor: pointer; }
+.icono:hover { background: var(--chip); }
+.side-repaso { margin: .65rem .15rem 0; font-size: .78rem; color: var(--soft); }
+.r-txt { display: flex; justify-content: space-between; margin-bottom: .25rem; }
+.r-txt b { color: var(--text); }
+.r-barra { height: 5px; border-radius: 3px; background: var(--chip); overflow: hidden; }
+.r-barra i { display: block; height: 100%; width: 0; background: #2f9e44; transition: width .3s; }
+.side-acciones { display: flex; gap: .4rem; margin-top: .55rem; }
+.side-acciones button { flex: 1; font: inherit; font-size: .75rem; color: var(--soft); background: none; border: 1px solid var(--rule);
+  border-radius: 8px; padding: .25rem .4rem; cursor: pointer; }
+.side-acciones button:hover { color: var(--text); background: var(--chip); }
+.grupo { margin: 0 0 .1rem; }
+.gfila { display: flex; align-items: center; border-radius: 9px; }
+.gfila:hover { background: var(--chip); }
+.gcab { flex: 1; min-width: 0; display: flex; align-items: center; gap: .6rem; padding: .45rem .3rem .45rem .55rem; color: var(--text);
+  text-decoration: none; font-size: .93rem; font-weight: 600; }
+.gcab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gcab b { flex: none; display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .2rem; border-radius: 99px;
+  background: var(--chip); color: var(--soft); font-size: .72rem; border: 1px solid var(--rule); }
+.gcont { flex: none; font-style: normal; font-size: .7rem; color: var(--soft); background: var(--chip); border-radius: 99px; padding: 0 .45rem; }
+.gcont.lleno { background: #2f9e44; color: #fff; }
+.gtog { flex: none; width: 1.9rem; height: 1.9rem; margin-left: .15rem; border: 0; background: none; color: var(--soft); cursor: pointer;
+  border-radius: 7px; font-size: .8rem; transition: transform .2s; }
+.gtog:hover { color: var(--text); background: var(--chip-hover); }
+.grupo.abierto .gtog { transform: rotate(90deg); }
+.grupo.on > .gfila { background: var(--chip); }
+.grupo.on .gcab b { background: var(--accent); border-color: var(--accent); color: #fff; }
+.grupo ul { list-style: none; margin: .1rem 0 .6rem 1.25rem; padding: 0 0 0 .55rem; border-left: 2px solid var(--rule); display: none; }
+.grupo.abierto ul { display: block; }
+.grupo ul a { display: flex; gap: .35rem; align-items: baseline; padding: .3rem .55rem; margin-left: -.67rem; border-left: 2px solid transparent;
+  font-size: .85rem; line-height: 1.35; color: var(--soft); text-decoration: none; border-radius: 0 6px 6px 0; }
+.grupo ul a:hover { color: var(--text); background: var(--chip); }
+.grupo ul a.on { color: var(--accent); font-weight: 650; border-left-color: var(--accent); background: var(--chip); }
+.grupo ul a code { font-size: .8em; padding: 0 .25em; }
+.grupo ul a .ses { font-size: .72rem; margin-right: .2rem; }
+.grupo ul a::after { content: ""; flex: none; margin-left: auto; width: .5rem; }
+.grupo ul li.rep a::after { content: "✓"; color: #2f9e44; font-weight: 700; width: auto; }
+.side-esquema { display: flex; gap: .6rem; align-items: center; margin: 1rem 0 0; padding: .7rem .75rem; border-radius: 10px;
+  border: 1.5px dashed var(--accent); color: var(--text); text-decoration: none; font-size: .9rem; font-weight: 650; }
+.side-esquema b { color: var(--accent); }
+.side-esquema small { display: block; font-weight: 400; color: var(--soft); font-size: .76rem; }
+.side-esquema:hover { background: var(--chip); }
+.side-ayuda { margin: 1.1rem .3rem 0; font-size: .74rem; color: var(--soft); line-height: 1.7; }
+.side-ayuda kbd { font: .7rem ui-monospace, Consolas, monospace; border: 1px solid var(--rule); border-radius: 4px; padding: 0 .3rem; background: var(--card); }
+.resultados a { display: block; padding: .5rem .6rem; border-radius: 8px; color: var(--text); text-decoration: none; font-size: .88rem; line-height: 1.35; }
+.resultados a:hover, .resultados a.sel { background: var(--chip); }
+.resultados small { display: block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); }
+.resultados .frag { display: block; color: var(--soft); font-size: .78rem; margin-top: .15rem; }
+.resultados mark { background: var(--inline-bg); color: var(--inline-text); border-radius: 3px; padding: 0 .1em; }
+.resultados .nada, .resultados .cab { color: var(--soft); font-size: .82rem; padding: .3rem .6rem; margin: .4rem 0 0; }
+.receta { position: relative; }
+.receta.destello { animation: il-destello 1.2s ease; }
+@keyframes il-destello { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.receta.repasada { border-color: #2f9e4466; }
+.receta h2 { padding-right: 2rem; }
+.copiar-enlace { position: absolute; top: 1.15rem; right: 1rem; width: 1.8rem; height: 1.8rem; border: 1px solid transparent; border-radius: 7px;
+  background: none; color: var(--soft); cursor: pointer; font-size: .85rem; opacity: .35; transition: opacity .15s; }
+.receta:hover .copiar-enlace, .copiar-enlace:focus { opacity: 1; }
+.copiar-enlace:hover { border-color: var(--rule); background: var(--chip); color: var(--text); }
+.pie-rep { display: flex; justify-content: flex-end; margin-top: .8rem; }
+.marca-rep { font: inherit; font-size: .82rem; color: var(--soft); background: none; border: 1px solid var(--rule); border-radius: 999px;
+  padding: .25rem .8rem; cursor: pointer; }
+.marca-rep:hover { background: var(--chip); color: var(--text); }
+.marca-rep[aria-pressed="true"] { background: #2f9e44; border-color: #2f9e44; color: #fff; }
+.aviso-seguir { position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%); z-index: 30; display: flex; gap: .6rem; align-items: center;
+  max-width: calc(100vw - 2rem); background: var(--card); color: var(--text); border: 1px solid var(--rule); border-radius: 12px;
+  padding: .55rem .6rem .55rem .9rem; box-shadow: 0 8px 26px rgba(0,0,0,.18); font-size: .88rem; }
+.aviso-seguir span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aviso-seguir button { flex: none; font: inherit; font-size: .82rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--chip); color: var(--text); padding: .25rem .65rem; cursor: pointer; }
+.aviso-seguir button.ir { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 650; }
+.arriba { position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 15; width: 2.6rem; height: 2.6rem; border-radius: 50%;
+  border: 1px solid var(--rule); background: var(--card); color: var(--text); font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.arriba.on { opacity: 1; pointer-events: auto; }
+.velo { display: none; }
+
+@media (min-width: 1000px) {
+  html { scroll-padding-top: 4.5rem; }
+  .tabs { display: none; }
+  .bar-in { max-width: none; padding-left: 1.25rem; padding-right: 1.25rem; }
+  .shell { display: grid; grid-template-columns: var(--sidew) minmax(0, 1fr); }
+  .side { position: sticky; top: var(--barh); height: calc(100vh - var(--barh)); border-right: 1px solid var(--rule); }
+  .shell main { width: 100%; }
+  .tab > .indice { display: none; }
+  body.indice-oculto .shell { grid-template-columns: minmax(0, 1fr); }
+  body.indice-oculto .side { display: none; }
+  body.indice-oculto .tab > .indice { display: flex; }
+  body.indice-oculto .menu-btn { display: inline-flex; }
+}
+@media (max-width: 999px) {
+  .menu-btn { display: inline-flex; }
+  .side { position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 21rem); z-index: 40; transform: translateX(-102%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s; box-shadow: 6px 0 24px rgba(0,0,0,.25); }
+  body.side-open .side { transform: none; visibility: visible; }
+  body.side-open .velo { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.45); }
+  body.side-open { overflow: hidden; }
+  .buscar-caja kbd, .side-ayuda { display: none; }
+  .copiar-enlace { opacity: .6; }
+}
+@media (max-width: 640px) { .menu-btn span { display: none; } .aviso-seguir { bottom: 4.2rem; } }
+@media print { .side, .velo, .arriba, .menu-btn, .progreso, .copiar-enlace, .pie-rep, .aviso-seguir { display: none !important; } .shell { display: block; } }
+@media (prefers-reduced-motion: reduce) { .side, .gtog, .receta.destello { transition: none; animation: none; } }
+</style>
+<!-- /indice-lateral:css -->
 </head>
 <body>
 <header class="bar">
@@ -2588,5 +2714,243 @@ document.querySelectorAll('figure.code').forEach(f => {
   });
 });
 </script>
+<!-- indice-lateral:js -->
+<script>
+// ===== índice lateral (recetarios-comun/indice_lateral.py) =====
+(() => {
+  const bar = document.querySelector('.bar'), main = document.querySelector('main');
+  if (!bar || !main || document.getElementById('side')) return;
+  const CLAVE = (location.pathname.split('/').pop() || 'recetario').replace(/\.html?$/, '');
+  const guarda = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const lee = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const extra = window.INDICE_EXTRA || null;
+
+  // ---------- estructura ----------
+  const shell = document.createElement('div'); shell.className = 'shell';
+  main.before(shell);
+  const side = document.createElement('aside'); side.className = 'side'; side.id = 'side'; side.setAttribute('aria-label', 'Índice del recetario');
+  shell.append(side, main);
+  const velo = document.createElement('div'); velo.className = 'velo'; document.body.append(velo);
+  const menu = document.createElement('button'); menu.type = 'button'; menu.className = 'menu-btn'; menu.id = 'menu';
+  menu.setAttribute('aria-label', 'Abrir el índice'); menu.innerHTML = '☰<span> Índice</span>';
+  (bar.querySelector('.home') || bar.querySelector('.bar-in').firstChild).after(menu);
+
+  const secciones = [...document.querySelectorAll('section.tab')];
+  const pestanas = {};
+  document.querySelectorAll('.tabs a[data-tab]').forEach(a => {
+    const c = a.cloneNode(true), b = c.querySelector('b'); const ins = b ? b.textContent : '';
+    if (b) b.remove();
+    pestanas[a.dataset.tab] = { ins, txt: c.textContent.trim() };
+  });
+  const simbolos = { ev: '⚡', adopta: '★', chuletas: 'C', chu: 'C', problemas: 'P', ej: 'E' };
+  const repasadas = new Set(lee('recetario-repaso:' + CLAVE, []));
+  const recetas = [];   // { id, art, sec, titulo, html }
+  const grupoHTML = secciones.map(sec => {
+    const p = pestanas[sec.id] || { ins: '', txt: (sec.querySelector('h1') || {}).textContent || sec.id };
+    const ins = p.ins || simbolos[sec.id] || p.txt.slice(0, 1).toUpperCase();
+    const arts = [...sec.querySelectorAll('article.receta')];
+    const items = arts.map(art => {
+      const a = art.querySelector('h2 a') || art.querySelector('h2');
+      const r = { id: art.id, art, sec, titulo: a.textContent.trim(), html: a.innerHTML };
+      recetas.push(r);
+      return `<li data-r="${esc(art.id)}"><a href="#${esc(art.id)}">${r.html}</a></li>`;
+    }).join('');
+    return `<div class="grupo" data-tab="${esc(sec.id)}"><div class="gfila"><a class="gcab" href="#${esc(sec.id)}" title="${esc(p.txt)}"><b>${esc(ins)}</b><span>${esc(p.txt)}</span></a>`
+      + `<em class="gcont"></em><button type="button" class="gtog" aria-label="Plegar o desplegar ${esc(p.txt)}" aria-expanded="false">▶</button></div><ul>${items}</ul></div>`;
+  }).join('');
+  side.innerHTML = `<div class="side-top">
+    <div class="side-fila"><div class="buscar-caja"><input type="search" id="buscar" placeholder="Buscar en el recetario…" autocomplete="off" aria-label="Buscar en el recetario">
+      <button type="button" class="limpiar" id="limpiar" aria-label="Borrar la búsqueda" hidden>×</button><kbd id="kbd">/</kbd></div>
+      <button type="button" class="icono" id="ocultar" title="Ocultar el índice (tecla i)" aria-label="Ocultar el índice">«</button></div>
+    <div class="side-repaso"><div class="r-txt"><span>Recetas repasadas</span><b id="rTotal"></b></div><div class="r-barra"><i id="rBarra"></i></div></div>
+    <div class="side-acciones"><button type="button" id="plegar">Plegar todo</button><button type="button" id="desplegar">Desplegar todo</button></div>
+  </div>
+  <div id="resultados" class="resultados" hidden></div>
+  <nav class="grupos" aria-label="Bloques y recetas">${grupoHTML}</nav>
+  ${extra ? `<a class="side-esquema" href="${esc(extra.url)}"><b>◆</b><span>${esc(extra.titulo)}<small>${esc(extra.sub || '')}</small></span></a>` : ''}
+  <p class="side-ayuda"><kbd>/</kbd> buscar · <kbd>i</kbd> mostrar/ocultar índice · <kbd>Esc</kbd> cerrar</p>`;
+  const $ = id => document.getElementById(id);
+  const grupos = [...side.querySelectorAll('.grupo')];
+
+  // ---------- plegar / desplegar ----------
+  function abre(g, si) { g.classList.toggle('abierto', si); g.querySelector('.gtog').setAttribute('aria-expanded', si); }
+  grupos.forEach(g => g.querySelector('.gtog').addEventListener('click', () => abre(g, !g.classList.contains('abierto'))));
+  $('plegar').onclick = () => grupos.forEach(g => abre(g, false));
+  $('desplegar').onclick = () => grupos.forEach(g => abre(g, true));
+
+  // ---------- bloque activo ----------
+  let tabActual = null, enlaces = [], articulos = [];
+  function activo() {
+    const sec = secciones.find(s => !s.hidden);
+    if (!sec) return;
+    if (sec.id !== tabActual) {
+      const ant = grupos.find(g => g.dataset.tab === tabActual);
+      if (ant && ant.dataset.auto) { abre(ant, false); delete ant.dataset.auto; }
+      tabActual = sec.id;
+      const g = grupos.find(g => g.dataset.tab === sec.id);
+      if (g && !g.classList.contains('abierto')) { abre(g, true); g.dataset.auto = '1'; }
+    }
+    grupos.forEach(g => g.classList.toggle('on', g.dataset.tab === sec.id));
+    const g = side.querySelector('.grupo.on');
+    enlaces = g ? [...g.querySelectorAll('ul a')] : [];
+    articulos = [...sec.querySelectorAll('article.receta')];
+    actual = null; espia();
+  }
+  new MutationObserver(activo).observe(main, { attributes: true, subtree: true, attributeFilter: ['hidden'] });
+  // pulsar el bloque en el que ya estás lo pliega o despliega
+  side.addEventListener('click', e => {
+    const cab = e.target.closest('.gcab'); if (!cab) return;
+    const g = cab.closest('.grupo');
+    if (g.dataset.tab === tabActual && g.classList.contains('abierto') && innerWidth >= 1000) { e.preventDefault(); e.stopPropagation(); abre(g, false); delete g.dataset.auto; }
+    else if (g.dataset.tab === tabActual) abre(g, true);
+  }, true);
+
+  // ---------- repasadas ----------
+  function pintaRepaso() {
+    let total = 0;
+    grupos.forEach(g => {
+      const lis = [...g.querySelectorAll('li[data-r]')]; let n = 0;
+      lis.forEach(li => { const s = repasadas.has(li.dataset.r); li.classList.toggle('rep', s); if (s) n++; });
+      total += n; const c = g.querySelector('.gcont');
+      c.textContent = n ? `${n}/${lis.length}` : lis.length; c.classList.toggle('lleno', lis.length > 0 && n === lis.length);
+    });
+    $('rTotal').textContent = `${total} / ${recetas.length}`;
+    $('rBarra').style.width = (recetas.length ? total / recetas.length * 100 : 0) + '%';
+  }
+  recetas.forEach(r => {
+    const pie = document.createElement('div'); pie.className = 'pie-rep';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'marca-rep';
+    const pinta = () => { const s = repasadas.has(r.id); b.setAttribute('aria-pressed', s); b.textContent = s ? '✓ Repasada' : 'Marcar como repasada'; r.art.classList.toggle('repasada', s); };
+    b.onclick = () => { repasadas.has(r.id) ? repasadas.delete(r.id) : repasadas.add(r.id); guarda('recetario-repaso:' + CLAVE, [...repasadas]); pinta(); pintaRepaso(); };
+    pinta(); pie.append(b); r.art.append(pie);
+    // copiar enlace a la receta
+    const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'copiar-enlace'; cp.title = 'Copiar enlace a esta receta';
+    cp.setAttribute('aria-label', 'Copiar enlace a esta receta'); cp.textContent = '🔗';
+    cp.onclick = async () => {
+      try { await navigator.clipboard.writeText(location.origin + location.pathname + '#' + r.id); cp.textContent = '✓'; }
+      catch (e) { cp.textContent = '✗'; }
+      setTimeout(() => cp.textContent = '🔗', 1300);
+    };
+    r.art.append(cp);
+  });
+  pintaRepaso();
+
+  // ---------- receta actual, progreso, arriba, «seguías en» ----------
+  const prog = document.createElement('div'); prog.className = 'progreso'; bar.append(prog);
+  const arriba = document.createElement('button'); arriba.type = 'button'; arriba.className = 'arriba'; arriba.textContent = '↑';
+  arriba.setAttribute('aria-label', 'Volver arriba'); document.body.append(arriba);
+  arriba.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+  let actual = null, pendiente = false;
+  function espia() {
+    pendiente = false;
+    const tope = bar.offsetHeight + 90;
+    let cual = null;
+    for (const a of articulos) { if (a.getBoundingClientRect().top <= tope) cual = a; else break; }
+    if (!cual && articulos.length && scrollY < 50) cual = null;
+    const id = cual ? cual.id : null;
+    if (id !== actual) {
+      actual = id;
+      enlaces.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+      if (id) guarda('recetario-ultima:' + CLAVE, id);
+      const on = side.querySelector('.grupo.on ul a.on');
+      if (on && innerWidth >= 1000) {
+        const r = on.getBoundingClientRect(), s = side.getBoundingClientRect();
+        if (r.top < s.top + 150 || r.bottom > s.bottom - 20) side.scrollTop += r.top - s.top - s.height / 3;
+      }
+    }
+    const max = document.documentElement.scrollHeight - innerHeight;
+    prog.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+    arriba.classList.toggle('on', scrollY > 900);
+  }
+  addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(espia); } }, { passive: true });
+  const ponAltura = () => document.documentElement.style.setProperty('--barh', bar.offsetHeight + 'px');
+  ponAltura(); addEventListener('resize', ponAltura);
+
+  function ir(id) {   // usa el propio enrutado del recetario (cambia de pestaña si hace falta)
+    const a = document.createElement('a'); a.href = '#' + id; a.style.display = 'none'; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => { const d = document.getElementById(id); if (d && d.classList.contains('receta')) { d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello'); } }, 60);
+  }
+  const ultima = lee('recetario-ultima:' + CLAVE, null);
+  const rUlt = ultima && recetas.find(r => r.id === ultima);
+  if (rUlt && !location.hash) {
+    const av = document.createElement('div'); av.className = 'aviso-seguir'; av.setAttribute('role', 'status');
+    av.innerHTML = `<span>Seguías en <b>${esc(rUlt.titulo)}</b></span><button type="button" class="ir">Ir</button><button type="button" class="x" aria-label="Cerrar">×</button>`;
+    document.body.append(av);
+    const quita = () => av.remove();
+    av.querySelector('.ir').onclick = () => { quita(); ir(rUlt.id); };
+    av.querySelector('.x').onclick = quita;
+    setTimeout(quita, 12000);
+  }
+
+  // ---------- mostrar / ocultar índice ----------
+  const cerrar = () => document.body.classList.remove('side-open');
+  function alternaIndice() {
+    if (innerWidth >= 1000) { const o = !document.body.classList.contains('indice-oculto'); document.body.classList.toggle('indice-oculto', o); guarda('recetario-indice-oculto', o); }
+    else if (document.body.classList.contains('side-open')) cerrar();
+    else { document.body.classList.add('side-open'); const g = side.querySelector('.grupo.on'); if (g) side.scrollTop = g.offsetTop - 140; }
+  }
+  if (lee('recetario-indice-oculto', false)) document.body.classList.add('indice-oculto');
+  menu.onclick = () => { if (innerWidth >= 1000) { document.body.classList.remove('indice-oculto'); guarda('recetario-indice-oculto', false); } else alternaIndice(); };
+  $('ocultar').onclick = () => innerWidth >= 1000 ? alternaIndice() : cerrar();
+  velo.onclick = cerrar;
+  side.addEventListener('click', e => {
+    const a = e.target.closest('a'); if (!a || a.classList.contains('gcab')) { if (a) cerrar(); return; }
+    cerrar();
+    const h = a.getAttribute('href');
+    if (h && h.startsWith('#')) setTimeout(() => { const d = document.getElementById(h.slice(1)); if (d && d.classList.contains('receta')) { d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello'); } }, 60);
+  });
+
+  // ---------- buscador ----------
+  const q = $('buscar'), res = $('resultados'), nav = side.querySelector('.grupos'), limpiar = $('limpiar'), kbd = $('kbd');
+  const indice = recetas.map(r => {
+    const txt = r.art.textContent.replace(/\s+/g, ' ');
+    const g = grupos.find(g => g.dataset.tab === r.sec.id);
+    return { ...r, nt: norm(r.titulo), txt, ntxt: norm(txt), bloque: g ? g.querySelector('.gcab span').textContent : '' };
+  });
+  function marca(texto, v) {
+    const n = norm(texto), i = n.indexOf(v);
+    return i < 0 ? esc(texto) : esc(texto.slice(0, i)) + '<mark>' + esc(texto.slice(i, i + v.length)) + '</mark>' + esc(texto.slice(i + v.length));
+  }
+  function buscar() {
+    const bruto = q.value.trim(), v = norm(bruto);
+    limpiar.hidden = !q.value; kbd.hidden = !!q.value;
+    if (!v) { res.hidden = true; nav.hidden = false; return; }
+    const tit = indice.filter(x => x.nt.includes(v));
+    const cuerpo = indice.filter(x => !x.nt.includes(v) && x.ntxt.includes(v)).slice(0, 30);
+    let h = tit.map(x => `<a href="#${esc(x.id)}"><small>${esc(x.bloque)}</small>${marca(x.titulo, v)}</a>`).join('');
+    if (cuerpo.length) h += '<p class="cab">Aparece dentro de:</p>' + cuerpo.map(x => {
+      const i = x.ntxt.indexOf(v), ini = Math.max(0, i - 35);
+      const frag = (ini ? '…' : '') + x.txt.slice(ini, i + v.length + 45) + '…';
+      return `<a href="#${esc(x.id)}"><small>${esc(x.bloque)}</small>${esc(x.titulo)}<span class="frag">${marca(frag, v)}</span></a>`;
+    }).join('');
+    res.innerHTML = h || `<p class="nada">Nada con «${esc(bruto)}»</p>`;
+    res.hidden = false; nav.hidden = true;
+    res.querySelector('a')?.classList.add('sel');
+  }
+  function borra() { q.value = ''; buscar(); }
+  q.addEventListener('input', buscar);
+  limpiar.onclick = () => { borra(); q.focus(); };
+  q.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const a = res.querySelector('a.sel') || res.querySelector('a'); if (a) a.click(); }
+    if (e.key === 'Escape') { e.stopPropagation(); if (q.value) borra(); else { q.blur(); cerrar(); } }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); const l = [...res.querySelectorAll('a')], i = l.findIndex(a => a.classList.contains('sel'));
+      const j = Math.max(0, Math.min(l.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
+      l.forEach((a, k) => a.classList.toggle('sel', k === j)); l[j]?.scrollIntoView({ block: 'nearest' });
+    }
+  });
+  addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === '/') { e.preventDefault(); if (innerWidth < 1000) document.body.classList.add('side-open'); else { document.body.classList.remove('indice-oculto'); } q.focus(); q.select(); }
+    if (e.key === 'i' || e.key === 'I') alternaIndice();
+    if (e.key === 'Escape') { cerrar(); document.querySelector('.aviso-seguir')?.remove(); }
+  });
+
+  activo();
+})();
+</script>
+<!-- /indice-lateral:js -->
 </body>
 </html>
