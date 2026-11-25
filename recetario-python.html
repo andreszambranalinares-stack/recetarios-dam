@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-theme="light">
+<html data-asig="sge" lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -135,129 +135,287 @@ ul.items li:first-child { border-top: 0; }
 }
 </style>
 <!-- indice-lateral:css -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap">
+<script>try{if(!localStorage.getItem('recetario-tema')&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <style>
-/* ===== índice lateral (recetarios-comun/indice_lateral.py) ===== */
-:root { --barh: 4rem; --sidew: 19.5rem; }
-.menu-btn { display: none; align-items: center; gap: .35rem; font: inherit; font-size: .85rem; color: var(--text); background: var(--chip);
-  border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; white-space: nowrap; }
-.menu-btn:hover { background: var(--chip-hover); }
-.progreso { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: var(--accent); transition: width .1s linear; pointer-events: none; }
-.side { background: var(--bar); padding: 0 .7rem 2.5rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.side-top { position: sticky; top: 0; z-index: 2; background: var(--bar); padding: .85rem 0 .5rem; border-bottom: 1px solid var(--rule); margin-bottom: .5rem; }
-.side-fila { display: flex; gap: .4rem; align-items: center; }
+/* ===== tema e índice lateral (recetarios-comun/indice_lateral.py) ===== */
+
+:root { --h: 250; --cl: oklch(0.5 0.12 250); --cd: oklch(0.8 0.1 250);
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, "SF Mono", monospace;
+  --ease: cubic-bezier(.2, .7, .2, 1); }
+@supports (color: oklch(0.5 0.1 100)) {
+  html:not([data-theme="dark"]) {
+    --bg: oklch(0.975 0.008 var(--h)); --card: oklch(0.995 0.003 var(--h)); --text: oklch(0.24 0.02 var(--h)); --soft: oklch(0.47 0.025 var(--h));
+    --rule: oklch(0.9 0.014 var(--h)); --bar: oklch(0.985 0.006 var(--h) / .86); --bar-solid: oklch(0.985 0.006 var(--h));
+    --accent: var(--cl); --link: var(--cl); --on-accent: #fff; --chip: oklch(0.948 0.014 var(--h)); --chip-hover: oklch(0.92 0.024 var(--h));
+    --tint: oklch(0.945 0.035 var(--h)); --tint-rule: oklch(0.87 0.06 var(--h));
+    --inline-bg: oklch(0.945 0.022 var(--h)); --inline-text: oklch(0.43 0.13 var(--h)); --thead: oklch(0.96 0.012 var(--h));
+    --ojo-bg: oklch(0.972 0.035 88); --ojo-rule: oklch(0.86 0.09 85); --ojo-ink: oklch(0.47 0.11 65);
+    --code-bg: oklch(0.225 0.028 var(--h)); --code-cap: oklch(0.265 0.032 var(--h)); --code-text: oklch(0.93 0.01 var(--h)); --code-soft: oklch(0.74 0.03 var(--h));
+    --sombra: 0 1px 2px oklch(0.3 0.03 var(--h) / .06), 0 8px 24px -12px oklch(0.3 0.05 var(--h) / .18);
+  }
+  html[data-theme="dark"] {
+    --bg: oklch(0.175 0.012 var(--h)); --card: oklch(0.212 0.014 var(--h)); --text: oklch(0.93 0.008 var(--h)); --soft: oklch(0.72 0.018 var(--h));
+    --rule: oklch(0.3 0.016 var(--h)); --bar: oklch(0.19 0.013 var(--h) / .84); --bar-solid: oklch(0.19 0.013 var(--h));
+    --accent: var(--cd); --link: var(--cd); --on-accent: oklch(0.2 0.03 var(--h)); --chip: oklch(0.245 0.016 var(--h)); --chip-hover: oklch(0.285 0.02 var(--h));
+    --tint: oklch(0.24 0.035 var(--h)); --tint-rule: oklch(0.36 0.06 var(--h));
+    --inline-bg: oklch(0.26 0.03 var(--h)); --inline-text: oklch(0.84 0.09 var(--h)); --thead: oklch(0.23 0.015 var(--h));
+    --ojo-bg: oklch(0.24 0.03 80); --ojo-rule: oklch(0.42 0.07 80); --ojo-ink: oklch(0.85 0.11 82);
+    --code-bg: oklch(0.14 0.012 var(--h)); --code-cap: oklch(0.17 0.015 var(--h)); --code-text: oklch(0.93 0.01 var(--h)); --code-soft: oklch(0.7 0.025 var(--h));
+    --sombra: 0 1px 2px rgb(0 0 0 / .3), 0 10px 30px -12px rgb(0 0 0 / .5);
+  }
+}
+
+html[data-asig="deint"] { --h: 292; --cl: oklch(0.49 0.2 292); --cd: oklch(0.78 0.13 292); --patron: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2730%27%20height%3D%2730%27%3E%3Crect%20x%3D%273%27%20y%3D%273%27%20width%3D%2711%27%20height%3D%2711%27%20rx%3D%272.5%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%271.4%27/%3E%3Crect%20x%3D%2718%27%20y%3D%2718%27%20width%3D%278%27%20height%3D%278%27%20rx%3D%272%27%20fill%3D%27black%27/%3E%3C/svg%3E"); }
+html[data-asig="sge"] { --h: 62; --cl: oklch(0.52 0.13 58); --cd: oklch(0.82 0.13 72); --patron: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2722%27%20height%3D%2722%27%3E%3Cpath%20d%3D%27M11%206.5v9M6.5%2011h9%27%20stroke%3D%27black%27%20stroke-width%3D%271.6%27%20stroke-linecap%3D%27round%27/%3E%3C/svg%3E"); }
+html[data-asig="psp"] { --h: 150; --cl: oklch(0.5 0.14 150); --cd: oklch(0.8 0.15 150); --patron: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2714%27%20height%3D%2714%27%3E%3Cpath%20d%3D%27M-2%204L4-2M0%2014L14%200M10%2016l6-6%27%20stroke%3D%27black%27%20stroke-width%3D%271.3%27/%3E%3C/svg%3E"); }
+html[data-asig="pmdm"] { --h: 8; --cl: oklch(0.52 0.19 8); --cd: oklch(0.79 0.12 8); --patron: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2714%27%20height%3D%2714%27%3E%3Ccircle%20cx%3D%277%27%20cy%3D%277%27%20r%3D%271.7%27%20fill%3D%27black%27/%3E%3C/svg%3E"); }
+body { background: var(--bg); text-rendering: optimizeLegibility; }
+::selection { background: color-mix(in oklab, var(--accent) 26%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--link); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+
+/* ---------- barra superior ---------- */
+.bar { background: var(--bar); -webkit-backdrop-filter: saturate(1.5) blur(14px); backdrop-filter: saturate(1.5) blur(14px); border-bottom: 1px solid var(--rule); }
+.bar-in { gap: .5rem; padding-top: .55rem; padding-bottom: .55rem; min-height: 3.5rem; }
+.home, .menu-btn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-size: .86rem; font-weight: 550; color: var(--soft);
+  background: none; border: 1px solid transparent; border-radius: 9px; padding: .4rem .6rem; text-decoration: none; cursor: pointer; white-space: nowrap;
+  transition: background .15s, color .15s; }
+.home:hover, .menu-btn:hover { background: var(--chip); color: var(--text); }
+.home svg, .menu-btn svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.brand { display: inline-flex; align-items: center; gap: .6rem; font-family: var(--display); font-weight: 700; font-size: 1.1rem; letter-spacing: -.015em; color: var(--text); min-width: 0; white-space: nowrap; }
+.brand > svg { display: none; }
+.logo { flex: none; display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: .6rem; background: var(--accent); color: var(--on-accent);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / .14), 0 2px 8px -2px color-mix(in oklab, var(--accent) 60%, transparent); }
+.logo svg, .brand .logo svg { width: 1.2rem; height: 1.2rem; color: inherit; }
+.sub { padding-left: .7rem; margin-left: .1rem; border-left: 1px solid var(--rule); color: var(--soft); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+#theme { flex: none; margin-left: auto; width: 2.4rem; height: 2.4rem; padding: 0; justify-content: center; gap: 0; font-size: 0; color: var(--soft);
+  background: none; border: 1px solid transparent; border-radius: 10px; transition: background .15s, color .15s; }
+#theme:hover { background: var(--chip); color: var(--text); }
+#theme svg { width: 1.15rem; height: 1.15rem; }
+.tabs a { transition: color .15s, border-color .2s; }
+.tabs a.on { color: var(--text); border-bottom-color: var(--accent); }
+.tabs a b { font-family: var(--mono); border-radius: 7px; }
+.tabs a.on b { background: var(--accent); color: var(--on-accent); }
+.progreso { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); pointer-events: none; }
+
+/* ---------- contenido ---------- */
+main { padding-top: 1.75rem; }
+section.tab { counter-reset: rec; }
+section.tab:not([hidden]) { animation: il-entra .4s var(--ease) both; }
+@keyframes il-entra { from { opacity: 0; transform: translateY(8px); } }
+
+.portada { position: relative; isolation: isolate; overflow: hidden; margin: 0 0 1.75rem; padding: 1.7rem 1.75rem 1.5rem; border-radius: 14px;
+  background: var(--tint); border: 1px solid var(--tint-rule); }
+.portada::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--accent); opacity: .2;
+  -webkit-mask: var(--patron), linear-gradient(105deg, transparent 30%, #000 95%); -webkit-mask-composite: source-in;
+  mask: var(--patron), linear-gradient(105deg, transparent 30%, #000 95%); mask-composite: intersect; }
+.portada .marca { position: absolute; right: -1.4rem; bottom: -2rem; width: 10rem; height: 10rem; color: var(--accent); opacity: .16; z-index: -1; stroke-width: 1.4; }
+.portada .kicker { margin: 0; display: inline-flex; align-items: center; gap: .5rem; font-family: var(--mono); font-size: .74rem; letter-spacing: .08em; color: var(--accent); }
+.portada h1 { font-family: var(--display); font-size: clamp(1.55rem, 1.1rem + 1.7vw, 2.3rem); font-weight: 750; letter-spacing: -.025em; line-height: 1.08;
+  margin: .45rem 0 .6rem; max-width: 26ch; text-wrap: balance; }
+.portada .meta { margin: 0; font-size: .86rem; color: var(--soft); }
+.portada .meta b { color: var(--text); font-weight: 650; }
+
+/* recetas: secciones numeradas, sin tarjetas */
+.receta { position: relative; counter-increment: rec; background: none; border: 0; border-top: 1px solid var(--rule); border-radius: 0;
+  padding: 2.1rem 0 1.5rem; margin: 0; scroll-margin-top: calc(var(--barh, 4rem) + 1rem); }
+.receta:focus { outline: none; }
+.receta::before { content: ""; position: absolute; left: -1.25rem; top: 2.15rem; bottom: 1.5rem; width: 3px; border-radius: 3px; background: var(--accent); opacity: 0; }
+.receta.destello::before { animation: il-marca 1.8s ease; }
+@keyframes il-marca { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
+.receta h2 { display: flex; align-items: baseline; gap: .8rem; font-family: var(--display); font-weight: 700; font-size: 1.4rem; letter-spacing: -.015em;
+  line-height: 1.22; margin: 0 0 .9rem; padding: 0; text-wrap: balance; }
+.receta h2::before { content: counter(rec, decimal-leading-zero); flex: none; font: 650 .74rem/1 var(--mono); letter-spacing: .02em; color: var(--accent);
+  background: var(--tint); border: 1px solid var(--tint-rule); padding: .3rem .4rem; border-radius: 6px; transform: translateY(-.22rem); }
+.ya-numerada .receta h2::before, .ya-numerada > .indice a::before { display: none; }   /* PSP y SGE ya numeran (1.1, 4.2…) */
+.receta h2 a { color: var(--text); text-decoration: none; }
+.receta h2 a:hover { color: var(--accent); }
+.receta > p, .receta > ul.items { max-width: 72ch; }
+.kicker { color: var(--accent); }
+
+/* índice de recetas dentro del bloque (móvil o índice lateral oculto) */
+.tab > .indice { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0 1.5rem; counter-reset: ix; margin: 0 0 2rem; }
+.tab > .indice a { counter-increment: ix; display: flex; gap: .65rem; align-items: baseline; padding: .5rem 0; background: none; border: 0;
+  border-bottom: 1px dashed var(--rule); border-radius: 0; font-size: .92rem; line-height: 1.35; color: var(--text); text-decoration: none; transition: color .15s; }
+.tab > .indice a::before { content: counter(ix, decimal-leading-zero); flex: none; font: 600 .7rem/1 var(--mono); color: var(--accent); }
+.tab > .indice a:hover { color: var(--accent); background: none; }
+
+/* código */
+figure.code { border-radius: 12px; border: 1px solid color-mix(in oklab, var(--code-bg) 85%, var(--accent)); box-shadow: var(--sombra); }
+figure.code figcaption { background: var(--code-cap); border-bottom: 1px solid rgb(255 255 255 / .06); padding: .4rem .5rem .4rem .85rem; }
+.file { display: inline-flex; align-items: center; gap: .55rem; color: var(--code-soft); font-size: .78rem; }
+.file::before { content: ""; flex: none; width: .5rem; height: .5rem; border-radius: 50%; background: var(--cd); }
+.copy { font-size: .76rem; color: var(--code-soft); border: 1px solid rgb(255 255 255 / .14); border-radius: 7px; padding: .2rem .6rem; transition: color .15s, border-color .15s, background .15s; }
+.copy:hover { color: #fff; border-color: rgb(255 255 255 / .35); background: rgb(255 255 255 / .06); }
+pre { line-height: 1.6; }
+pre code, code { font-family: var(--mono); }
+
+/* avisos, tablas, listas */
+.ojo { position: relative; background: var(--ojo-bg); border: 1px solid var(--ojo-rule); border-radius: 10px; padding: .7rem .95rem .7rem 2.65rem; }
+.ojo::before { content: "!"; position: absolute; left: .85rem; top: .82rem; width: 1.15rem; height: 1.15rem; display: grid; place-items: center;
+  border-radius: 50%; background: var(--ojo-ink); color: var(--ojo-bg); font: 800 .72rem/1 var(--display); }
+.ojo strong { color: var(--ojo-ink); }
+.table { border-color: var(--rule); border-radius: 10px; background: var(--card); }
+thead th { background: var(--thead); font-size: .76rem; letter-spacing: .05em; text-transform: uppercase; color: var(--soft); font-weight: 700; }
+tbody tr { transition: background .15s; }
+tbody tr:hover { background: var(--chip); }
+#problemas ul.items li::before, #ej ul.items li::before { font-family: var(--mono); font-size: .85rem; }
+.pasar { gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.pasar a { display: inline-flex; align-items: center; padding: .65rem 1rem; border-radius: 10px; border: 1px solid var(--rule); background: var(--card);
+  color: var(--text); font-weight: 600; transition: border-color .15s, color .15s, transform .2s var(--ease); }
+.pasar a:hover { border-color: var(--accent); color: var(--accent); }
+.pasar a:last-child:hover { transform: translateX(2px); }
+.pasar a:first-child:hover { transform: translateX(-2px); }
+
+/* enlace al esquema interactivo (DEINT) */
+.banner-esquema, .side-esquema { position: relative; display: flex; align-items: center; gap: .8rem; text-decoration: none; color: var(--text);
+  background: var(--tint); border: 1px solid var(--tint-rule); border-radius: 12px; transition: border-color .15s; }
+.banner-esquema { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 1rem 1.2rem; margin: 0 0 1.75rem; }
+.banner-esquema:hover, .side-esquema:hover { border-color: var(--accent); }
+.banner-esquema b { color: var(--accent); font-family: var(--display); }
+.banner-esquema i { background: var(--accent); color: var(--on-accent); border-radius: 9px; }
+
+/* ---------- índice lateral ---------- */
+.side { background: var(--bar-solid); padding: 0 .75rem 2.5rem; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.side > * { min-width: calc(var(--sidew) - 1.5rem); }
+.side-top { position: sticky; top: 0; z-index: 2; display: flex; gap: .4rem; align-items: center; background: var(--bar-solid); padding: .85rem 0 .6rem; }
 .buscar-caja { position: relative; flex: 1; display: flex; align-items: center; }
-#buscar { width: 100%; font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--rule);
-  border-radius: 10px; padding: .5rem 2.2rem .5rem .75rem; -webkit-appearance: none; appearance: none; }
+.buscar-caja .lupa { position: absolute; left: .7rem; width: 1rem; height: 1rem; color: var(--soft); pointer-events: none; }
+#buscar { width: 100%; font: inherit; font-size: .9rem; color: var(--text); background: var(--card); border: 1px solid var(--rule); border-radius: 10px;
+  padding: .55rem 2.2rem .55rem 2.15rem; -webkit-appearance: none; appearance: none; transition: border-color .15s, box-shadow .15s; }
+#buscar::placeholder { color: var(--soft); }
 #buscar::-webkit-search-cancel-button { display: none; }
-#buscar:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.buscar-caja kbd { position: absolute; right: .55rem; font: .72rem ui-monospace, Consolas, monospace; color: var(--soft);
-  border: 1px solid var(--rule); border-radius: 5px; padding: 0 .35rem; pointer-events: none; }
-.limpiar { position: absolute; right: .35rem; width: 1.6rem; height: 1.6rem; border: 0; border-radius: 50%; background: var(--chip);
-  color: var(--text); font-size: 1.05rem; line-height: 1; cursor: pointer; }
-.limpiar:hover { background: var(--chip-hover); }
-.icono { flex: none; width: 2.2rem; height: 2.2rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--card);
-  color: var(--text); font-size: 1rem; cursor: pointer; }
-.icono:hover { background: var(--chip); }
-.side-repaso { margin: .65rem .15rem 0; font-size: .78rem; color: var(--soft); }
-.r-txt { display: flex; justify-content: space-between; margin-bottom: .25rem; }
-.r-txt b { color: var(--text); }
-.r-barra { height: 5px; border-radius: 3px; background: var(--chip); overflow: hidden; }
-.r-barra i { display: block; height: 100%; width: 0; background: #2f9e44; transition: width .3s; }
-.side-acciones { display: flex; gap: .4rem; margin-top: .55rem; }
-.side-acciones button { flex: 1; font: inherit; font-size: .75rem; color: var(--soft); background: none; border: 1px solid var(--rule);
-  border-radius: 8px; padding: .25rem .4rem; cursor: pointer; }
-.side-acciones button:hover { color: var(--text); background: var(--chip); }
-.grupo { margin: 0 0 .1rem; }
-.gfila { display: flex; align-items: center; border-radius: 9px; }
+#buscar:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent); }
+.buscar-caja kbd { position: absolute; right: .55rem; font: .72rem var(--mono); color: var(--soft); border: 1px solid var(--rule); border-bottom-width: 2px;
+  border-radius: 5px; padding: 0 .35rem; pointer-events: none; }
+.limpiar { position: absolute; right: .3rem; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border: 0; border-radius: 7px; background: none; color: var(--soft); cursor: pointer; }
+.limpiar[hidden] { display: none; }
+.limpiar:hover { background: var(--chip); color: var(--text); }
+.limpiar svg, .icono svg { width: 1.05rem; height: 1.05rem; }
+.icono { flex: none; width: 2.35rem; height: 2.35rem; display: grid; place-items: center; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--card); color: var(--soft); cursor: pointer; transition: background .15s, color .15s; }
+.icono:hover { background: var(--chip); color: var(--text); }
+.side-meta { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: 0 .2rem .6rem .45rem; margin-bottom: .45rem;
+  border-bottom: 1px solid var(--rule); font-size: .76rem; color: var(--soft); }
+.side-meta button { font: inherit; font-weight: 600; color: var(--soft); background: none; border: 0; padding: .25rem .45rem; border-radius: 7px; cursor: pointer; }
+.side-meta button:hover { background: var(--chip); color: var(--text); }
+
+.grupo { margin: 0 0 .15rem; }
+.gfila { display: flex; align-items: center; border-radius: 10px; transition: background .15s; }
 .gfila:hover { background: var(--chip); }
-.gcab { flex: 1; min-width: 0; display: flex; align-items: center; gap: .6rem; padding: .45rem .3rem .45rem .55rem; color: var(--text);
-  text-decoration: none; font-size: .93rem; font-weight: 600; }
+.gcab { flex: 1; min-width: 0; display: flex; align-items: center; gap: .65rem; padding: .45rem .3rem .45rem .45rem; color: var(--text);
+  text-decoration: none; font-size: .92rem; font-weight: 600; }
 .gcab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gcab b { flex: none; display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .2rem; border-radius: 99px;
-  background: var(--chip); color: var(--soft); font-size: .72rem; border: 1px solid var(--rule); }
-.gcont { flex: none; font-style: normal; font-size: .7rem; color: var(--soft); background: var(--chip); border-radius: 99px; padding: 0 .45rem; }
-.gcont.lleno { background: #2f9e44; color: #fff; }
-.gtog { flex: none; width: 1.9rem; height: 1.9rem; margin-left: .15rem; border: 0; background: none; color: var(--soft); cursor: pointer;
-  border-radius: 7px; font-size: .8rem; transition: transform .2s; }
+.gcab b { flex: none; display: inline-grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 8px; background: var(--chip);
+  border: 1px solid var(--rule); color: var(--soft); font: 700 .74rem/1 var(--mono); transition: background .2s, color .2s, border-color .2s; }
+.gcont { flex: none; font-style: normal; font-size: .72rem; color: var(--soft); font-variant-numeric: tabular-nums; padding: 0 .1rem; }
+.gtog { flex: none; width: 2rem; height: 2rem; display: grid; place-items: center; border: 0; background: none; color: var(--soft); cursor: pointer; border-radius: 8px; }
 .gtog:hover { color: var(--text); background: var(--chip-hover); }
-.grupo.abierto .gtog { transform: rotate(90deg); }
-.grupo.on > .gfila { background: var(--chip); }
-.grupo.on .gcab b { background: var(--accent); border-color: var(--accent); color: #fff; }
-.grupo ul { list-style: none; margin: .1rem 0 .6rem 1.25rem; padding: 0 0 0 .55rem; border-left: 2px solid var(--rule); display: none; }
-.grupo.abierto ul { display: block; }
-.grupo ul a { display: flex; gap: .35rem; align-items: baseline; padding: .3rem .55rem; margin-left: -.67rem; border-left: 2px solid transparent;
-  font-size: .85rem; line-height: 1.35; color: var(--soft); text-decoration: none; border-radius: 0 6px 6px 0; }
+.gtog svg { width: .95rem; height: .95rem; transition: transform .3s var(--ease); }
+.grupo.abierto .gtog svg { transform: rotate(90deg); }
+.grupo.on > .gfila { background: var(--tint); }
+.grupo.on .gcab b { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.gcuerpo { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s var(--ease); }
+.grupo.abierto .gcuerpo { grid-template-rows: 1fr; }
+.gcuerpo > ul { min-height: 0; overflow: hidden; list-style: none; margin: 0 0 0 1.25rem; padding: 0 0 0 .6rem; border-left: 1px solid var(--rule);
+  opacity: 0; transition: opacity .25s; }
+.grupo.abierto .gcuerpo > ul { opacity: 1; }
+.gcuerpo li:first-child { margin-top: .25rem; }
+.gcuerpo li:last-child { margin-bottom: .55rem; }
+.grupo ul a { position: relative; display: block; padding: .33rem .6rem; margin-left: -.61rem; font-size: .855rem; line-height: 1.4; color: var(--soft);
+  text-decoration: none; border-radius: 0 8px 8px 0; transition: color .15s, background .15s; }
+.grupo ul a::before { content: ""; position: absolute; left: 0; top: .3rem; bottom: .3rem; width: 2px; border-radius: 2px; background: var(--accent);
+  transform: scaleY(0); transition: transform .25s var(--ease); }
 .grupo ul a:hover { color: var(--text); background: var(--chip); }
-.grupo ul a.on { color: var(--accent); font-weight: 650; border-left-color: var(--accent); background: var(--chip); }
+.grupo ul a.on { color: var(--accent); font-weight: 650; background: var(--tint); }
+.grupo ul a.on::before { transform: scaleY(1); }
 .grupo ul a code { font-size: .8em; padding: 0 .25em; }
 .grupo ul a .ses { font-size: .72rem; margin-right: .2rem; }
-.grupo ul a::after { content: ""; flex: none; margin-left: auto; width: .5rem; }
-.grupo ul li.rep a::after { content: "✓"; color: #2f9e44; font-weight: 700; width: auto; }
-.side-esquema { display: flex; gap: .6rem; align-items: center; margin: 1rem 0 0; padding: .7rem .75rem; border-radius: 10px;
-  border: 1.5px dashed var(--accent); color: var(--text); text-decoration: none; font-size: .9rem; font-weight: 650; }
-.side-esquema b { color: var(--accent); }
-.side-esquema small { display: block; font-weight: 400; color: var(--soft); font-size: .76rem; }
-.side-esquema:hover { background: var(--chip); }
-.side-ayuda { margin: 1.1rem .3rem 0; font-size: .74rem; color: var(--soft); line-height: 1.7; }
-.side-ayuda kbd { font: .7rem ui-monospace, Consolas, monospace; border: 1px solid var(--rule); border-radius: 4px; padding: 0 .3rem; background: var(--card); }
-.resultados a { display: block; padding: .5rem .6rem; border-radius: 8px; color: var(--text); text-decoration: none; font-size: .88rem; line-height: 1.35; }
-.resultados a:hover, .resultados a.sel { background: var(--chip); }
-.resultados small { display: block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); }
+.side-esquema { margin: 1rem .1rem 0; padding: .7rem .75rem; font-size: .88rem; font-weight: 650; line-height: 1.3; }
+.side-esquema .logo { width: 1.9rem; height: 1.9rem; }
+.side-esquema small { display: block; font-weight: 450; color: var(--soft); font-size: .76rem; margin-top: .1rem; }
+.side-esquema .flecha { margin-left: auto; color: var(--accent); transition: transform .2s var(--ease); }
+.side-esquema:hover .flecha { transform: translateX(3px); }
+.side-ayuda { margin: 1.25rem .4rem 0; font-size: .74rem; color: var(--soft); line-height: 1.8; }
+.side-ayuda kbd { font: .7rem var(--mono); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 5px; padding: 0 .3rem; background: var(--card); }
+
+.resultados { padding: .1rem 0 .5rem; }
+.resultados a { display: block; padding: .55rem .65rem; border-radius: 10px; color: var(--text); text-decoration: none; font-size: .88rem; line-height: 1.35; }
+.resultados a:hover { background: var(--chip); }
+.resultados a.sel { background: var(--tint); box-shadow: inset 2px 0 0 var(--accent); }
+.resultados small { display: block; font: 700 .66rem/1.6 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
 .resultados .frag { display: block; color: var(--soft); font-size: .78rem; margin-top: .15rem; }
-.resultados mark { background: var(--inline-bg); color: var(--inline-text); border-radius: 3px; padding: 0 .1em; }
-.resultados .nada, .resultados .cab { color: var(--soft); font-size: .82rem; padding: .3rem .6rem; margin: .4rem 0 0; }
-.receta { position: relative; }
-.receta.destello { animation: il-destello 1.2s ease; }
-@keyframes il-destello { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
-.receta.repasada { border-color: #2f9e4466; }
-.receta h2 { padding-right: 2rem; }
-.copiar-enlace { position: absolute; top: 1.15rem; right: 1rem; width: 1.8rem; height: 1.8rem; border: 1px solid transparent; border-radius: 7px;
-  background: none; color: var(--soft); cursor: pointer; font-size: .85rem; opacity: .35; transition: opacity .15s; }
-.receta:hover .copiar-enlace, .copiar-enlace:focus { opacity: 1; }
-.copiar-enlace:hover { border-color: var(--rule); background: var(--chip); color: var(--text); }
-.pie-rep { display: flex; justify-content: flex-end; margin-top: .8rem; }
-.marca-rep { font: inherit; font-size: .82rem; color: var(--soft); background: none; border: 1px solid var(--rule); border-radius: 999px;
-  padding: .25rem .8rem; cursor: pointer; }
-.marca-rep:hover { background: var(--chip); color: var(--text); }
-.marca-rep[aria-pressed="true"] { background: #2f9e44; border-color: #2f9e44; color: #fff; }
-.aviso-seguir { position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%); z-index: 30; display: flex; gap: .6rem; align-items: center;
-  max-width: calc(100vw - 2rem); background: var(--card); color: var(--text); border: 1px solid var(--rule); border-radius: 12px;
-  padding: .55rem .6rem .55rem .9rem; box-shadow: 0 8px 26px rgba(0,0,0,.18); font-size: .88rem; }
+.resultados mark { background: color-mix(in oklab, var(--accent) 24%, transparent); color: inherit; border-radius: 3px; padding: 0 .1em; }
+.resultados .nada, .resultados .cab { color: var(--soft); font-size: .8rem; padding: .3rem .65rem; margin: .5rem 0 .1rem; }
+
+/* ---------- avisos flotantes ---------- */
+.aviso-seguir { position: fixed; left: 50%; bottom: 1.2rem; z-index: 30; display: flex; gap: .5rem; align-items: center; max-width: calc(100vw - 2rem);
+  background: var(--card); color: var(--text); border: 1px solid var(--rule); border-radius: 12px; padding: .5rem .5rem .5rem .9rem;
+  box-shadow: var(--sombra), 0 18px 40px -16px rgb(0 0 0 / .35); font-size: .88rem; transform: translateX(-50%); animation: il-sube .4s var(--ease) both; }
+@keyframes il-sube { from { opacity: 0; transform: translate(-50%, 12px); } }
 .aviso-seguir span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.aviso-seguir button { flex: none; font: inherit; font-size: .82rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--chip); color: var(--text); padding: .25rem .65rem; cursor: pointer; }
-.aviso-seguir button.ir { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 650; }
-.arriba { position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 15; width: 2.6rem; height: 2.6rem; border-radius: 50%;
-  border: 1px solid var(--rule); background: var(--card); color: var(--text); font-size: 1.1rem; cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,.15); opacity: 0; pointer-events: none; transition: opacity .2s; }
-.arriba.on { opacity: 1; pointer-events: auto; }
+.aviso-seguir button { flex: none; font: inherit; font-size: .82rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--chip); color: var(--text); padding: .3rem .7rem; cursor: pointer; }
+.aviso-seguir button.ir { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 650; }
+.arriba { position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 15; width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border-radius: 12px;
+  border: 1px solid var(--rule); background: var(--card); color: var(--text); cursor: pointer; box-shadow: var(--sombra);
+  opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .25s var(--ease), border-color .15s; }
+.arriba svg { width: 1.1rem; height: 1.1rem; }
+.arriba:hover { border-color: var(--accent); color: var(--accent); }
+.arriba.on { opacity: 1; transform: none; pointer-events: auto; }
 .velo { display: none; }
 
+/* ---------- escritorio: índice fijo ---------- */
 @media (min-width: 1000px) {
-  html { scroll-padding-top: 4.5rem; }
+  :root { --sidew: 18.5rem; }
+  html { scroll-padding-top: calc(var(--barh, 4rem) + 1.25rem); }
   .tabs { display: none; }
-  .bar-in { max-width: none; padding-left: 1.25rem; padding-right: 1.25rem; }
-  .shell { display: grid; grid-template-columns: var(--sidew) minmax(0, 1fr); }
-  .side { position: sticky; top: var(--barh); height: calc(100vh - var(--barh)); border-right: 1px solid var(--rule); }
-  .shell main { width: 100%; }
+  .bar-in { max-width: none; padding-left: 1rem; padding-right: 1.25rem; }
+  .shell { display: grid; grid-template-columns: var(--sidew) minmax(0, 1fr); transition: grid-template-columns .35s var(--ease); }
+  .side { position: sticky; top: var(--barh); height: calc(100vh - var(--barh)); height: calc(100dvh - var(--barh)); border-right: 1px solid var(--rule);
+    transition: opacity .25s, visibility .35s; }
+  .shell main { width: 100%; max-width: 55rem; margin: 0 auto; padding: 2rem 2.75rem 6rem; }
   .tab > .indice { display: none; }
-  body.indice-oculto .shell { grid-template-columns: minmax(0, 1fr); }
-  body.indice-oculto .side { display: none; }
-  body.indice-oculto .tab > .indice { display: flex; }
+  body.indice-oculto .shell { grid-template-columns: 0 minmax(0, 1fr); }
+  body.indice-oculto .side { opacity: 0; visibility: hidden; }
+  body.indice-oculto .tab > .indice { display: grid; }
+  .menu-btn { display: none; }
   body.indice-oculto .menu-btn { display: inline-flex; }
 }
+/* ---------- móvil y tableta: cajón ---------- */
 @media (max-width: 999px) {
-  .menu-btn { display: inline-flex; }
-  .side { position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, 21rem); z-index: 40; transform: translateX(-102%); visibility: hidden;
-    transition: transform .25s ease, visibility .25s; box-shadow: 6px 0 24px rgba(0,0,0,.25); }
-  body.side-open .side { transform: none; visibility: visible; }
-  body.side-open .velo { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.45); }
+  :root { --sidew: min(86vw, 21rem); }
+  .side { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidew); z-index: 40; border-right: 1px solid var(--rule);
+    transform: translateX(-100%); visibility: hidden; transition: transform .34s var(--ease), visibility 0s .34s; }
+  body.side-open .side { transform: none; visibility: visible; transition: transform .34s var(--ease), visibility 0s; box-shadow: 12px 0 40px -12px rgb(0 0 0 / .35); }
+  .velo { display: block; position: fixed; inset: 0; z-index: 35; background: rgb(8 8 14 / .5); opacity: 0; pointer-events: none; transition: opacity .3s; }
+  body.side-open .velo { opacity: 1; pointer-events: auto; }
   body.side-open { overflow: hidden; }
   .buscar-caja kbd, .side-ayuda { display: none; }
-  .copiar-enlace { opacity: .6; }
+  .receta::before { left: -.75rem; }
 }
-@media (max-width: 640px) { .menu-btn span { display: none; } .aviso-seguir { bottom: 4.2rem; } }
-@media print { .side, .velo, .arriba, .menu-btn, .progreso, .copiar-enlace, .pie-rep, .aviso-seguir { display: none !important; } .shell { display: block; } }
-@media (prefers-reduced-motion: reduce) { .side, .gtog, .receta.destello { transition: none; animation: none; } }
+@media (max-width: 640px) {
+  .menu-btn span, .home span { display: none; }
+  .bar-in { gap: .25rem; }
+  .brand { font-size: 1rem; }
+  .logo { width: 1.8rem; height: 1.8rem; }
+  .portada { padding: 1.3rem 1.15rem 1.2rem; border-radius: 12px; margin-bottom: 1.25rem; }
+  .portada .marca { width: 7rem; height: 7rem; }
+  .receta { padding: 1.6rem 0 1.1rem; }
+  .receta h2 { font-size: 1.2rem; gap: .6rem; }
+  .receta::before { left: -.6rem; }
+  .aviso-seguir { bottom: 4.6rem; }
+}
+@media print {
+  .side, .velo, .arriba, .menu-btn, .progreso, .aviso-seguir, .portada::before, .portada .marca { display: none !important; }
+  .shell { display: block; } .portada { background: none; border: 0; padding: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 </style>
 <!-- /indice-lateral:css -->
 </head>
@@ -265,7 +423,7 @@ ul.items li:first-child { border-top: 0; }
 <header class="bar">
 <div class="bar-in">
 <a class="home" href="./" aria-label="Volver al menú de recetarios">&larr;<span> Recetarios</span></a>
-<a class="brand" href="#b1">Recetario Python</a><span class="sub">SGE · de la lógica a los objetos</span>
+<a class="brand" href="#b1"><!--logo--><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="5.5" y="12" width="3" height="5" rx=".8"/><rect x="10.5" y="8" width="3" height="9" rx=".8"/><rect x="15.5" y="4" width="3" height="13" rx=".8"/></svg></span><!--/logo-->Recetario Python</a><span class="sub">SGE · de la lógica a los objetos</span>
 <button type="button" id="theme" aria-label="Cambiar entre modo claro y oscuro"></button>
 </div>
 <nav class="tabs" aria-label="Bloques"><a href="#b1" data-tab="b1"><b>1</b>Pensar en Python</a><a href="#b2" data-tab="b2"><b>2</b>Colecciones y referencias</a><a href="#b3" data-tab="b3"><b>3</b>Funciones y módulos</a><a href="#b4" data-tab="b4"><b>4</b>Clases y objetos</a><a href="#b5" data-tab="b5"><b>5</b>Encapsulación y contratos</a><a href="#b6" data-tab="b6"><b>6</b>Composición y responsabilidades</a><a href="#b7" data-tab="b7"><b>7</b>Herencia y polimorfismo</a><a href="#b8" data-tab="b8"><b>8</b>Objetos al estilo Python</a><a href="#b9" data-tab="b9"><b>9</b>Persistencia y ficheros</a><a href="#b10" data-tab="b10"><b>10</b>Pruebas y proyecto final</a><a href="#ej" data-tab="ej">Ejercicios</a><a href="#chu" data-tab="chu">Chuleta</a></nav>
@@ -2185,26 +2343,37 @@ document.querySelectorAll('figure.code').forEach(f => {
 </script>
 <!-- indice-lateral:js -->
 <script>
-// ===== índice lateral (recetarios-comun/indice_lateral.py) =====
+// ===== tema e índice lateral (recetarios-comun/indice_lateral.py) =====
 (() => {
   const bar = document.querySelector('.bar'), main = document.querySelector('main');
   if (!bar || !main || document.getElementById('side')) return;
+  const ICO = {"lupa": "<svg class=\"lupa\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/></svg>", "x": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M6 6l12 12M18 6 6 18\"/></svg>", "panel": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M9 4v16M15.5 10l-2 2 2 2\"/></svg>", "menu": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M9 4v16M13 10l2 2-2 2\"/></svg>", "chevron": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6\"/></svg>", "arriba": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 19V5M6 11l6-6 6 6\"/></svg>", "atras": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 12H5M11 6l-6 6 6 6\"/></svg>"};
   const CLAVE = (location.pathname.split('/').pop() || 'recetario').replace(/\.html?$/, '');
   const guarda = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   const lee = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const extra = window.INDICE_EXTRA || null;
+  const escritorio = matchMedia('(min-width: 1000px)');
+  const body = document.body;
+  const logo = document.querySelector('.brand .logo');
+  const logoSVG = logo ? logo.innerHTML : '';
+
+  // limpia restos de la versión anterior («repasadas»)
+  try { localStorage.removeItem('recetario-repaso:' + CLAVE); } catch (e) {}
 
   // ---------- estructura ----------
+  const home = bar.querySelector('.home');
+  if (home && !home.querySelector('svg')) home.innerHTML = ICO.atras + '<span>Recetarios</span>';
   const shell = document.createElement('div'); shell.className = 'shell';
   main.before(shell);
   const side = document.createElement('aside'); side.className = 'side'; side.id = 'side'; side.setAttribute('aria-label', 'Índice del recetario');
   shell.append(side, main);
-  const velo = document.createElement('div'); velo.className = 'velo'; document.body.append(velo);
+  const velo = document.createElement('div'); velo.className = 'velo'; body.append(velo);
   const menu = document.createElement('button'); menu.type = 'button'; menu.className = 'menu-btn'; menu.id = 'menu';
-  menu.setAttribute('aria-label', 'Abrir el índice'); menu.innerHTML = '☰<span> Índice</span>';
-  (bar.querySelector('.home') || bar.querySelector('.bar-in').firstChild).after(menu);
+  menu.setAttribute('aria-controls', 'side'); menu.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-label', 'Índice');
+  menu.innerHTML = ICO.menu + '<span>Índice</span>';
+  (home || bar.querySelector('.bar-in').firstChild).after(menu);
 
   const secciones = [...document.querySelectorAll('section.tab')];
   const pestanas = {};
@@ -2213,44 +2382,66 @@ document.querySelectorAll('figure.code').forEach(f => {
     if (b) b.remove();
     pestanas[a.dataset.tab] = { ins, txt: c.textContent.trim() };
   });
-  const simbolos = { ev: '⚡', adopta: '★', chuletas: 'C', chu: 'C', problemas: 'P', ej: 'E' };
-  const repasadas = new Set(lee('recetario-repaso:' + CLAVE, []));
+  const simbolos = { ev: '⚡', adopta: '★', chuletas: 'C', chu: 'C', problemas: '?', ej: 'E' };
   const recetas = [];   // { id, art, sec, titulo, html }
+
+  // portada con el fondo de la asignatura al principio de cada bloque
+  function portada(sec, n) {
+    const h1 = sec.querySelector(':scope > h1'); if (!h1 || sec.querySelector(':scope > .portada')) return;
+    const k = sec.querySelector(':scope > .kicker');
+    const div = document.createElement('div'); div.className = 'portada';
+    (k || h1).before(div);
+    if (k) div.append(k);
+    div.append(h1);
+    if (n) { const meta = document.createElement('p'); meta.className = 'meta'; meta.innerHTML = `<b>${n}</b> ${n === 1 ? 'receta' : 'recetas'}`; div.append(meta); }
+    if (logoSVG) div.insertAdjacentHTML('beforeend', `<svg class="marca" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${logoSVG.replace(/<svg[^>]*>|<\/svg>/g, '')}</svg>`);
+  }
+
   const grupoHTML = secciones.map(sec => {
     const p = pestanas[sec.id] || { ins: '', txt: (sec.querySelector('h1') || {}).textContent || sec.id };
     const ins = p.ins || simbolos[sec.id] || p.txt.slice(0, 1).toUpperCase();
     const arts = [...sec.querySelectorAll('article.receta')];
+    // si el bloque ya numera sus recetas (1.1, 4.2…), no se añade el 01, 02…
+    const yaNum = arts.filter(a => { const h = a.querySelector('h2'); return h && (h.querySelector('.ses') || /^\s*\d+(\.\d+)+/.test(h.textContent)); });
+    if (arts.length && yaNum.length >= arts.length / 2) sec.classList.add('ya-numerada');
     const items = arts.map(art => {
       const a = art.querySelector('h2 a') || art.querySelector('h2');
       const r = { id: art.id, art, sec, titulo: a.textContent.trim(), html: a.innerHTML };
       recetas.push(r);
-      return `<li data-r="${esc(art.id)}"><a href="#${esc(art.id)}">${r.html}</a></li>`;
+      return `<li><a href="#${esc(art.id)}">${r.html}</a></li>`;
     }).join('');
-    return `<div class="grupo" data-tab="${esc(sec.id)}"><div class="gfila"><a class="gcab" href="#${esc(sec.id)}" title="${esc(p.txt)}"><b>${esc(ins)}</b><span>${esc(p.txt)}</span></a>`
-      + `<em class="gcont"></em><button type="button" class="gtog" aria-label="Plegar o desplegar ${esc(p.txt)}" aria-expanded="false">▶</button></div><ul>${items}</ul></div>`;
+    portada(sec, arts.length);
+    return `<div class="grupo" data-tab="${esc(sec.id)}"><div class="gfila"><a class="gcab" href="#${esc(sec.id)}"><b aria-hidden="true">${esc(ins)}</b><span>${esc(p.txt)}</span></a>`
+      + `<em class="gcont" title="${arts.length} recetas">${arts.length}</em><button type="button" class="gtog" aria-expanded="false" aria-controls="g-${esc(sec.id)}" aria-label="Recetas de ${esc(p.txt)}">${ICO.chevron}</button></div>`
+      + `<div class="gcuerpo" id="g-${esc(sec.id)}" inert><ul>${items}</ul></div></div>`;
   }).join('');
+
   side.innerHTML = `<div class="side-top">
-    <div class="side-fila"><div class="buscar-caja"><input type="search" id="buscar" placeholder="Buscar en el recetario…" autocomplete="off" aria-label="Buscar en el recetario">
-      <button type="button" class="limpiar" id="limpiar" aria-label="Borrar la búsqueda" hidden>×</button><kbd id="kbd">/</kbd></div>
-      <button type="button" class="icono" id="ocultar" title="Ocultar el índice (tecla i)" aria-label="Ocultar el índice">«</button></div>
-    <div class="side-repaso"><div class="r-txt"><span>Recetas repasadas</span><b id="rTotal"></b></div><div class="r-barra"><i id="rBarra"></i></div></div>
-    <div class="side-acciones"><button type="button" id="plegar">Plegar todo</button><button type="button" id="desplegar">Desplegar todo</button></div>
-  </div>
-  <div id="resultados" class="resultados" hidden></div>
-  <nav class="grupos" aria-label="Bloques y recetas">${grupoHTML}</nav>
-  ${extra ? `<a class="side-esquema" href="${esc(extra.url)}"><b>◆</b><span>${esc(extra.titulo)}<small>${esc(extra.sub || '')}</small></span></a>` : ''}
-  <p class="side-ayuda"><kbd>/</kbd> buscar · <kbd>i</kbd> mostrar/ocultar índice · <kbd>Esc</kbd> cerrar</p>`;
+      <div class="buscar-caja" role="search">${ICO.lupa}<input type="search" id="buscar" placeholder="Buscar receta o código" autocomplete="off" spellcheck="false" aria-label="Buscar en el recetario" aria-controls="resultados">
+        <kbd id="kbd" aria-hidden="true">/</kbd><button type="button" class="limpiar" id="limpiar" aria-label="Borrar la búsqueda" hidden>${ICO.x}</button></div>
+      <button type="button" class="icono" id="ocultar" aria-label="Ocultar el índice" title="Ocultar el índice (i)">${ICO.panel}</button></div>
+    <div class="side-meta"><span>${secciones.length} bloques · ${recetas.length} recetas</span><button type="button" id="todo">Desplegar todo</button></div>
+    <p class="sr" id="estado" aria-live="polite"></p>
+    <div id="resultados" class="resultados" hidden></div>
+    <nav class="grupos" aria-label="Bloques y recetas">${grupoHTML}</nav>
+    ${extra ? `<a class="side-esquema" href="${esc(extra.url)}"><span class="logo">${logoSVG}</span><span>${esc(extra.titulo)}<small>${esc(extra.sub || '')}</small></span><span class="flecha" aria-hidden="true">→</span></a>` : ''}
+    <p class="side-ayuda"><kbd>/</kbd> buscar · <kbd>i</kbd> mostrar u ocultar el índice · <kbd>Esc</kbd> cerrar</p>`;
   const $ = id => document.getElementById(id);
   const grupos = [...side.querySelectorAll('.grupo')];
 
   // ---------- plegar / desplegar ----------
-  function abre(g, si) { g.classList.toggle('abierto', si); g.querySelector('.gtog').setAttribute('aria-expanded', si); }
-  grupos.forEach(g => g.querySelector('.gtog').addEventListener('click', () => abre(g, !g.classList.contains('abierto'))));
-  $('plegar').onclick = () => grupos.forEach(g => abre(g, false));
-  $('desplegar').onclick = () => grupos.forEach(g => abre(g, true));
+  function pintaTodo() { $('todo').textContent = grupos.every(g => g.classList.contains('abierto')) ? 'Plegar todo' : 'Desplegar todo'; }
+  function abre(g, si) {
+    g.classList.toggle('abierto', si);
+    g.querySelector('.gtog').setAttribute('aria-expanded', si);
+    g.querySelector('.gcuerpo').inert = !si;
+    pintaTodo();
+  }
+  grupos.forEach(g => g.querySelector('.gtog').addEventListener('click', () => { abre(g, !g.classList.contains('abierto')); delete g.dataset.auto; }));
+  $('todo').onclick = () => { const todos = grupos.every(g => g.classList.contains('abierto')); grupos.forEach(g => { abre(g, !todos); delete g.dataset.auto; }); };
 
   // ---------- bloque activo ----------
-  let tabActual = null, enlaces = [], articulos = [];
+  let tabActual = null, enlaces = [], articulos = [], actual;
   function activo() {
     const sec = secciones.find(s => !s.hidden);
     if (!sec) return;
@@ -2261,92 +2452,69 @@ document.querySelectorAll('figure.code').forEach(f => {
       const g = grupos.find(g => g.dataset.tab === sec.id);
       if (g && !g.classList.contains('abierto')) { abre(g, true); g.dataset.auto = '1'; }
     }
-    grupos.forEach(g => g.classList.toggle('on', g.dataset.tab === sec.id));
+    grupos.forEach(g => {
+      const on = g.dataset.tab === sec.id; g.classList.toggle('on', on);
+      const cab = g.querySelector('.gcab'); on ? cab.setAttribute('aria-current', 'true') : cab.removeAttribute('aria-current');
+    });
     const g = side.querySelector('.grupo.on');
     enlaces = g ? [...g.querySelectorAll('ul a')] : [];
     articulos = [...sec.querySelectorAll('article.receta')];
-    actual = null; espia();
+    actual = undefined; espia();
   }
   new MutationObserver(activo).observe(main, { attributes: true, subtree: true, attributeFilter: ['hidden'] });
-  // pulsar el bloque en el que ya estás lo pliega o despliega
   side.addEventListener('click', e => {
     const cab = e.target.closest('.gcab'); if (!cab) return;
-    const g = cab.closest('.grupo');
-    if (g.dataset.tab === tabActual && g.classList.contains('abierto') && innerWidth >= 1000) { e.preventDefault(); e.stopPropagation(); abre(g, false); delete g.dataset.auto; }
-    else if (g.dataset.tab === tabActual) abre(g, true);
+    const g = cab.closest('.grupo'); abre(g, true); delete g.dataset.auto;
   }, true);
 
-  // ---------- repasadas ----------
-  function pintaRepaso() {
-    let total = 0;
-    grupos.forEach(g => {
-      const lis = [...g.querySelectorAll('li[data-r]')]; let n = 0;
-      lis.forEach(li => { const s = repasadas.has(li.dataset.r); li.classList.toggle('rep', s); if (s) n++; });
-      total += n; const c = g.querySelector('.gcont');
-      c.textContent = n ? `${n}/${lis.length}` : lis.length; c.classList.toggle('lleno', lis.length > 0 && n === lis.length);
-    });
-    $('rTotal').textContent = `${total} / ${recetas.length}`;
-    $('rBarra').style.width = (recetas.length ? total / recetas.length * 100 : 0) + '%';
-  }
-  recetas.forEach(r => {
-    const pie = document.createElement('div'); pie.className = 'pie-rep';
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'marca-rep';
-    const pinta = () => { const s = repasadas.has(r.id); b.setAttribute('aria-pressed', s); b.textContent = s ? '✓ Repasada' : 'Marcar como repasada'; r.art.classList.toggle('repasada', s); };
-    b.onclick = () => { repasadas.has(r.id) ? repasadas.delete(r.id) : repasadas.add(r.id); guarda('recetario-repaso:' + CLAVE, [...repasadas]); pinta(); pintaRepaso(); };
-    pinta(); pie.append(b); r.art.append(pie);
-    // copiar enlace a la receta
-    const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'copiar-enlace'; cp.title = 'Copiar enlace a esta receta';
-    cp.setAttribute('aria-label', 'Copiar enlace a esta receta'); cp.textContent = '🔗';
-    cp.onclick = async () => {
-      try { await navigator.clipboard.writeText(location.origin + location.pathname + '#' + r.id); cp.textContent = '✓'; }
-      catch (e) { cp.textContent = '✗'; }
-      setTimeout(() => cp.textContent = '🔗', 1300);
-    };
-    r.art.append(cp);
-  });
-  pintaRepaso();
-
-  // ---------- receta actual, progreso, arriba, «seguías en» ----------
+  // ---------- receta actual, progreso, arriba ----------
   const prog = document.createElement('div'); prog.className = 'progreso'; bar.append(prog);
-  const arriba = document.createElement('button'); arriba.type = 'button'; arriba.className = 'arriba'; arriba.textContent = '↑';
-  arriba.setAttribute('aria-label', 'Volver arriba'); document.body.append(arriba);
-  arriba.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
-  let actual = null, pendiente = false;
+  const arriba = document.createElement('button'); arriba.type = 'button'; arriba.className = 'arriba'; arriba.innerHTML = ICO.arriba;
+  arriba.setAttribute('aria-label', 'Volver arriba'); body.append(arriba);
+  arriba.onclick = () => scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  let pendiente = false;
   function espia() {
     pendiente = false;
-    const tope = bar.offsetHeight + 90;
+    const tope = bar.offsetHeight + 100;
     let cual = null;
     for (const a of articulos) { if (a.getBoundingClientRect().top <= tope) cual = a; else break; }
-    if (!cual && articulos.length && scrollY < 50) cual = null;
     const id = cual ? cual.id : null;
     if (id !== actual) {
       actual = id;
-      enlaces.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
+      enlaces.forEach(a => { const on = a.getAttribute('href') === '#' + id; a.classList.toggle('on', on); on ? a.setAttribute('aria-current', 'location') : a.removeAttribute('aria-current'); });
       if (id) guarda('recetario-ultima:' + CLAVE, id);
       const on = side.querySelector('.grupo.on ul a.on');
-      if (on && innerWidth >= 1000) {
+      if (on && escritorio.matches && !body.classList.contains('indice-oculto')) {
         const r = on.getBoundingClientRect(), s = side.getBoundingClientRect();
-        if (r.top < s.top + 150 || r.bottom > s.bottom - 20) side.scrollTop += r.top - s.top - s.height / 3;
+        if (r.top < s.top + 140 || r.bottom > s.bottom - 30) side.scrollTo({ top: side.scrollTop + r.top - s.top - s.height / 3, behavior: 'smooth' });
       }
     }
     const max = document.documentElement.scrollHeight - innerHeight;
-    prog.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+    prog.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
     arriba.classList.toggle('on', scrollY > 900);
   }
   addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(espia); } }, { passive: true });
   const ponAltura = () => document.documentElement.style.setProperty('--barh', bar.offsetHeight + 'px');
   ponAltura(); addEventListener('resize', ponAltura);
+  if ('ResizeObserver' in window) new ResizeObserver(ponAltura).observe(bar);
 
+  function senala(id) {   // marca la receta a la que se ha saltado y le pasa el foco (lectores de pantalla)
+    setTimeout(() => {
+      const d = document.getElementById(id); if (!d || !d.classList.contains('receta')) return;
+      d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello');
+      if (!d.hasAttribute('tabindex')) d.setAttribute('tabindex', '-1');
+      d.focus({ preventScroll: true });
+    }, 60);
+  }
   function ir(id) {   // usa el propio enrutado del recetario (cambia de pestaña si hace falta)
-    const a = document.createElement('a'); a.href = '#' + id; a.style.display = 'none'; document.body.append(a); a.click(); a.remove();
-    setTimeout(() => { const d = document.getElementById(id); if (d && d.classList.contains('receta')) { d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello'); } }, 60);
+    const a = document.createElement('a'); a.href = '#' + id; a.hidden = true; body.append(a); a.click(); a.remove(); senala(id);
   }
   const ultima = lee('recetario-ultima:' + CLAVE, null);
   const rUlt = ultima && recetas.find(r => r.id === ultima);
   if (rUlt && !location.hash) {
     const av = document.createElement('div'); av.className = 'aviso-seguir'; av.setAttribute('role', 'status');
-    av.innerHTML = `<span>Seguías en <b>${esc(rUlt.titulo)}</b></span><button type="button" class="ir">Ir</button><button type="button" class="x" aria-label="Cerrar">×</button>`;
-    document.body.append(av);
+    av.innerHTML = `<span>Seguías en <b>${esc(rUlt.titulo)}</b></span><button type="button" class="ir">Ir</button><button type="button" class="x" aria-label="Cerrar el aviso">×</button>`;
+    body.append(av);
     const quita = () => av.remove();
     av.querySelector('.ir').onclick = () => { quita(); ir(rUlt.id); };
     av.querySelector('.x').onclick = quita;
@@ -2354,42 +2522,77 @@ document.querySelectorAll('figure.code').forEach(f => {
   }
 
   // ---------- mostrar / ocultar índice ----------
-  const cerrar = () => document.body.classList.remove('side-open');
-  function alternaIndice() {
-    if (innerWidth >= 1000) { const o = !document.body.classList.contains('indice-oculto'); document.body.classList.toggle('indice-oculto', o); guarda('recetario-indice-oculto', o); }
-    else if (document.body.classList.contains('side-open')) cerrar();
-    else { document.body.classList.add('side-open'); const g = side.querySelector('.grupo.on'); if (g) side.scrollTop = g.offsetTop - 140; }
+  const abierto = () => body.classList.contains('side-open');
+  function ajusta() {   // qué partes se pueden enfocar según el tamaño
+    if (escritorio.matches) {
+      body.classList.remove('side-open');
+      side.inert = body.classList.contains('indice-oculto');
+      menu.setAttribute('aria-expanded', String(!body.classList.contains('indice-oculto')));
+      $('ocultar').setAttribute('aria-label', 'Ocultar el índice');
+    } else {
+      side.inert = !abierto();
+      menu.setAttribute('aria-expanded', String(abierto()));
+      $('ocultar').setAttribute('aria-label', 'Cerrar el índice');
+    }
   }
-  if (lee('recetario-indice-oculto', false)) document.body.classList.add('indice-oculto');
-  menu.onclick = () => { if (innerWidth >= 1000) { document.body.classList.remove('indice-oculto'); guarda('recetario-indice-oculto', false); } else alternaIndice(); };
-  $('ocultar').onclick = () => innerWidth >= 1000 ? alternaIndice() : cerrar();
-  velo.onclick = cerrar;
+  function abreCajon() {
+    body.classList.add('side-open'); ajusta();
+    const g = side.querySelector('.grupo.on'); if (g) side.scrollTop = g.offsetTop - 120;
+    setTimeout(() => $('ocultar').focus(), 40);
+  }
+  function cierraCajon(devolverFoco) {
+    if (!abierto()) return;
+    body.classList.remove('side-open'); ajusta();
+    if (devolverFoco) menu.focus();
+  }
+  function alternaIndice() {
+    if (escritorio.matches) {
+      const o = !body.classList.contains('indice-oculto'); body.classList.toggle('indice-oculto', o); guarda('recetario-indice-oculto', o); ajusta();
+      (o ? menu : $('ocultar')).focus();
+    } else abierto() ? cierraCajon(true) : abreCajon();
+  }
+  if (lee('recetario-indice-oculto', false)) body.classList.add('indice-oculto');
+  ajusta();
+  escritorio.addEventListener ? escritorio.addEventListener('change', ajusta) : escritorio.addListener(ajusta);
+  menu.onclick = () => escritorio.matches ? alternaIndice() : abreCajon();
+  $('ocultar').onclick = () => escritorio.matches ? alternaIndice() : cierraCajon(true);
+  velo.onclick = () => cierraCajon(true);
+  side.addEventListener('keydown', e => {   // foco atrapado dentro del cajón en móvil
+    if (e.key !== 'Tab' || escritorio.matches || !abierto()) return;
+    const f = [...side.querySelectorAll('a[href], button:not([hidden]), input')].filter(x => x.offsetParent !== null && !x.closest('[inert]'));
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  });
   side.addEventListener('click', e => {
-    const a = e.target.closest('a'); if (!a || a.classList.contains('gcab')) { if (a) cerrar(); return; }
-    cerrar();
+    const a = e.target.closest('a'); if (!a) return;
+    cierraCajon(false);
     const h = a.getAttribute('href');
-    if (h && h.startsWith('#')) setTimeout(() => { const d = document.getElementById(h.slice(1)); if (d && d.classList.contains('receta')) { d.classList.remove('destello'); void d.offsetWidth; d.classList.add('destello'); } }, 60);
+    if (h && h.startsWith('#') && !a.classList.contains('gcab')) senala(h.slice(1));
   });
 
   // ---------- buscador ----------
-  const q = $('buscar'), res = $('resultados'), nav = side.querySelector('.grupos'), limpiar = $('limpiar'), kbd = $('kbd');
-  const indice = recetas.map(r => {
+  const q = $('buscar'), res = $('resultados'), nav = side.querySelector('.grupos'), limpiar = $('limpiar'), kbd = $('kbd'), estado = $('estado');
+  let indice = null;   // se construye la primera vez que se busca
+  const preparaIndice = () => indice || (indice = recetas.map(r => {
     const txt = r.art.textContent.replace(/\s+/g, ' ');
     const g = grupos.find(g => g.dataset.tab === r.sec.id);
     return { ...r, nt: norm(r.titulo), txt, ntxt: norm(txt), bloque: g ? g.querySelector('.gcab span').textContent : '' };
-  });
+  }));
   function marca(texto, v) {
     const n = norm(texto), i = n.indexOf(v);
     return i < 0 ? esc(texto) : esc(texto.slice(0, i)) + '<mark>' + esc(texto.slice(i, i + v.length)) + '</mark>' + esc(texto.slice(i + v.length));
   }
+  let tBusca;
   function buscar() {
     const bruto = q.value.trim(), v = norm(bruto);
     limpiar.hidden = !q.value; kbd.hidden = !!q.value;
-    if (!v) { res.hidden = true; nav.hidden = false; return; }
-    const tit = indice.filter(x => x.nt.includes(v));
-    const cuerpo = indice.filter(x => !x.nt.includes(v) && x.ntxt.includes(v)).slice(0, 30);
+    if (!v) { res.hidden = true; nav.hidden = false; estado.textContent = ''; return; }
+    const ix = preparaIndice();
+    const tit = ix.filter(x => x.nt.includes(v));
+    const cuerpo = ix.filter(x => !x.nt.includes(v) && x.ntxt.includes(v)).slice(0, 30);
     let h = tit.map(x => `<a href="#${esc(x.id)}"><small>${esc(x.bloque)}</small>${marca(x.titulo, v)}</a>`).join('');
-    if (cuerpo.length) h += '<p class="cab">Aparece dentro de:</p>' + cuerpo.map(x => {
+    if (cuerpo.length) h += '<p class="cab">Aparece dentro de</p>' + cuerpo.map(x => {
       const i = x.ntxt.indexOf(v), ini = Math.max(0, i - 35);
       const frag = (ini ? '…' : '') + x.txt.slice(ini, i + v.length + 45) + '…';
       return `<a href="#${esc(x.id)}"><small>${esc(x.bloque)}</small>${esc(x.titulo)}<span class="frag">${marca(frag, v)}</span></a>`;
@@ -2397,13 +2600,15 @@ document.querySelectorAll('figure.code').forEach(f => {
     res.innerHTML = h || `<p class="nada">Nada con «${esc(bruto)}»</p>`;
     res.hidden = false; nav.hidden = true;
     res.querySelector('a')?.classList.add('sel');
+    const n = tit.length + cuerpo.length;
+    clearTimeout(tBusca); tBusca = setTimeout(() => estado.textContent = n ? `${n} resultado${n === 1 ? '' : 's'}` : 'Sin resultados', 400);
   }
   function borra() { q.value = ''; buscar(); }
   q.addEventListener('input', buscar);
   limpiar.onclick = () => { borra(); q.focus(); };
   q.addEventListener('keydown', e => {
     if (e.key === 'Enter') { const a = res.querySelector('a.sel') || res.querySelector('a'); if (a) a.click(); }
-    if (e.key === 'Escape') { e.stopPropagation(); if (q.value) borra(); else { q.blur(); cerrar(); } }
+    if (e.key === 'Escape') { e.stopPropagation(); if (q.value) borra(); else { q.blur(); cierraCajon(true); } }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault(); const l = [...res.querySelectorAll('a')], i = l.findIndex(a => a.classList.contains('sel'));
       const j = Math.max(0, Math.min(l.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)));
@@ -2412,9 +2617,13 @@ document.querySelectorAll('figure.code').forEach(f => {
   });
   addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === '/') { e.preventDefault(); if (innerWidth < 1000) document.body.classList.add('side-open'); else { document.body.classList.remove('indice-oculto'); } q.focus(); q.select(); }
+    if (e.key === '/') {
+      e.preventDefault();
+      if (escritorio.matches) { body.classList.remove('indice-oculto'); guarda('recetario-indice-oculto', false); ajusta(); } else if (!abierto()) abreCajon();
+      setTimeout(() => { q.focus(); q.select(); }, 50);
+    }
     if (e.key === 'i' || e.key === 'I') alternaIndice();
-    if (e.key === 'Escape') { cerrar(); document.querySelector('.aviso-seguir')?.remove(); }
+    if (e.key === 'Escape') { cierraCajon(true); document.querySelector('.aviso-seguir')?.remove(); }
   });
 
   activo();
